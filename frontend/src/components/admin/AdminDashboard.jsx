@@ -20,6 +20,9 @@ import { BankAccountsView } from './BankAccountsView';
 import { SettingsView } from './SettingsView';
 import { CustomersView } from './CustomersView';
 import { OverviewDashboard } from './OverviewDashboard';
+import { MenuView } from './MenuView';
+import { StaffView } from './StaffView';
+import { TablesView } from './TablesView';
 import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
 import { initialMockData } from '../../mockData';
 
@@ -1883,208 +1886,31 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
         {/* ─── TAB: USERS ─── */}
         {activeTab === 'users' && (
-          <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 800 }}>{t('admin.usersTitle')}</h3>
-                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{t('admin.userDataDbDesc')}</p>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => setShowImportUserModal(true)}
-                  style={{
-                    padding: '8px 16px',
-                    fontSize: '13px',
-                    backgroundColor: '#ecfdf5',
-                    color: '#059669',
-                    border: '1px solid #a7f3d0',
-                    borderRadius: '8px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <FileSpreadsheet size={15} /> {t('admin.importUserExcel') || 'Nhập từ Excel / CSV'}
-                </button>
-                <button onClick={openAddUser} style={btnPrimary}>
-                  <Plus size={15} /> {t('admin.addStaff')}
-                </button>
-              </div>
-            </div>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-              <thead>
-                <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0', textAlign: 'left' }}>
-                  {[t('admin.fullName'), t('admin.loginName'), t('admin.email'), t('admin.role'), t('admin.shift'), t('admin.phone'), t('status'), t('actions')].map(h => (
-                    <th key={h} style={{ padding: '10px 12px', fontSize: '12px', fontWeight: 700, color: '#475569', textAlign: h === t('actions') ? 'right' : 'left' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {users.map(u => {
-                  const isMainAdmin = u.id === 1 || u.username === 'admin';
-                  const isSelf = currentUser && (currentUser.id === u.id || currentUser.username === u.username);
-                  const canDelete = !isMainAdmin && !isSelf;
-                  const isActive = u.is_active !== undefined ? Boolean(u.is_active) : true;
-
-                  return (
-                    <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px', fontWeight: 700 }}>{u.name}</td>
-                      <td style={{ padding: '12px', fontFamily: 'monospace', color: '#1B5E20', fontSize: '12.5px' }}>{u.username}</td>
-                      <td style={{ padding: '12px', color: '#64748b' }}>{u.email}</td>
-                      <td style={{ padding: '12px' }}>
-                        <span style={{
-                          padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700,
-                          backgroundColor: u.role === 'admin' ? 'rgba(56,189,248,0.15)' : 'rgba(27, 94, 32,0.15)',
-                          color: u.role === 'admin' ? '#1B5E20' : '#1B5E20'
-                        }}>
-                          {u.role === 'admin' ? t('admin.roleAdmin') : t('admin.roleCashier')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px', color: '#475569' }}>{getShiftLabel(u.shift)}</td>
-                      <td style={{ padding: '12px', color: '#64748b' }}>{u.phone || '—'}</td>
-                      <td style={{ padding: '12px' }}>
-                        <span style={{
-                          color: isActive ? '#10b981' : '#ef4444',
-                          fontSize: '11.5px',
-                          fontWeight: 600,
-                          backgroundColor: isActive ? '#ecfdf5' : '#fef2f2',
-                          padding: '2px 8px',
-                          borderRadius: '12px'
-                        }}>
-                          {isActive ? t('admin.working') : t('admin.locked')}
-                        </span>
-                      </td>
-                      <td style={{ padding: '12px', textAlign: 'right' }}>
-                        <div style={{ display: 'inline-flex', gap: '6px' }}>
-                          <button
-                            onClick={() => openEditUser(u)}
-                            title={t('edit')}
-                            style={{
-                              padding: '6px 8px', borderRadius: '6px',
-                              color: '#1B5E20', backgroundColor: '#E8F5E9',
-                              border: 'none', cursor: 'pointer',
-                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
-                            }}
-                          >
-                            <Pencil size={13} />
-                          </button>
-                          <button
-                            onClick={() => handleDeleteUser(u)}
-                            disabled={!canDelete}
-                            title={isMainAdmin ? t('admin.cannotDeleteAdmin') : isSelf ? t('admin.cannotDeleteSelf') : t('delete')}
-                            style={{
-                              padding: '6px 8px', borderRadius: '6px',
-                              color: !canDelete ? '#94a3b8' : '#ef4444',
-                              backgroundColor: !canDelete ? '#f1f5f9' : '#fee2e2',
-                              border: 'none',
-                              cursor: !canDelete ? 'not-allowed' : 'pointer',
-                              opacity: !canDelete ? 0.6 : 1,
-                              display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
-                            }}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          <StaffView
+            users={users}
+            currentUser={currentUser}
+            onOpenAddUser={openAddUser}
+            onOpenEditUser={openEditUser}
+            onDeleteUser={handleDeleteUser}
+            onOpenImportUser={() => setShowImportUserModal(true)}
+          />
         )}
 
-        {/* ─── TAB: MENU (Products) ─── */}
-        {activeTab === 'menu' && (
-          <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap', gap: '10px' }}>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 800 }}>{t('admin.menuTitle')}</h3>
-                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{t('admin.autoGenCodeDesc')}</p>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowImportProductModal(true)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid #10b981',
-                    backgroundColor: '#ecfdf5',
-                    color: '#059669',
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.15s'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d1fae5'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ecfdf5'}
-                >
-                  <FileSpreadsheet size={15} /> {t('admin.importProductExcel') || 'Nhập từ Excel / CSV'}
-                </button>
-                <button onClick={openAddProduct} style={btnPrimary}>
-                  <Plus size={15} /> {t('admin.addProduct')}
-                </button>
-              </div>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '12px' }}>
-              {(menuData.products || []).map(p => (
-                <div key={p.id} style={{ padding: '12px 14px', borderRadius: '8px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatDishName(p.name, p.code)}</div>
-                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                      <span style={{ backgroundColor: '#E8F5E9', color: '#1B5E20', padding: '1px 6px', borderRadius: '4px', fontWeight: 700, marginRight: '6px' }}>{p.code}</span>
-                      {t('menu.unit')}: {formatDishUnit(p.unit)}
-                    </div>
-                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#1B5E20', marginTop: '4px' }}>{formatMoney(p.price)}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px', marginLeft: '8px' }}>
-                    <button onClick={() => openEditProduct(p)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}>
-                      <Pencil size={13} />
-                    </button>
-                    <button onClick={() => handleDeleteProduct(p)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
-                      <Trash2 size={13} />
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* ─── TAB: CATEGORIES ─── */}
-        {activeTab === 'categories' && (
-          <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h3 style={{ fontSize: '16px', fontWeight: 800 }}>{t('admin.categoryTitle')}</h3>
-                <p style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>{t('admin.categoryDbDesc')}</p>
-              </div>
-              <button onClick={openAddCat} style={btnPrimary}>
-                <Plus size={15} /> {t('admin.addCategory')}
-              </button>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: '12px' }}>
-              {categories.map(c => (
-                <div key={c.id} style={{ padding: '14px 16px', borderRadius: '10px', border: '1px solid #e2e8f0', backgroundColor: '#f8fafc', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <div>
-                    <div style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>{formatCategoryName(c.name)}</div>
-                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>{c.products_count ?? c.products?.length ?? 0} {t('table.items')}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => openEditCat(c)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
-                    <button onClick={() => handleDeleteCategory(c)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
+        {/* ─── TAB: MENU (Products) & CATEGORIES ─── */}
+        {(activeTab === 'menu' || activeTab === 'categories') && (
+          <MenuView
+            menuData={menuData}
+            categories={categories}
+            onOpenAddProduct={openAddProduct}
+            onOpenEditProduct={openEditProduct}
+            onDeleteProduct={handleDeleteProduct}
+            onOpenAddCategory={openAddCat}
+            onOpenEditCategory={openEditCat}
+            onDeleteCategory={handleDeleteCategory}
+            onOpenImportProduct={() => setShowImportProductModal(true)}
+            activeSubTab={activeTab === 'categories' ? 'categories' : 'products'}
+            onSelectSubTab={(tab) => setActiveTab(tab === 'categories' ? 'categories' : 'menu')}
+          />
         )}
 
         {/* ─── TAB: CUSTOMERS ─── */}
@@ -2196,180 +2022,21 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
           </div>
         )}
 
-        {/* ─── TAB: TABLES (Phòng/Bàn) ─── */}
-        {activeTab === 'tables' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{t('admin.tableTitle')}</h2>
-                <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{t('admin.tableManageDesc')}</p>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowImportModal(true)}
-                  style={{
-                    padding: '8px 14px',
-                    borderRadius: '6px',
-                    border: '1px solid #10b981',
-                    backgroundColor: '#ecfdf5',
-                    color: '#059669',
-                    fontWeight: 700,
-                    fontSize: '13px',
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    transition: 'all 0.15s'
-                  }}
-                  onMouseEnter={e => e.currentTarget.style.backgroundColor = '#d1fae5'}
-                  onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ecfdf5'}
-                >
-                  <FileSpreadsheet size={15} /> {t('admin.importTableExcel') || 'Nhập từ Excel / CSV'}
-                </button>
-                <button onClick={openAddTable} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px' }}>
-                  <Plus size={15} /> {t('admin.addTable')}
-                </button>
-              </div>
-            </div>
-
-            {/* Summary cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
-              {[
-                { label: t('admin.totalTables'), value: tables.length, bg: '#E8F5E9', color: '#1B5E20', icon: <LayoutGrid size={18} /> },
-                { label: t('admin.emptyTables'), value: tables.filter(t => t.status === 'empty' || !t.status).length, bg: '#ecfdf5', color: '#059669', icon: <CheckCircle size={18} /> },
-                { label: t('admin.occupiedTables'), value: tables.filter(t => t.status === 'occupied').length, bg: '#fef3c7', color: '#d97706', icon: <Users size={18} /> },
-                { label: t('admin.areasCount'), value: areas.length, bg: '#E8F5E9', color: '#1B5E20', icon: <MapPin size={18} /> },
-              ].map((s, i) => (
-                <div key={i} style={{ backgroundColor: '#fff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div>
-                    <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>{s.label}</div>
-                    <div style={{ fontSize: '22px', fontWeight: 900, color: '#0f172a', marginTop: '4px' }}>{s.value}</div>
-                  </div>
-                  <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: s.bg, color: s.color }}>{s.icon}</div>
-                </div>
-              ))}
-            </div>
-
-            {/* Search + Filter */}
-            <div style={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Search size={16} color="#94a3b8" />
-              <input type="text" placeholder={t('admin.searchTablePlaceholder')} value={tableSearch} onChange={e => setTableSearch(e.target.value)}
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '13.5px', color: '#0f172a', background: 'transparent' }} />
-              <div style={{ width: '1px', height: '20px', backgroundColor: '#e2e8f0' }} />
-              <MapPin size={15} color="#64748b" />
-              <select value={tableAreaFilter} onChange={e => setTableAreaFilter(e.target.value)}
-                style={{ border: 'none', outline: 'none', fontSize: '13px', color: '#334155', background: 'transparent', cursor: 'pointer', fontWeight: 600 }}>
-                <option value="all">{t('table.allAreas')}</option>
-                {areas.map(a => <option key={a.id} value={String(a.id)}>{formatAreaName(a.name)}</option>)}
-              </select>
-            </div>
-
-            {/* Tables grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '12px' }}>
-              {tables
-                .filter(t => {
-                  const q = tableSearch.toLowerCase();
-                  const locName = formatTableName(t.name).toLowerCase();
-                  const matchName = (t.name || '').toLowerCase().includes(q) || locName.includes(q);
-                  const matchArea = tableAreaFilter === 'all' || String(t.area_id) === tableAreaFilter;
-                  return matchName && matchArea;
-                })
-                .map(tObj => {
-                  const statusInfo = tObj.status === 'occupied'
-                    ? { label: t('table.occupied'), bg: '#fef3c7', color: '#b45309' }
-                    : tObj.status === 'reserved'
-                    ? { label: t('table.reserved'), bg: '#ede9fe', color: '#7c3aed' }
-                    : { label: t('table.empty'), bg: '#ecfdf5', color: '#059669' };
-                  return (
-                    <div key={tObj.id} style={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '14px 16px', position: 'relative' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                        <div>
-                          <div style={{ fontSize: '15px', fontWeight: 800, color: '#0f172a' }}>{formatTableName(tObj.name)}</div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', marginTop: '4px', color: '#64748b', fontSize: '12px' }}>
-                            <MapPin size={11} />
-                            <span>{formatAreaName(tObj.area_name || areas.find(a => a.id === tObj.area_id)?.name || '—')}</span>
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{t('table.capacity')}: {tObj.capacity || 4} {t('table.people')}</div>
-                        </div>
-                        <span style={{ padding: '3px 9px', borderRadius: '10px', fontSize: '11px', fontWeight: 700, backgroundColor: statusInfo.bg, color: statusInfo.color }}>
-                          {statusInfo.label}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '6px', marginTop: '12px', justifyContent: 'flex-end' }}>
-                        <button onClick={() => openEditTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
-                          <Pencil size={12} /> {t('edit')}
-                        </button>
-                        <button onClick={() => handleDeleteTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
-                          <Trash2 size={12} /> {t('delete')}
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              {tables.length === 0 && (
-                <div style={{ gridColumn: '1/-1', padding: '60px', textAlign: 'center', color: '#94a3b8' }}>
-                  <LayoutGrid size={40} style={{ margin: '0 auto 12px', opacity: 0.3, display: 'block' }} />
-                  {t('admin.noTablesNotice')}
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* ─── TAB: AREAS (Khu vực) ─── */}
-        {activeTab === 'areas' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{t('admin.areaTitle')}</h2>
-                <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{t('admin.areaManageDesc')}</p>
-              </div>
-              <button onClick={openAddArea} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px' }}>
-                <Plus size={15} /> {t('admin.addArea')}
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '14px' }}>
-              {areas.map(a => (
-                <div key={a.id} style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: '#E8F5E9', color: '#1B5E20' }}><MapPin size={18} /></div>
-                      <div>
-                        <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>{formatAreaName(a.name)}</div>
-                        <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
-                          {tables.filter(t => t.area_id === a.id).length} {t('admin.tablesInArea')}
-                        </div>
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '6px' }}>
-                      <button onClick={() => openEditArea(a)} title={t('edit')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
-                      <button onClick={() => handleDeleteArea(a)} title={t('delete')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
-                    </div>
-                  </div>
-                  {/* Mini table list in this area */}
-                  {tables.filter(t => t.area_id === a.id).length > 0 && (
-                    <div style={{ marginTop: '14px', display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
-                      {tables.filter(t => t.area_id === a.id).map(t => (
-                        <span key={t.id} style={{
-                          padding: '4px 10px', borderRadius: '8px', fontSize: '12px', fontWeight: 600,
-                          backgroundColor: t.status === 'occupied' ? '#fef3c7' : '#f1f5f9',
-                          color: t.status === 'occupied' ? '#b45309' : '#475569'
-                        }}>{formatTableName(t.name)}</span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              ))}
-              {areas.length === 0 && (
-                <div style={{ gridColumn: '1/-1', padding: '60px', textAlign: 'center', color: '#94a3b8' }}>
-                  <MapPin size={40} style={{ margin: '0 auto 12px', opacity: 0.3, display: 'block' }} />
-                  {t('admin.noAreasNotice')}
-                </div>
-              )}
-            </div>
-          </div>
+        {/* ─── TAB: TABLES (Phòng/Bàn) & AREAS (Khu vực) ─── */}
+        {(activeTab === 'tables' || activeTab === 'areas') && (
+          <TablesView
+            tables={tables}
+            areas={areas}
+            onOpenAddTable={openAddTable}
+            onOpenEditTable={openEditTable}
+            onDeleteTable={handleDeleteTable}
+            onOpenImportTable={() => setShowImportModal(true)}
+            onOpenAddArea={openAddArea}
+            onOpenEditArea={openEditArea}
+            onDeleteArea={handleDeleteArea}
+            activeSubTab={activeTab === 'areas' ? 'areas' : 'tables'}
+            onSelectSubTab={(tab) => setActiveTab(tab === 'areas' ? 'areas' : 'tables')}
+          />
         )}
 
       </div>{/* end content */}

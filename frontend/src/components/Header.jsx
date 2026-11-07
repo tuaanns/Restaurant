@@ -10,14 +10,10 @@ import {
   LayoutDashboard,
   Clock,
   Phone,
-  Store,
-  Edit3,
-  Check,
-  X
+  Store
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
-import { api } from '../api';
 
 export function Header({
   activeTab,
@@ -43,14 +39,6 @@ export function Header({
   const { t } = useLanguage();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
-
-  // Quick Profile Edit Modal State
-  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
-  const [editName, setEditName] = useState('');
-  const [editShift, setEditShift] = useState('');
-  const [editPhone, setEditPhone] = useState('');
-  const [isSavingProfile, setIsSavingProfile] = useState(false);
-  const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
 
   // Close dropdown when clicked outside
   useEffect(() => {
@@ -85,57 +73,8 @@ export function Header({
   const shiftText = formatShift(currentUser?.shift);
   const initials = displayName.split(' ').filter(Boolean).map(n => n[0]).slice(-2).join('').toUpperCase() || 'AD';
 
-  const handleOpenEditProfile = () => {
-    setEditName(displayName);
-    setEditShift(currentUser?.shift || 'Toàn ca (Quản lý nhà hàng)');
-    setEditPhone(currentUser?.phone || '');
-    setProfileSuccessMsg('');
-    setShowEditProfileModal(true);
-    setDropdownOpen(false);
-  };
-
-  const handleSaveProfile = async (e) => {
-    e.preventDefault();
-    if (!editName.trim()) return;
-    setIsSavingProfile(true);
-    try {
-      const payload = {
-        name: editName.trim(),
-        username: currentUser?.username || 'admin',
-        email: currentUser?.email || 'admin@aura.vn',
-        role: currentUser?.role || 'admin',
-        shift: editShift,
-        phone: editPhone.trim(),
-        is_active: 1
-      };
-      if (currentUser?.id) {
-        await api.updateUser(currentUser.id, payload);
-      }
-      const updated = {
-        ...currentUser,
-        ...payload
-      };
-      try {
-        sessionStorage.setItem('pos_user', JSON.stringify(updated));
-      } catch (err) {}
-      if (onUpdateCurrentUser) {
-        onUpdateCurrentUser(updated);
-      }
-      setProfileSuccessMsg('Cập nhật thông tin thành công!');
-      setTimeout(() => {
-        setShowEditProfileModal(false);
-        setProfileSuccessMsg('');
-      }, 700);
-    } catch (err) {
-      alert('Lỗi: ' + (err.response?.data?.message || err.message));
-    } finally {
-      setIsSavingProfile(false);
-    }
-  };
-
   return (
-    <>
-      <header style={{
+    <header style={{
         backgroundColor: '#0d2814', // Deep Botanical Matcha Pine
         color: '#ffffff',
         height: '56px',
@@ -495,34 +434,6 @@ export function Header({
 
                 {/* Menu Items */}
                 <div style={{ padding: '6px' }}>
-                  {/* Quick Profile Edit button */}
-                  <button
-                    onClick={handleOpenEditProfile}
-                    style={{
-                      width: '100%',
-                      textAlign: 'left',
-                      padding: '9px 12px',
-                      borderRadius: '6px',
-                      fontSize: '12.5px',
-                      fontWeight: 600,
-                      color: '#A5D6A7',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      backgroundColor: 'transparent',
-                      border: 'none',
-                      cursor: 'pointer',
-                      transition: 'background-color 0.15s ease'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(102, 187, 106, 0.15)'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
-                  >
-                    <Edit3 size={15} color="#66BB6A" />
-                    <span>Đổi tên / Thông tin tài khoản</span>
-                  </button>
-
-                  <div style={{ height: '1px', backgroundColor: '#2a5231', margin: '4px 0' }} />
-
                   {/* Admin Switcher */}
                   {isAdmin && (
                     <>
@@ -594,200 +505,5 @@ export function Header({
           </div>
         </div>
       </header>
-
-      {/* ═══ MODAL: QUICK EDIT USER PROFILE ═══ */}
-      {showEditProfileModal && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          backgroundColor: 'rgba(0, 0, 0, 0.55)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 99999,
-          padding: '16px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            width: '100%',
-            maxWidth: '420px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-            overflow: 'hidden',
-            animation: 'fadeIn 0.15s ease-out'
-          }}>
-            {/* Header */}
-            <div style={{
-              padding: '16px 20px',
-              borderBottom: '1px solid #e2e8f0',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              backgroundColor: '#E8F5E9'
-            }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Edit3 size={18} color="#1B5E20" />
-                <h3 style={{ fontSize: '15px', fontWeight: 800, color: '#1B5E20', margin: 0 }}>
-                  Cập nhật thông tin tài khoản
-                </h3>
-              </div>
-              <button
-                onClick={() => setShowEditProfileModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  cursor: 'pointer',
-                  color: '#64748b',
-                  padding: '4px'
-                }}
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            {/* Form */}
-            <form onSubmit={handleSaveProfile} style={{ padding: '20px' }}>
-              {profileSuccessMsg && (
-                <div style={{
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  backgroundColor: '#E8F5E9',
-                  border: '1px solid #A5D6A7',
-                  color: '#1B5E20',
-                  fontSize: '12.5px',
-                  fontWeight: 600,
-                  marginBottom: '14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px'
-                }}>
-                  <Check size={16} color="#1B5E20" />
-                  <span>{profileSuccessMsg}</span>
-                </div>
-              )}
-
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Tên hiển thị <span style={{ color: '#ef4444' }}>*</span>
-                </label>
-                <input
-                  type="text"
-                  required
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  placeholder="Ví dụ: Hoàng Nam, Tuấn, Thu Hằng..."
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '7px',
-                    border: '1.5px solid #cbd5e1',
-                    fontSize: '13.5px',
-                    color: '#0f172a',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#1B5E20'}
-                  onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
-                />
-              </div>
-
-              <div style={{ marginBottom: '14px' }}>
-                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Ca làm việc
-                </label>
-                <select
-                  value={editShift}
-                  onChange={(e) => setEditShift(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '7px',
-                    border: '1.5px solid #cbd5e1',
-                    fontSize: '13px',
-                    color: '#0f172a',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    backgroundColor: '#ffffff'
-                  }}
-                >
-                  <option value="Toàn ca (Quản lý nhà hàng)">Toàn ca (Quản lý nhà hàng)</option>
-                  <option value="Ca sáng (07:00 - 15:00)">Ca sáng (07:00 - 15:00)</option>
-                  <option value="Ca chiều (15:00 - 23:00)">Ca chiều (15:00 - 23:00)</option>
-                  <option value="Ca tối (18:00 - 23:00)">Ca tối (18:00 - 23:00)</option>
-                </select>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: '#334155', marginBottom: '6px' }}>
-                  Số điện thoại
-                </label>
-                <input
-                  type="text"
-                  value={editPhone}
-                  onChange={(e) => setEditPhone(e.target.value)}
-                  placeholder="Ví dụ: 0901234567"
-                  style={{
-                    width: '100%',
-                    padding: '9px 12px',
-                    borderRadius: '7px',
-                    border: '1.5px solid #cbd5e1',
-                    fontSize: '13.5px',
-                    color: '#0f172a',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                  onFocus={(e) => e.target.style.borderColor = '#1B5E20'}
-                  onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
-                />
-              </div>
-
-              {/* Actions */}
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-                <button
-                  type="button"
-                  onClick={() => setShowEditProfileModal(false)}
-                  style={{
-                    padding: '8px 16px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    color: '#475569',
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    cursor: 'pointer'
-                  }}
-                >
-                  {t('cancel') || 'Hủy'}
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingProfile}
-                  style={{
-                    padding: '8px 18px',
-                    borderRadius: '6px',
-                    border: 'none',
-                    backgroundColor: '#1B5E20',
-                    color: '#ffffff',
-                    fontSize: '13px',
-                    fontWeight: 700,
-                    cursor: isSavingProfile ? 'not-allowed' : 'pointer',
-                    opacity: isSavingProfile ? 0.7 : 1,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <Check size={14} />
-                  <span>{isSavingProfile ? 'Đang lưu...' : 'Lưu thay đổi'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
-    </>
   );
 }

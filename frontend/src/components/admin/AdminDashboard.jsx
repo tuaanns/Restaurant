@@ -1192,33 +1192,6 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
           {/* Language Switcher */}
           <LanguageSwitcher variant="light" />
 
-          {/* Quick Settings Icon Button */}
-          <button
-            onClick={() => setActiveTab('settings')}
-            title={t('admin.settings.title') || 'Thiết lập'}
-            style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '8px',
-              border: '1px solid #e2e8f0',
-              backgroundColor: activeTab === 'settings' ? '#E8F5E9' : '#ffffff',
-              color: activeTab === 'settings' ? '#1B5E20' : '#64748b',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              transition: 'all 0.15s ease'
-            }}
-            onMouseEnter={(e) => {
-              if (activeTab !== 'settings') e.currentTarget.style.backgroundColor = '#f8fafc';
-            }}
-            onMouseLeave={(e) => {
-              if (activeTab !== 'settings') e.currentTarget.style.backgroundColor = '#ffffff';
-            }}
-          >
-            <Settings size={15} />
-          </button>
-
           {/* User Account Dropdown Menu */}
           <div ref={userDropdownRef} style={{ position: 'relative' }}>
             <div

@@ -30,9 +30,12 @@ export function App() {
   const { t, formatTableName } = useLanguage();
   const [isClearOrderModalOpen, setIsClearOrderModalOpen] = useState(false);
   // === AUTHENTICATION & ROLE STATE ===
+  // Bắt buộc phải đăng nhập khi vừa mở web/app. Phiên đăng nhập chỉ duy trì trong tab qua sessionStorage
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const saved = localStorage.getItem('pos_user');
+      localStorage.removeItem('pos_user');
+      localStorage.removeItem('pos_token');
+      const saved = sessionStorage.getItem('pos_user');
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
       return null;
@@ -141,6 +144,11 @@ export function App() {
 
   // Auth Handlers
   const handleLoginSuccess = (user) => {
+    try {
+      sessionStorage.setItem('pos_user', JSON.stringify(user));
+      localStorage.removeItem('pos_user');
+      localStorage.removeItem('pos_token');
+    } catch (e) {}
     setCurrentUser(user);
     if (user.role === 'admin') {
       setCurrentView('pos'); // Mặc định vào POS hoặc có thể chuyển Admin
@@ -151,6 +159,12 @@ export function App() {
 
   const handleLogout = async () => {
     await api.logout();
+    try {
+      sessionStorage.removeItem('pos_user');
+      sessionStorage.removeItem('pos_token');
+      localStorage.removeItem('pos_user');
+      localStorage.removeItem('pos_token');
+    } catch (e) {}
     setCurrentUser(null);
     setCurrentView('pos');
   };

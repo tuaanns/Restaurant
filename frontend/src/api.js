@@ -7,7 +7,7 @@ const API_BASE = `${API_ROOT}/pos`;
 
 // Tự động gắn token vào header nếu có
 axios.interceptors.request.use((config) => {
-  const token = localStorage.getItem('pos_token');
+  const token = sessionStorage.getItem('pos_token') || localStorage.getItem('pos_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -20,8 +20,11 @@ export const api = {
     try {
       const res = await axios.post(`${API_ROOT}/auth/login`, { username, password });
       if (res.data.token) {
-        localStorage.setItem('pos_token', res.data.token);
-        localStorage.setItem('pos_user', JSON.stringify(res.data.user));
+        sessionStorage.setItem('pos_token', res.data.token);
+        sessionStorage.setItem('pos_user', JSON.stringify(res.data.user));
+        // Xóa sạch vĩnh viễn ở localStorage để mở cửa sổ/tab mới luôn bắt buộc đăng nhập
+        localStorage.removeItem('pos_token');
+        localStorage.removeItem('pos_user');
       }
       return res.data;
     } catch (err) {
@@ -36,6 +39,8 @@ export const api = {
     try {
       await axios.post(`${API_ROOT}/auth/logout`);
     } catch (e) {}
+    sessionStorage.removeItem('pos_token');
+    sessionStorage.removeItem('pos_user');
     localStorage.removeItem('pos_token');
     localStorage.removeItem('pos_user');
   },

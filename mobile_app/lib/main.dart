@@ -52,22 +52,13 @@ class PosRootController extends StatefulWidget {
 }
 
 class _PosRootControllerState extends State<PosRootController> {
-  bool _isLoggedIn = true; // Mặc định đã có phiên đăng nhập sẵn (có thể bấm Đăng xuất ở tab Cá nhân)
+  bool _isLoggedIn = false; // Bắt buộc đăng nhập khi vừa mở app
 
   @override
   void initState() {
     super.initState();
     I18n.currentLocale.addListener(_onLocaleChanged);
-    // Default initial user
-    ApiService.currentUser ??= User(
-      id: 2,
-      name: 'Thu Hằng',
-      username: 'thuhang',
-      role: 'cashier',
-      shift: 'Ca sáng (07:00 - 15:00)',
-      phone: '0912.345.678',
-      email: 'thuhang@aura.vn',
-    );
+    ApiService.currentUser = null;
   }
 
   @override
@@ -86,6 +77,7 @@ class _PosRootControllerState extends State<PosRootController> {
       return LoginScreen(
         onLoginSuccess: (user) {
           setState(() {
+            ApiService.currentUser = user;
             _isLoggedIn = true;
           });
         },
@@ -95,6 +87,7 @@ class _PosRootControllerState extends State<PosRootController> {
     return PosMainScreen(
       onLogout: () {
         setState(() {
+          ApiService.currentUser = null;
           _isLoggedIn = false;
         });
       },

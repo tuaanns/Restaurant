@@ -42,7 +42,7 @@ export function OrderPanel({
   onOpenSplitOrderModal,
   onShowToast
 }) {
-  const { t, formatTableName, formatDishName } = useLanguage();
+  const { t, formatTableName, formatDishName, formatPromoName } = useLanguage();
 
   // Đồng hồ thời gian thực (Real-time clock cập nhật từng giây)
   const [liveClock, setLiveClock] = React.useState(() => {
@@ -526,8 +526,8 @@ export function OrderPanel({
             <Gift size={14} color={order?.promotion_id ? '#009688' : '#64748b'} />
             <span>
               {order?.promotion_id
-                ? `${order.promotion_name || order.promotion_code}`
-                : '🎁 Áp dụng Khuyến Mãi / CTKM'}
+                ? formatPromoName(order.promotion_name || order.promotion_code)
+                : (t('order.applyPromotion') || '🎁 Áp dụng Khuyến Mãi / CTKM')}
             </span>
           </div>
 
@@ -541,7 +541,7 @@ export function OrderPanel({
                   e.stopPropagation();
                   onApplyPromotion && onApplyPromotion(null);
                 }}
-                title="Hủy khuyến mãi"
+                title={t('order.removePromotion') || 'Hủy khuyến mãi'}
                 style={{
                   background: 'none',
                   border: 'none',
@@ -569,7 +569,7 @@ export function OrderPanel({
                 cursor: 'pointer'
               }}
             >
-              Chọn
+              {t('order.selectPromotion') || 'Chọn'}
             </button>
           )}
         </div>

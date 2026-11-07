@@ -31,7 +31,7 @@ export function FooterShortcuts({ onTriggerShortcut }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
           <PhoneCall size={12} color="#00a884" />
-          <span>Hotline: <strong style={{ color: '#f8fafc' }}>1900 6888</strong></span>
+          <span>Hotline: <strong style={{ color: '#f8fafc' }}>0348974111</strong></span>
         </div>
         <span style={{ color: '#334155' }}>|</span>
         <div>

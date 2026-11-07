@@ -79,7 +79,7 @@ export const translations = {
       forgotModalNotice: 'Để bảo vệ an toàn dữ liệu hóa đơn và thu ngân, tài khoản thu ngân không thể tự đặt lại mật khẩu trực tuyến.',
       quickSupportSteps: 'Các bước hỗ trợ nhanh:',
       step1Notice: '1. Báo trực tiếp với Quản lý nhà hàng (Admin) để cài lại mật khẩu trong mục Quản lý Nhân Viên.',
-      step2Notice: '2. Gọi tổng đài Kỹ thuật POS: 1900 6868 (nhánh 1).',
+      step2Notice: '2. Gọi tổng đài Kỹ thuật POS: 0348974111 (nhánh 1).',
       gotIt: 'Đã Hiểu',
       diagnosticsTitle: 'Chẩn Đoán Kết Nối POS',
       backendApiStatus: 'Trạng thái API Backend:',
@@ -186,6 +186,9 @@ export const translations = {
       newPending: 'Mới thêm (Chưa báo quầy)',
       autoAdded: 'Tự động tính',
       emptyOrderHint: 'Bàn chưa có món nào',
+      applyPromotion: 'Áp dụng Khuyến Mãi / CTKM',
+      selectPromotion: 'Chọn',
+      removePromotion: 'Hủy khuyến mãi',
     },
 
     // === FOOTER ===
@@ -1170,7 +1173,7 @@ export const translations = {
       forgotModalNotice: 'To protect invoice and cashier data security, cashier accounts cannot reset passwords online directly.',
       quickSupportSteps: 'Quick Support Steps:',
       step1Notice: '1. Report directly to the Restaurant Manager (Admin) to reset password in Staff Management.',
-      step2Notice: '2. Call POS Technical Support: 1900 6868 (ext. 1).',
+      step2Notice: '2. Call POS Technical Support: 0348974111 (ext. 1).',
       gotIt: 'Understood',
       diagnosticsTitle: 'POS Connection Diagnostics',
       backendApiStatus: 'Backend API Status:',
@@ -1273,6 +1276,9 @@ export const translations = {
       newPending: 'New (Pending)',
       autoAdded: 'Auto added',
       emptyOrderHint: 'No items for this table yet',
+      applyPromotion: 'Apply Promotion / Voucher',
+      selectPromotion: 'Select',
+      removePromotion: 'Remove promotion',
     },
 
     footer: {
@@ -2238,7 +2244,7 @@ export const translations = {
       forgotModalNotice: '계산서 및 결제 데이터 보안을 위해 계산원 계정은 온라인에서 직접 비밀번호를 재설정할 수 없습니다.',
       quickSupportSteps: '빠른 지원 절차:',
       step1Notice: '1. 매장 관리자(Admin)에게 직접 문의하여 직원 관리 메뉴에서 비밀번호를 재설정하세요.',
-      step2Notice: '2. POS 기술 지원 콜센터: 1900 6868 (1번).',
+      step2Notice: '2. POS 기술 지원 콜센터: 0348974111 (1번).',
       gotIt: '확인',
       diagnosticsTitle: 'POS 연결 상태 진단',
       backendApiStatus: '백엔드 API 상태:',
@@ -2341,6 +2347,9 @@ export const translations = {
       newPending: '새로 추가됨 (대기)',
       autoAdded: '자동 계산',
       emptyOrderHint: '테이블에 메뉴가 없습니다',
+      applyPromotion: '프로모션 / 쿠폰 적용',
+      selectPromotion: '선택',
+      removePromotion: '프로모션 취소',
     },
 
     footer: {
@@ -3306,7 +3315,7 @@ export const translations = {
       forgotModalNotice: 'В целях безопасности кассовых данных кассиры не могут самостоятельно сбросить пароль онлайн.',
       quickSupportSteps: 'Быстрые шаги поддержки:',
       step1Notice: '1. Обратитесь к управляющему (Admin) для сброса пароля в меню «Персонал».',
-      step2Notice: '2. Позвоните в техподдержку POS: 1900 6868 (доб. 1).',
+      step2Notice: '2. Позвоните в техподдержку POS: 0348974111 (доб. 1).',
       gotIt: 'Понятно',
       diagnosticsTitle: 'Диагностика подключения POS',
       backendApiStatus: 'Статус API бэкенда:',
@@ -3409,6 +3418,9 @@ export const translations = {
       newPending: 'Новое (Ожидает)',
       autoAdded: 'Автоматически',
       emptyOrderHint: 'На столе пока нет блюд',
+      applyPromotion: 'Применить акцию / промокод',
+      selectPromotion: 'Выбрать',
+      removePromotion: 'Удалить акцию',
     },
 
     footer: {

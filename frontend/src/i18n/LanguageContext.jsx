@@ -123,12 +123,19 @@ export const AREA_MAP = {
 export const PROMO_MAP = {
   'tri an khach hang': 'triAn',
   'tri ân khách hàng': 'triAn',
+  'km000004': 'triAn',
   'cà phê pha máy giảm 5%': 'coffee5',
   'ca phe pha may giam 5%': 'coffee5',
   '10 ly tặng 1 hộp (combo)': 'cup10box1',
   '10 ly tang 1 hop (combo)': 'cup10box1',
+  '10 ly tặng 1 hộp': 'cup10box1',
+  '10 ly tang 1 hop': 'cup10box1',
+  'km000013': 'cup10box1',
   'ctkm khai trương': 'grandOpening',
   'ctkm khai truong': 'grandOpening',
+  'khai trương': 'grandOpening',
+  'khai truong': 'grandOpening',
+  'km000014': 'grandOpening',
 };
 
 export const CASH_CATEGORY_MAP = {
@@ -320,7 +327,7 @@ export function LanguageProvider({ children }) {
   const formatPromoName = useCallback((rawName) => {
     if (!rawName) return '';
     const lower = String(rawName).toLowerCase().trim();
-    const key = PROMO_MAP[lower];
+    const key = PROMO_MAP[lower] || PROMO_MAP[lower.replace(/[()]/g, '').trim()];
     if (key) {
       const translated = t(`promos.${key}`);
       if (translated && translated !== `promos.${key}`) return translated;

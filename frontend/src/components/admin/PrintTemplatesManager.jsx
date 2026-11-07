@@ -39,7 +39,7 @@ const normalizeTemplate = (tpl) => {
     companyName: tpl.companyName !== undefined ? tpl.companyName : 'HỆ THỐNG TRÀ & ẨM THỰC',
     storeName: tpl.storeName || 'QUÁN TRÀ - SPECIALTY TEA & COFFEE',
     address: tpl.address || '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang',
-    hotline: tpl.hotline || 'HOTLINE: 0901.234.567 - 0988.888.888',
+    hotline: tpl.hotline || 'HOTLINE: 0348974111',
     title: tpl.title || 'HÓA ĐƠN TÍNH TIỀN',
     footerThankYou: tpl.footerThankYou || 'Cảm ơn Quý Khách & Hẹn Gặp Lại!',
     fontSize: tpl.fontSize || 14,
@@ -641,7 +641,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
     <div style="font-weight: 700; font-size: 15px;">${editingTemplate.companyName || 'HỆ THỐNG TRÀ & ẨM THỰC'}</div>
     <div style="font-weight: 900; font-size: 18px;">${editingTemplate.storeName || 'QUÁN TRÀ - SPECIALTY TEA & COFFEE'}</div>
     <div style="font-size: 12px;">${editingTemplate.address || '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang'}</div>
-    <div style="font-weight: 700; font-size: 12px;">${editingTemplate.hotline || 'HOTLINE: 0901.234.567 - 0988.888.888'}</div>
+    <div style="font-weight: 700; font-size: 12px;">${editingTemplate.hotline || 'HOTLINE: 0348974111'}</div>
   </div>
 
   <!-- KHỐI 2: TIÊU ĐỀ & MÃ HÓA ĐƠN -->
@@ -1677,7 +1677,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                           type="text"
                           value={editingTemplate.hotline || ''}
                           onChange={(e) => setEditingTemplate({ ...editingTemplate, hotline: e.target.value })}
-                          placeholder="HOTLINE: 0901.234.567 - 0988.888.888"
+                          placeholder="HOTLINE: 0348974111"
                           style={{
                             width: '100%',
                             border: 'none',

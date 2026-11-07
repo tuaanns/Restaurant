@@ -149,7 +149,7 @@ export function LoginPage({ onLoginSuccess }) {
           }}>
             <Phone size={14} color="#64748b" />
             <span>Hotline:</span>
-            <strong style={{ color: '#064e3b', fontWeight: 700 }}>1900 6868</strong>
+            <strong style={{ color: '#064e3b', fontWeight: 700 }}>0348974111</strong>
           </div>
 
           {/* Language Switcher */}
@@ -486,7 +486,7 @@ export function LoginPage({ onLoginSuccess }) {
                 fontWeight: 600
               }}>
                 <Phone size={12} color="#064e3b" />
-                Hotline: 1900 6868
+                Hotline: 0348974111
               </span>
               <span style={{ color: '#cbd5e1' }}>•</span>
               <span style={{ color: '#6b7280' }}>
@@ -535,7 +535,7 @@ export function LoginPage({ onLoginSuccess }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
             <Phone size={13} color="#64748b" />
             <span>{t('login.supportHotlinePriority')}</span>
-            <strong style={{ color: '#334155', fontWeight: 600 }}>1900 6868</strong>
+            <strong style={{ color: '#334155', fontWeight: 600 }}>0348974111</strong>
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>

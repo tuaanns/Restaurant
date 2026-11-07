@@ -205,7 +205,7 @@ export function CashTransactionModal({
         <body>
           <div class="header">
             <h3 style="margin: 0; font-size: 14px; letter-spacing: 0.5px;">QUÁN TRÀ - HỆ THỐNG QUẢN LÝ F&B</h3>
-            <p>103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang - Hotline: 0988.888.888</p>
+            <p>103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang - Hotline: 0348974111</p>
             <div style="border-bottom: 1px solid #ccc; margin: 8px 0 12px 0;"></div>
             <h2>${title}</h2>
             <p>Mã phiếu: <strong>${transaction.code}</strong> | Thời gian: ${transaction.transacted_at || new Date().toLocaleString('vi-VN')}</p>

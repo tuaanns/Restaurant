@@ -381,7 +381,7 @@ export function ReportPrintModal({
                 103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang
               </div>
               <div style={{ fontSize: '11px', color: '#64748b' }}>
-                Hotline: 0988.888.888 - 0912.345.678
+                Hotline: 0348974111
               </div>
               <div style={{ borderBottom: '1.5px dashed #000000', margin: '10px 0' }} />
             </div>

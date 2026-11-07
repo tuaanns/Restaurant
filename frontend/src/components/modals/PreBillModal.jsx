@@ -241,7 +241,7 @@ export function PreBillModal({
                 ĐC: {appSettings.billHeaderAddress || '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang'}
               </div>
               <div style={{ fontSize: '11.5px', fontWeight: 600, marginTop: '2px' }}>
-                Hotline: {appSettings.billHeaderPhone || '0901.234.567'}
+                Hotline: {appSettings.billHeaderPhone || '0348974111'}
               </div>
             </div>
 

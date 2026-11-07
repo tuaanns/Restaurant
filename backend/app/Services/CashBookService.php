@@ -180,3 +180,4 @@ class CashBookService
         return (bool)$tx->delete();
     }
 }
+

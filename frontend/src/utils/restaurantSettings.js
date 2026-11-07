@@ -56,7 +56,7 @@ export const DEFAULT_RESTAURANT_SETTINGS = {
   showCustomerPointsOnBill: true,
   billHeaderStoreName: 'QUÁN TRÀ - SPECIALTY TEA & COFFEE',
   billHeaderAddress: '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang',
-  billHeaderPhone: '0901.234.567 - 0988.888.888',
+  billHeaderPhone: '0348974111',
   billWifiInfo: 'Wifi: QuanTra_Guest / Pass: 88888888',
   billFooterThankYou: 'Cảm ơn Quý Khách & Hẹn Gặp Lại!',
 };
@@ -68,7 +68,14 @@ export function getRestaurantSettings() {
   try {
     const raw = localStorage.getItem(SETTINGS_STORAGE_KEY);
     if (raw) {
-      return { ...DEFAULT_RESTAURANT_SETTINGS, ...JSON.parse(raw) };
+      const parsed = JSON.parse(raw);
+      if (parsed.billHeaderPhone && (parsed.billHeaderPhone.includes('0901') || parsed.billHeaderPhone.includes('0988'))) {
+        parsed.billHeaderPhone = '0348974111';
+        try {
+          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
+        } catch (_) {}
+      }
+      return { ...DEFAULT_RESTAURANT_SETTINGS, ...parsed };
     }
   } catch (e) {
     console.warn('Lỗi đọc cấu hình từ localStorage:', e);

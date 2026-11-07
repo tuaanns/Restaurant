@@ -15,7 +15,7 @@ export const DEFAULT_PRINT_TEMPLATES = {
       companyName: 'HỆ THỐNG TRÀ & ẨM THỰC',
       storeName: 'QUÁN TRÀ - SPECIALTY TEA & COFFEE',
       address: '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang',
-      hotline: '0901.234.567 - 0988.888.888',
+      hotline: '0348974111',
       title: 'HÓA ĐƠN TÍNH TIỀN',
       headerNote: '',
       footerThankYou: 'Cảm ơn Quý Khách & Hẹn Gặp Lại!',
@@ -53,7 +53,7 @@ export const DEFAULT_PRINT_TEMPLATES = {
       companyName: 'CHI NHÁNH PHÚ QUỐC PREMIUM',
       storeName: 'QUÁN TRÀ PHÚ QUỐC',
       address: '103 Trần Hưng Đạo, P. Dương Đông, TP. Phú Quốc',
-      hotline: '0901.234.567',
+      hotline: '0348974111',
       title: 'PHIẾU THANH TOÁN',
       headerNote: 'Khách hàng thân thiết VIP',
       footerThankYou: 'Rất hân hạnh được phục vụ Quý Khách!',
@@ -91,7 +91,7 @@ export const DEFAULT_PRINT_TEMPLATES = {
       companyName: 'HỆ THỐNG F&B QUÁN TRÀ',
       storeName: 'QUÁN TRÀ - GARDEN & LOUNGE',
       address: 'Khu Sân Vườn Sinh Thái, Đặc khu Phú Quốc',
-      hotline: 'HOTLINE: 0901.234.567',
+      hotline: 'HOTLINE: 0348974111',
       title: 'HÓA ĐƠN TÍNH TIỀN',
       headerNote: '',
       footerThankYou: 'Chúc Quý Khách một ngày thật thư thái!',
@@ -129,7 +129,7 @@ export const DEFAULT_PRINT_TEMPLATES = {
       companyName: 'QUÁN TRÀ EXPRESS',
       storeName: 'QUÁN TRÀ PHÚ QUỐC',
       address: '103 Trần Hưng Đạo, Phú Quốc',
-      hotline: '0901.234.567',
+      hotline: '0348974111',
       title: 'HÓA ĐƠN BÁN LẺ',
       headerNote: '',
       footerThankYou: 'Cảm ơn & Hẹn gặp lại quý khách!',
@@ -169,7 +169,7 @@ export const DEFAULT_PRINT_TEMPLATES = {
       orientation: 'portrait',
       storeName: 'QUÁN TRÀ - SPECIALTY TEA & COFFEE',
       address: '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang',
-      hotline: '0901.234.567',
+      hotline: '0348974111',
       title: 'PHIẾU TẠM TÍNH',
       headerNote: '(Chưa bao gồm hóa đơn GTGT)',
       footerThankYou: 'Quý khách vui lòng kiểm tra lại món trước khi thanh toán!',
@@ -235,7 +235,7 @@ export const DEFAULT_PRINT_TEMPLATES = {
       orientation: 'portrait',
       storeName: 'QUÁN TRÀ - SỔ QUỸ TIỀN MẶT',
       address: '103 Trần Hưng Đạo, Phú Quốc',
-      hotline: '0901.234.567',
+      hotline: '0348974111',
       title: 'PHIẾU THU TIỀN MẶT',
       headerNote: '',
       footerThankYou: 'Kèm theo chứng từ gốc (nếu có)',
@@ -257,7 +257,7 @@ export const DEFAULT_PRINT_TEMPLATES = {
       orientation: 'portrait',
       storeName: 'QUÁN TRÀ - SỔ QUỸ TIỀN MẶT',
       address: '103 Trần Hưng Đạo, Phú Quốc',
-      hotline: '0901.234.567',
+      hotline: '0348974111',
       title: 'PHIẾU CHI TIỀN MẶT',
       headerNote: '',
       footerThankYou: 'Thủ quỹ & Người nhận tiền ký nhận',
@@ -280,7 +280,14 @@ export function loadAllPrintTemplates() {
       Object.keys(DEFAULT_PRINT_TEMPLATES).forEach(key => {
         if (parsed[key] && Array.isArray(parsed[key])) {
           // Clean out any legacy kiotviet template so it doesn't persist
-          const cleaned = parsed[key].filter(t => t.id !== 'inv_k80_kiotviet' && !t.name?.includes('KIOTVIET'));
+          const cleaned = parsed[key]
+            .filter(t => t.id !== 'inv_k80_kiotviet' && !t.name?.includes('KIOTVIET'))
+            .map(t => {
+              if (t.hotline && (t.hotline.includes('0901') || t.hotline.includes('0988') || t.hotline.includes('0949'))) {
+                return { ...t, hotline: '0348974111' };
+              }
+              return t;
+            });
           const existingIds = new Set(cleaned.map(t => t.id));
           const missingDefaults = DEFAULT_PRINT_TEMPLATES[key].filter(d => !existingIds.has(d.id));
           result[key] = [...cleaned, ...missingDefaults];

@@ -102,3 +102,4 @@ export function usePrintTemplates(initialDocType = 'invoice') {
     resetToDefault,
   };
 }
+

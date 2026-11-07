@@ -7,9 +7,7 @@ import {
   Eye,
   EyeOff,
   Store,
-  MapPin,
   Phone,
-  ShieldCheck,
   AlertCircle,
   HelpCircle,
   Activity,
@@ -106,40 +104,11 @@ export function LoginPage({ onLoginSuccess }) {
           }}>
             QUÁN TRÀ
           </div>
-
-          {/* Badge trạng thái hệ thống tiếng Việt */}
-          <div style={{
-            marginLeft: '8px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            backgroundColor: '#e6f4ea',
-            border: '1px solid #c7eed8',
-            borderRadius: '9999px',
-            padding: '3px 12px'
-          }}>
-            <span style={{
-              width: '7px',
-              height: '7px',
-              borderRadius: '50%',
-              backgroundColor: '#059669',
-              display: 'inline-block',
-              boxShadow: '0 0 0 2px rgba(5, 150, 105, 0.25)'
-            }} />
-            <span style={{
-              fontSize: '10.5px',
-              fontWeight: 700,
-              color: '#065f46',
-              letterSpacing: '0.6px'
-            }}>
-              {t('login.systemActive')}
-            </span>
-          </div>
         </div>
 
-        {/* Bên phải: Hotline, Các liên kết, Language, Avatar */}
+        {/* Bên phải: Hotline, Language, Kiểm tra kết nối */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          {/* Hotline hỗ trợ */}
+          {/* Hotline hỗ trợ duy nhất trên Header */}
           <div style={{
             display: 'flex',
             alignItems: 'center',
@@ -171,24 +140,6 @@ export function LoginPage({ onLoginSuccess }) {
           >
             {t('login.diagnostics')}
           </button>
-
-          {/* Avatar đại diện */}
-          <div style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '50%',
-            backgroundColor: '#064e3b',
-            color: '#ffffff',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-            boxShadow: '0 2px 6px rgba(6, 78, 59, 0.2)'
-          }}
-          title={t('login.restaurantBrand')}
-          >
-            <User size={16} />
-          </div>
         </div>
       </header>
 
@@ -239,24 +190,11 @@ export function LoginPage({ onLoginSuccess }) {
             fontWeight: 800,
             color: '#111827',
             textAlign: 'center',
-            marginBottom: '4px',
+            marginBottom: '6px',
             letterSpacing: '-0.2px'
           }}>
             {t('login.restaurantBrand')}
           </h1>
-          <p style={{
-            fontSize: '11.5px',
-            color: '#047857',
-            fontWeight: 600,
-            textAlign: 'center',
-            marginBottom: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: '4px'
-          }}>
-            <MapPin size={13} color="#047857" /> {t('login.branchDetail')}
-          </p>
           <p style={{
             fontSize: '12.5px',
             color: '#6b7280',
@@ -467,40 +405,13 @@ export function LoginPage({ onLoginSuccess }) {
             </button>
           </form>
 
-          {/* Chú thích hotline dưới thẻ */}
-          <div style={{ marginTop: '16px', textAlign: 'center' }}>
-            <p style={{ fontSize: '11.5px', color: '#6b7280', marginBottom: '4px' }}>
-              {t('login.needSupport')}
-            </p>
-            <div style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '8px',
-              fontSize: '12px'
-            }}>
-              <span style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                color: '#064e3b',
-                fontWeight: 600
-              }}>
-                <Phone size={12} color="#064e3b" />
-                Hotline: 0348974111
-              </span>
-              <span style={{ color: '#cbd5e1' }}>•</span>
-              <span style={{ color: '#6b7280' }}>
-                {t('login.posTechnicalSupport')}
-              </span>
-            </div>
-          </div>
         </div>
 
       </main>
 
       {/* 3. THANH FOOTER DƯỚI CÙNG (FULL CHIỀU RỘNG) */}
       <footer style={{
-        height: '48px',
+        height: '44px',
         padding: '0 32px',
         display: 'flex',
         alignItems: 'center',
@@ -530,18 +441,9 @@ export function LoginPage({ onLoginSuccess }) {
           <span style={{ color: '#64748b' }}>{t('login.workstation')}</span>
         </div>
 
-        {/* Bên phải: Tổng đài hỗ trợ & Mã hóa bảo mật */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <Phone size={13} color="#64748b" />
-            <span>{t('login.supportHotlinePriority')}</span>
-            <strong style={{ color: '#334155', fontWeight: 600 }}>0348974111</strong>
-          </div>
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <ShieldCheck size={14} color="#059669" />
-            <span>{t('login.hardwareEncrypted')}</span>
-          </div>
+        {/* Bên phải: Giữ tối giản, sạch sẽ */}
+        <div style={{ fontSize: '11.5px', color: '#94a3b8' }}>
+          © {new Date().getFullYear()} {t('login.restaurantBrand')}
         </div>
       </footer>
 

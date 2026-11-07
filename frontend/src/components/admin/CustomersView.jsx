@@ -2043,7 +2043,7 @@ export function CustomersView({
                   <input
                     type="text"
                     required
-                    placeholder="VD: PHAM THI DOAN TRANG"
+                    placeholder={t('admin.customersView.placeholderName') || 'VD: Nguyễn Văn An'}
                     value={formName}
                     onChange={e => setFormName(e.target.value)}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
@@ -2055,7 +2055,7 @@ export function CustomersView({
                   </label>
                   <input
                     type="text"
-                    placeholder="VD: 0949393043"
+                    placeholder={t('admin.customersView.placeholderPhone') || 'VD: 0912 345 678'}
                     value={formPhone}
                     onChange={e => setFormPhone(e.target.value)}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
@@ -2071,7 +2071,7 @@ export function CustomersView({
                   </label>
                   <input
                     type="email"
-                    placeholder="VD: doantrang@gmail.com"
+                    placeholder={t('admin.customersView.placeholderEmail') || 'VD: nguyenvanan@gmail.com'}
                     value={formEmail}
                     onChange={e => setFormEmail(e.target.value)}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
@@ -2083,7 +2083,7 @@ export function CustomersView({
                   </label>
                   <input
                     type="text"
-                    placeholder="VD: 079195000123"
+                    placeholder={t('admin.customersView.placeholderIdCode') || 'VD: 079090001234'}
                     value={formIdCode}
                     onChange={e => setFormIdCode(e.target.value)}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
@@ -2127,7 +2127,7 @@ export function CustomersView({
                     list="customer_group_options"
                     value={formGroup}
                     onChange={e => setFormGroup(e.target.value)}
-                    placeholder="VD: Khách lẻ, VIP..."
+                    placeholder={t('admin.customersView.placeholderCustomerGroup') || 'VD: Khách quen, VIP, Khách sỉ...'}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
                   />
                   <datalist id="customer_group_options">
@@ -2146,7 +2146,7 @@ export function CustomersView({
                   </label>
                   <input
                     type="text"
-                    placeholder="Tên công ty hoặc cơ quan"
+                    placeholder={t('admin.customersView.placeholderCompany') || 'VD: Công ty TNHH Dịch vụ & Thương mại Á Châu'}
                     value={formCompany}
                     onChange={e => setFormCompany(e.target.value)}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
@@ -2158,7 +2158,7 @@ export function CustomersView({
                   </label>
                   <input
                     type="text"
-                    placeholder="Mã số thuế"
+                    placeholder={t('admin.customersView.placeholderTaxCode') || 'VD: 0312345678'}
                     value={formTaxCode}
                     onChange={e => setFormTaxCode(e.target.value)}
                     style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px', fontFamily: 'monospace' }}
@@ -2173,7 +2173,7 @@ export function CustomersView({
                 </label>
                 <input
                   type="text"
-                  placeholder="Địa chỉ số nhà, đường, phường/xã..."
+                  placeholder={t('admin.customersView.placeholderAddress') || 'VD: Số 12 Lê Lợi, Phường Bến Nghé, Quận 1, TP.HCM'}
                   value={formAddress}
                   onChange={e => setFormAddress(e.target.value)}
                   style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
@@ -2187,7 +2187,7 @@ export function CustomersView({
                 </label>
                 <textarea
                   rows={2}
-                  placeholder="Ghi chú sở thích khách hàng, lưu ý phục vụ..."
+                  placeholder={t('admin.customersView.placeholderNote') || 'VD: Thích ngồi bàn gần cửa sổ, uống trà ít đường...'}
                   value={formNote}
                   onChange={e => setFormNote(e.target.value)}
                   style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px', resize: 'vertical' }}
@@ -2264,7 +2264,7 @@ export function CustomersView({
                 type="text"
                 autoFocus
                 required
-                placeholder="Nhập tên nhóm (VD: Khách sỉ, Khách VIP...)"
+                placeholder={t('admin.customersView.placeholderCustomerGroup') || 'VD: Khách quen, VIP, Khách sỉ...'}
                 value={newGroupName}
                 onChange={e => setNewGroupName(e.target.value)}
                 style={{ width: '100%', padding: '9px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px', marginBottom: '14px', outline: 'none' }}

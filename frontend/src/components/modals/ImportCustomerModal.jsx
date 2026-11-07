@@ -509,7 +509,7 @@ export function ImportCustomerModal({
                 rows={5}
                 value={pasteText}
                 onChange={e => setPasteText(e.target.value)}
-                placeholder={'Tên khách hàng\tSố điện thoại\tHạng thành viên\tChiết khấu (%)\nNguyễn Văn Hùng\t0912345678\tHội viên Kim Cương\t15\nTrần Thị Thu Trang\t0987654321\tHội viên Vàng\t10\nLê Hoàng Nam\t0905112233\tHội viên Bạc\t5'}
+                placeholder={'Tên khách hàng\tSố điện thoại\tHạng thành viên\tChiết khấu (%)\nNguyễn Văn An\t0912345678\tKhách VIP\t10\nTrần Thị Mai\t0987654321\tKhách quen\t5\nLê Quốc Bảo\t0905112233\tHội viên Bạc\t5'}
                 style={{
                   width: '100%',
                   padding: '10px 12px',

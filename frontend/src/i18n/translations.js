@@ -891,7 +891,16 @@ export const translations = {
         confirmDeleteTitle: 'Xác nhận xóa khách hàng',
         confirmDeleteSelectedTitle: 'Xác nhận xóa khách hàng đã chọn',
         confirmDeleteMsg: 'Bạn có chắc chắn muốn xóa khách hàng này không?',
-        deleteSelectedConfirm: 'Bạn có chắc muốn xóa {count} khách hàng đã chọn?'
+        deleteSelectedConfirm: 'Bạn có chắc muốn xóa {count} khách hàng đã chọn?',
+        placeholderName: 'VD: Nguyễn Văn An',
+        placeholderPhone: 'VD: 0912 345 678',
+        placeholderEmail: 'VD: nguyenvanan@gmail.com',
+        placeholderIdCode: 'VD: 079090001234',
+        placeholderCustomerGroup: 'VD: Khách quen, VIP, Khách sỉ...',
+        placeholderCompany: 'VD: Công ty TNHH Dịch vụ & Thương mại Á Châu',
+        placeholderTaxCode: 'VD: 0312345678',
+        placeholderAddress: 'VD: Số 12 Lê Lợi, P. Bến Nghé, Quận 1, TP.HCM',
+        placeholderNote: 'VD: Thích ngồi bàn gần cửa sổ, uống trà ít đường...'
       },
 
       // Promotion tab
@@ -2082,7 +2091,16 @@ export const translations = {
         confirmDeleteTitle: 'Confirm Delete Customer',
         confirmDeleteSelectedTitle: 'Confirm Delete Selected Customers',
         confirmDeleteMsg: 'Are you sure you want to delete this customer?',
-        deleteSelectedConfirm: 'Are you sure you want to delete {count} selected customers?'
+        deleteSelectedConfirm: 'Are you sure you want to delete {count} selected customers?',
+        placeholderName: 'e.g. John Doe',
+        placeholderPhone: 'e.g. 0912 345 678',
+        placeholderEmail: 'e.g. johndoe@gmail.com',
+        placeholderIdCode: 'e.g. 079090001234',
+        placeholderCustomerGroup: 'e.g. Regular, VIP, Wholesale...',
+        placeholderCompany: 'e.g. Asia Trading & Service Co., Ltd',
+        placeholderTaxCode: 'e.g. 0312345678',
+        placeholderAddress: 'e.g. 12 Le Loi Street, Ben Nghe Ward, Dist 1, HCMC',
+        placeholderNote: 'e.g. Prefers window table, less sugar in tea...'
       },
 
       promoTitle: 'Promotions',
@@ -3269,7 +3287,16 @@ export const translations = {
         confirmDeleteTitle: '고객 삭제 확인',
         confirmDeleteSelectedTitle: '선택한 고객 삭제 확인',
         confirmDeleteMsg: '이 고객을 삭제하시겠습니까?',
-        deleteSelectedConfirm: '선택한 {count}명의 고객을 삭제하시겠습니까?'
+        deleteSelectedConfirm: '선택한 {count}명의 고객을 삭제하시겠습니까?',
+        placeholderName: '예: 홍길동',
+        placeholderPhone: '예: 010-1234-5678',
+        placeholderEmail: '예: customer@gmail.com',
+        placeholderIdCode: '예: 900101-1234567',
+        placeholderCustomerGroup: '예: 일반, VIP, 단골...',
+        placeholderCompany: '예: (주)아시아 트레이딩',
+        placeholderTaxCode: '예: 123-45-67890',
+        placeholderAddress: '예: 호치민시 1군 레로이 12번지',
+        placeholderNote: '예: 창가 자리 선호, 덜 달게 주문...'
       },
 
       promoTitle: '프로모션',
@@ -4456,7 +4483,16 @@ export const translations = {
         confirmDeleteTitle: 'Подтвердить удаление клиента',
         confirmDeleteSelectedTitle: 'Подтверждение удаления выбранных клиентов',
         confirmDeleteMsg: 'Вы уверены, что хотите удалить этого клиента?',
-        deleteSelectedConfirm: 'Удалить {count} выбранных клиентов?'
+        deleteSelectedConfirm: 'Удалить {count} выбранных клиентов?',
+        placeholderName: 'Например: Иван Иванов',
+        placeholderPhone: 'Например: +84 912 345 678',
+        placeholderEmail: 'Например: customer@gmail.com',
+        placeholderIdCode: 'Например: 079090001234',
+        placeholderCustomerGroup: 'Например: Постоянный, VIP...',
+        placeholderCompany: 'Например: ООО "Азия Трейд"',
+        placeholderTaxCode: 'Например: 7701234567',
+        placeholderAddress: 'Например: ул. Ле Лой 12, Район 1, Хошимин',
+        placeholderNote: 'Например: Предпочитает столик у окна, чай без сахара...'
       },
 
       promoTitle: 'Рекламные акции',

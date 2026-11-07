@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Printer } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { api } from '../../api';
+import { getRestaurantSettings } from '../../utils/restaurantSettings';
 
 /**
  * Chuyển đổi số tiền thành chữ Tiếng Việt chuẩn theo văn phong hóa đơn tài chính
@@ -64,6 +66,21 @@ export function PreBillModal({
   onConfirmPrintPreBill
 }) {
   const { t, formatTableName, formatDishName, formatDishUnit } = useLanguage();
+  const [defaultBank, setDefaultBank] = useState(null);
+  const appSettings = getRestaurantSettings();
+
+  useEffect(() => {
+    if (isOpen) {
+      api.getDefaultBankAccount().then(res => {
+        if (res && res.bank_account) {
+          setDefaultBank(res.bank_account);
+        }
+      }).catch(err => {
+        console.warn('Could not fetch default bank account for PreBill, using fallback', err);
+      });
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const items = order?.items || [];
@@ -109,6 +126,18 @@ export function PreBillModal({
 
   // Mã hóa đơn thực tế
   const orderCode = order?.order_code || (order?.id ? `ORD-${order.id}` : `ORD-${selectedTable?.name || '01'}`);
+
+  const activeBank = defaultBank || {
+    bank_name: 'Ngân hàng TMCP Quân đội (MBBank)',
+    bank_code: 'MB',
+    bin: '970422',
+    account_number: '19006888',
+    account_name: 'QUAN TRA',
+    qr_template: 'compact2'
+  };
+
+  const qrTransferContent = `QUAN TRA BAN ${tableBadge.num || ''}`.trim();
+  const vietQrUrl = `https://img.vietqr.io/image/${activeBank.bin}-${activeBank.account_number}-${activeBank.qr_template || 'compact2'}.png?amount=${Math.round(totalAmount)}&addInfo=${encodeURIComponent(qrTransferContent)}&accountName=${encodeURIComponent(activeBank.account_name)}`;
 
   const handlePrint = () => {
     if (onConfirmPrintPreBill) onConfirmPrintPreBill();
@@ -186,30 +215,33 @@ export function PreBillModal({
               boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
             }}
           >
-            {/* 1. THÔNG TIN NHÀ HÀNG (THÔNG TIN THỰC TẾ CỦA HỆ THỐNG AURA POS) */}
+            {/* 1. THÔNG TIN NHÀ HÀNG (LẤY TỪ THIẾT LẬP HỆ THỐNG) */}
             <div style={{ textAlign: 'center', marginBottom: '12px' }}>
+              {appSettings.showStoreLogoOnBill && (
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  letterSpacing: '0.4px',
+                  lineHeight: 1.2
+                }}>
+                  NHÀ HÀNG
+                </div>
+              )}
               <div style={{
-                fontSize: '15px',
-                fontWeight: 700,
-                letterSpacing: '0.4px',
-                lineHeight: 1.2
-              }}>
-                NHÀ HÀNG
-              </div>
-              <div style={{
-                fontSize: '17px',
+                fontSize: '16px',
                 fontWeight: 900,
                 letterSpacing: '0.5px',
                 marginTop: '2px',
-                lineHeight: 1.2
+                lineHeight: 1.2,
+                textTransform: 'uppercase'
               }}>
-                AURA RESTAURANT
+                {appSettings.billHeaderStoreName || 'QUÁN TRÀ - SPECIALTY TEA & COFFEE'}
               </div>
               <div style={{ fontSize: '11px', marginTop: '4px', lineHeight: 1.3 }}>
-                ĐC: Chi nhánh 01 - Tràng Tiền, Hoàn Kiếm, Hà Nội
+                ĐC: {appSettings.billHeaderAddress || '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang'}
               </div>
               <div style={{ fontSize: '11.5px', fontWeight: 600, marginTop: '2px' }}>
-                Hotline: 1900 6868
+                Hotline: {appSettings.billHeaderPhone || '0901.234.567'}
               </div>
             </div>
 
@@ -435,35 +467,59 @@ export function PreBillModal({
               </div>
             </div>
 
-            {/* 5. MÃ VIETQR CHUYỂN KHOẢN (AURA RESTAURANT) */}
-            <div style={{
-              textAlign: 'center',
-              marginTop: '12px',
-              paddingTop: '6px'
-            }}>
+            {/* 5. MÃ VIETQR CHUYỂN KHOẢN (Hiển thị nếu bật trong Thiết lập Mẫu in) */}
+            {appSettings.showVietQrOnBill && (
               <div style={{
-                display: 'inline-block',
-                padding: '4px',
-                backgroundColor: '#ffffff'
+                textAlign: 'center',
+                marginTop: '12px',
+                paddingTop: '6px'
               }}>
-                <img
-                  src={`https://img.vietqr.io/image/970422-19006888-compact2.png?amount=${Math.round(totalAmount)}&addInfo=${encodeURIComponent('AURA BAN ' + tableBadge.num)}&accountName=AURA%20RESTAURANT`}
-                  alt="VietQR Payment"
-                  style={{
-                    width: '135px',
-                    height: '135px',
-                    display: 'block',
-                    margin: '0 auto',
-                    objectFit: 'contain'
-                  }}
-                  onError={(e) => {
-                    e.currentTarget.src = `https://api.qrserver.com/v1/create-qr-code/?size=135x135&data=${encodeURIComponent('AURA PAYMENT AMOUNT ' + totalAmount)}`;
-                  }}
-                />
+                <div style={{
+                  display: 'inline-block',
+                  padding: '4px',
+                  backgroundColor: '#ffffff'
+                }}>
+                  <img
+                    src={vietQrUrl}
+                    alt={`VietQR ${activeBank.bank_code}`}
+                    style={{
+                      width: '135px',
+                      height: '135px',
+                      display: 'block',
+                      margin: '0 auto',
+                      objectFit: 'contain'
+                    }}
+                    onError={(e) => {
+                      e.currentTarget.src = `https://api.qrserver.com/v1/create-qr-code/?size=135x135&data=${encodeURIComponent('QUAN TRA ' + activeBank.bank_code + ' ' + activeBank.account_number + ' AMOUNT ' + totalAmount)}`;
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: '11px', fontWeight: 700, marginTop: '3px' }}>
+                  {t('preBill.scanQrToPay')}
+                </div>
+                <div style={{ fontSize: '10.5px', marginTop: '1px' }}>
+                  {activeBank.bank_code} - {t('payment.accountNumber')}: <strong>{activeBank.account_number}</strong>
+                </div>
+                <div style={{ fontSize: '10px', color: '#334155', textTransform: 'uppercase' }}>
+                  {t('payment.accountOwner')}: {activeBank.account_name}
+                </div>
               </div>
-            </div>
+            )}
 
-            {/* 6. LỜI CẢM ƠN DƯỚI CÙNG */}
+            {/* Thông tin Wifi (Nếu bật trong Thiết lập) */}
+            {appSettings.showWifiOnBill && appSettings.billWifiInfo && (
+              <div style={{
+                textAlign: 'center',
+                fontSize: '10.5px',
+                color: '#475569',
+                margin: '6px 0',
+                fontWeight: 600
+              }}>
+                📶 {appSettings.billWifiInfo}
+              </div>
+            )}
+
+            {/* 6. LỜI CẢM ƠN DƯỚI CÙNG (Lấy từ Thiết lập) */}
             <div style={{
               textAlign: 'center',
               marginTop: '10px',
@@ -471,7 +527,7 @@ export function PreBillModal({
               fontSize: '11.5px',
               fontWeight: 500
             }}>
-              Xin Cám Ơn & Hẹn Gặp Lại!!!
+              {appSettings.billFooterThankYou || t('preBill.thankYou')}
             </div>
           </div>
         </div>

@@ -1,5 +1,6 @@
 import React from 'react';
 import {
+  ArrowLeft,
   ArrowLeftRight,
   Trash2,
   User,
@@ -14,9 +15,11 @@ import {
   FileText,
   Clock,
   CheckCircle2,
-  Utensils
+  Utensils,
+  Gift
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { getRestaurantSettings } from '../utils/restaurantSettings';
 
 export function OrderPanel({
   selectedTable,
@@ -30,9 +33,65 @@ export function OrderPanel({
   onOpenCustomerModal,
   onOpenMenuModal,
   onClearOrder,
-  onEditItemNote
+  onEditItemNote,
+  onOpenPromotionModal,
+  onApplyPromotion,
+  promotions = [],
+  isMobile = false,
+  onBackToTables,
+  onOpenSplitOrderModal,
+  onShowToast
 }) {
   const { t, formatTableName, formatDishName } = useLanguage();
+
+  // Đồng hồ thời gian thực (Real-time clock cập nhật từng giây)
+  const [liveClock, setLiveClock] = React.useState(() => {
+    const d = new Date();
+    return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+  });
+
+  React.useEffect(() => {
+    const timer = setInterval(() => {
+      const d = new Date();
+      setLiveClock(`${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const getTableTimeDisplay = () => {
+    // Chỉ hiển thị giờ bắt đầu khi bàn ĐÃ CÓ MÓN (đang phục vụ thực sự)
+    const hasItems = order?.items && order.items.length > 0;
+
+    if (hasItems) {
+      // 1. Nếu bàn đã có started_at
+      if (selectedTable?.started_at) {
+        if (typeof selectedTable.started_at === 'string') {
+          const match = selectedTable.started_at.match(/(\d{2}:\d{2})/);
+          if (match) return match[1];
+          return selectedTable.started_at;
+        }
+      }
+      // 2. Nếu đơn có created_time hoặc created_at
+      if (order?.created_time) {
+        return order.created_time;
+      }
+      if (order?.created_at) {
+        if (typeof order.created_at === 'string') {
+          const match = order.created_at.match(/(\d{2}:\d{2})/);
+          if (match) return match[1];
+        }
+        try {
+          const d = new Date(order.created_at);
+          if (!isNaN(d.getTime())) {
+            return `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
+          }
+        } catch (e) {}
+      }
+    }
+
+    // 3. Nếu là bàn mới mở / chưa có món, luôn đồng bộ theo thời gian thực tế hiện tại
+    return liveClock;
+  };
 
   const formatMoney = (val) => {
     return Number(val || 0).toLocaleString('vi-VN') + ' đ';
@@ -41,19 +100,38 @@ export function OrderPanel({
   if (!selectedTable) {
     return (
       <div style={{
-        width: '460px',
+        width: isMobile ? '100%' : '460px',
+        minWidth: isMobile ? 'unset' : '460px',
         backgroundColor: '#ffffff',
-        borderLeft: '1px solid #e2e8f0',
+        borderLeft: isMobile ? 'none' : '1px solid #e2e8f0',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
         padding: '30px',
-        color: '#94a3b8'
+        color: '#94a3b8',
+        height: '100%'
       }}>
         <Utensils size={48} strokeWidth={1.5} color="#cbd5e1" style={{ marginBottom: '16px' }} />
         <p style={{ fontSize: '16px', fontWeight: 600, color: '#475569' }}>{t('order.noTable')}</p>
         <p style={{ fontSize: '13px', marginTop: '4px' }}>{t('order.addItems')}</p>
+        {isMobile && onBackToTables && (
+          <button
+            onClick={onBackToTables}
+            style={{
+              marginTop: '18px',
+              padding: '10px 20px',
+              borderRadius: '8px',
+              backgroundColor: '#009688',
+              color: '#ffffff',
+              fontWeight: 700,
+              fontSize: '13px',
+              boxShadow: '0 2px 8px rgba(0, 150, 136, 0.3)'
+            }}
+          >
+            ← Chọn bàn trên sơ đồ
+          </button>
+        )}
       </div>
     );
   }
@@ -64,37 +142,57 @@ export function OrderPanel({
 
   return (
     <div style={{
-      width: '470px',
-      minWidth: '470px',
+      width: isMobile ? '100%' : '470px',
+      minWidth: isMobile ? 'unset' : '470px',
       backgroundColor: '#ffffff',
-      borderLeft: '1px solid #e2e8f0',
+      borderLeft: isMobile ? 'none' : '1px solid #e2e8f0',
       display: 'flex',
       flexDirection: 'column',
-      height: 'calc(100vh - 56px - 34px)',
-      boxShadow: '-2px 0 8px rgba(0,0,0,0.02)'
+      height: isMobile ? '100%' : 'calc(100vh - 56px - 34px)',
+      boxShadow: isMobile ? 'none' : '-2px 0 8px rgba(0,0,0,0.02)'
     }}>
       {/* Header of Order Panel */}
       <div style={{
-        padding: '12px 18px',
+        padding: isMobile ? '10px 14px' : '12px 18px',
         borderBottom: '1px solid #f1f5f9',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          {isMobile && onBackToTables && (
+            <button
+              onClick={onBackToTables}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+                padding: '6px 10px',
+                borderRadius: '6px',
+                backgroundColor: '#f1f5f9',
+                color: '#0f172a',
+                fontSize: '12px',
+                fontWeight: 700,
+                border: '1px solid #e2e8f0'
+              }}
+            >
+              <ArrowLeft size={14} />
+              <span>Bàn</span>
+            </button>
+          )}
           <span style={{
             backgroundColor: '#0f172a',
             color: '#ffffff',
-            padding: '5px 12px',
+            padding: '5px 10px',
             borderRadius: '6px',
-            fontSize: '13.5px',
+            fontSize: '13px',
             fontWeight: 800,
             letterSpacing: '0.3px'
           }}>
             {formatTableName(selectedTable.name)}
           </span>
-          <span style={{ fontSize: '12.5px', color: '#64748b' }}>
-            {t('order.timeIn')}: <strong style={{ color: '#334155' }}>{selectedTable.started_at || '11:30'}</strong>
+          <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>
+            {getTableTimeDisplay()}
           </span>
         </div>
 
@@ -401,8 +499,83 @@ export function OrderPanel({
           </span>
         </div>
 
-        {/* Giảm giá hội viên - chỉ hiển thị khi có giảm giá */}
-        {(order?.discount_amount > 0) && (
+        {/* Nút chọn hoặc hiển thị Khuyến Mãi (CTKM) */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          fontSize: '12.5px',
+          marginBottom: '6px',
+          padding: '6px 8px',
+          borderRadius: '6px',
+          backgroundColor: order?.promotion_id ? '#e6f7f5' : '#f8fafc',
+          border: order?.promotion_id ? '1px solid #80cbc4' : '1px dashed #cbd5e1'
+        }}>
+          <div
+            onClick={onOpenPromotionModal}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              flex: 1,
+              color: order?.promotion_id ? '#00796b' : '#475569',
+              fontWeight: order?.promotion_id ? 700 : 500
+            }}
+          >
+            <Gift size={14} color={order?.promotion_id ? '#009688' : '#64748b'} />
+            <span>
+              {order?.promotion_id
+                ? `${order.promotion_name || order.promotion_code}`
+                : '🎁 Áp dụng Khuyến Mãi / CTKM'}
+            </span>
+          </div>
+
+          {order?.promotion_id ? (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <span style={{ fontWeight: 700, color: '#009688' }}>
+                -{formatMoney(order?.promotion_discount_amount || 0)}
+              </span>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onApplyPromotion && onApplyPromotion(null);
+                }}
+                title="Hủy khuyến mãi"
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#94a3b8',
+                  cursor: 'pointer',
+                  padding: '2px',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <Trash2 size={13} color="#ef4444" />
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={onOpenPromotionModal}
+              style={{
+                fontSize: '11px',
+                fontWeight: 600,
+                color: '#0284c7',
+                background: '#e0f2fe',
+                border: 'none',
+                borderRadius: '4px',
+                padding: '2px 8px',
+                cursor: 'pointer'
+              }}
+            >
+              Chọn
+            </button>
+          )}
+        </div>
+
+        {/* Giảm giá hội viên - chỉ hiển thị khi có chiết khấu hội viên */}
+        {(order?.discount_percent > 0) && (
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
@@ -412,7 +585,7 @@ export function OrderPanel({
           }}>
             <span>{t('payment.memberDiscount')} ({order?.discount_percent || 0}%):</span>
             <span style={{ fontWeight: 600 }}>
-              -{formatMoney(order?.discount_amount || 0)}
+              -{formatMoney(Math.round((order?.subtotal || 0) * ((order?.discount_percent || 0) / 100)))}
             </span>
           </div>
         )}
@@ -497,7 +670,17 @@ export function OrderPanel({
           {/* Tách Đơn */}
           <button
             id="btn-split-order"
-            onClick={() => alert(t('order.splitOrder'))}
+            onClick={() => {
+              if (!order?.items || order.items.length === 0) {
+                if (onShowToast) {
+                  onShowToast('Bàn hiện chưa có món ăn nào để tách đơn!', 'warning');
+                }
+                return;
+              }
+              if (onOpenSplitOrderModal) {
+                onOpenSplitOrderModal();
+              }
+            }}
             style={{
               padding: '9px 6px',
               borderRadius: '7px',
@@ -509,7 +692,8 @@ export function OrderPanel({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              gap: '6px'
+              gap: '6px',
+              cursor: 'pointer'
             }}
           >
             <Scissors size={14} color="#64748b" />
@@ -520,7 +704,18 @@ export function OrderPanel({
         {/* Primary Action Button: THANH TOÁN (F9) */}
         <button
           id="btn-checkout"
-          onClick={onOpenCheckoutModal}
+          onClick={() => {
+            const settings = getRestaurantSettings();
+            if (settings.allowPayBeforeKitchen === false && hasNewItems) {
+              if (onShowToast) {
+                onShowToast('Cấu hình quản lý: Cần bấm "Báo Bếp" trước khi thanh toán!');
+              } else {
+                alert('Cấu hình quản lý: Cần bấm "Báo Bếp" trước khi thanh toán!');
+              }
+              return;
+            }
+            onOpenCheckoutModal();
+          }}
           style={{
             width: '100%',
             padding: '13px 18px',
@@ -540,7 +735,7 @@ export function OrderPanel({
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CreditCard size={18} />
-            <span>{t('order.payment')} (F9)</span>
+            <span>{t('order.payment')}</span>
           </div>
           <span style={{ fontSize: '16px', letterSpacing: '0.4px' }}>
             {formatMoney(order?.total_amount || 0)}

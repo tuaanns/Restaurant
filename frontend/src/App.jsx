@@ -18,6 +18,9 @@ import { TransferTableModal } from './components/modals/TransferTableModal';
 import { CustomerModal } from './components/modals/CustomerModal';
 import { ItemNoteModal } from './components/modals/ItemNoteModal';
 import { ConfirmDeleteModal } from './components/modals/ConfirmDeleteModal';
+import { PromotionModal } from './components/modals/PromotionModal';
+import { SplitOrderModal } from './components/modals/SplitOrderModal';
+import { CheckCircle2, AlertCircle } from 'lucide-react';
 
 import { useLanguage } from './i18n/LanguageContext';
 import { api } from './api';
@@ -37,10 +40,23 @@ export function App() {
   });
 
   const [currentView, setCurrentView] = useState('pos'); // 'pos' hoặc 'admin'
+  const [adminTab, setAdminTab] = useState('overview');
   const [activeTab, setActiveTab] = useState('tables');
   const [selectedArea, setSelectedArea] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+
+  // === RESPONSIVE MOBILE STATE ===
+  const [isMobile, setIsMobile] = useState(() => typeof window !== 'undefined' ? window.innerWidth < 900 : false);
+  const [mobileTab, setMobileTab] = useState('tables'); // 'tables' | 'order'
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 900);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   // Data states
   const [areas, setAreas] = useState(initialMockData.areas);
@@ -60,7 +76,18 @@ export function App() {
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [isTransferOpen, setIsTransferOpen] = useState(false);
   const [isCustomerOpen, setIsCustomerOpen] = useState(false);
+  const [isPromotionOpen, setIsPromotionOpen] = useState(false);
+  const [isSplitOrderOpen, setIsSplitOrderOpen] = useState(false);
+  const [promotions, setPromotions] = useState([]);
   const [editingItem, setEditingItem] = useState(null);
+  const [toast, setToast] = useState(null);
+
+  const showToast = (message, type = 'success') => {
+    setToast({ message, type });
+    setTimeout(() => {
+      setToast(null);
+    }, 3500);
+  };
 
   const searchInputRef = useRef(null);
 
@@ -95,6 +122,13 @@ export function App() {
       const custRes = await api.getCustomers();
       if (custRes && custRes.customers) {
         setCustomers(custRes.customers);
+      }
+    } catch (err) {}
+
+    try {
+      const promoRes = await api.getPosPromotions();
+      if (promoRes && promoRes.promotions) {
+        setPromotions(promoRes.promotions);
       }
     } catch (err) {}
   };
@@ -316,16 +350,125 @@ export function App() {
     }));
   };
 
-  // Báo Bếp (F10)
-  const handleConfirmSendKitchen = async () => {
-    if (!order) return;
+  // In trực tiếp phiếu báo bếp K80 qua iframe ngầm, không mở modal xem trước hay dialog khổ in
+  const printDirectKitchenSlip = (tableName, items) => {
+    try {
+      let iframe = document.getElementById('silent-kitchen-print-frame');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.id = 'silent-kitchen-print-frame';
+        iframe.style.position = 'fixed';
+        iframe.style.right = '0';
+        iframe.style.bottom = '0';
+        iframe.style.width = '0';
+        iframe.style.height = '0';
+        iframe.style.border = '0';
+        document.body.appendChild(iframe);
+      }
+
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+      const dateStr = now.toLocaleDateString('vi-VN');
+      const ticketCode = 'BEP-' + now.getTime().toString().slice(-6);
+
+      const rowsHtml = items.map((it, idx) => `
+        <tr>
+          <td style="padding: 4px 0; font-size: 12px; vertical-align: top;">${idx + 1}.</td>
+          <td style="padding: 4px 4px; font-size: 12.5px; font-weight: bold; vertical-align: top;">
+            ${it.product_name || it.name}
+            ${it.note ? `<div style="font-size: 10.5px; font-weight: normal; font-style: italic; color: #444;">* ${it.note}</div>` : ''}
+          </td>
+          <td style="padding: 4px 0; text-align: center; font-size: 13.5px; font-weight: 900; vertical-align: top;">${it.quantity}</td>
+        </tr>
+      `).join('');
+
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <style>
+            @page { size: 80mm auto; margin: 2mm; }
+            body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, monospace; font-size: 12px; margin: 0; padding: 4px; width: 72mm; color: #000; }
+            .center { text-align: center; }
+            .bold { font-weight: bold; }
+            .dashed { border-top: 1px dashed #000; margin: 5px 0; }
+            table { width: 100%; border-collapse: collapse; }
+            th { border-bottom: 1px solid #000; font-size: 11px; padding: 3px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="center bold" style="font-size: 14px;">QUÁN TRÀ</div>
+          <div class="center" style="font-size: 10px;">${t('header.branch')}</div>
+          <div class="dashed"></div>
+          <div class="center bold" style="font-size: 13px;">PHIẾU BÁO BẾP / BAR</div>
+          <div class="dashed"></div>
+          <div style="display: flex; justify-content: space-between; font-size: 11.5px;">
+            <span><strong>BÀN:</strong> ${tableName}</span>
+            <span>Mã: ${ticketCode}</span>
+          </div>
+          <div style="font-size: 10.5px; color: #333;">Thời gian: ${timeStr} - ${dateStr}</div>
+          <div style="font-size: 10.5px; color: #333;">Thu ngân: Thu Hằng (Ca sáng)</div>
+          <div class="dashed"></div>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 22px; text-align: left;">STT</th>
+                <th style="text-align: left;">Tên món</th>
+                <th style="width: 32px; text-align: center;">SL</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+          <div class="dashed"></div>
+          <div class="center bold" style="font-size: 10.5px; margin-top: 5px;">*** XIN CẢM ƠN - BẾP LÀM NGAY ***</div>
+        </body>
+        </html>
+      `;
+
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(htmlContent);
+      doc.close();
+
+      setTimeout(() => {
+        try {
+          iframe.contentWindow.focus();
+          iframe.contentWindow.print();
+        } catch (_) {}
+      }, 150);
+    } catch (e) {
+      console.warn('Silent print error:', e);
+    }
+  };
+
+  // Báo Bếp (F10) - Tự động in và gửi bếp trực tiếp, không hiện modal xem trước hay dialog khổ in
+  const handleDirectSendKitchen = async () => {
+    if (!order || !order.id) {
+      showToast('Vui lòng chọn bàn có đơn trước khi báo bếp!', 'warning');
+      return;
+    }
+    const items = order.items || [];
+    if (items.length === 0) {
+      showToast('Bàn chưa có món nào để báo bếp!', 'warning');
+      return;
+    }
+
+    const pendingItems = items.filter(it => it.status === 'new_pending');
+    const itemsToPrint = pendingItems.length > 0 ? pendingItems : items;
+    const tableName = selectedTable ? formatTableName(selectedTable.name) : 'Bàn';
+
     try {
       const res = await api.sendToKitchen(order.id);
       if (res && res.order) {
         setOrder(res.order);
         loadData();
       }
-    } catch (err) {}
+    } catch (err) {
+      console.warn('sendToKitchen err:', err);
+    }
 
     setOrder(prev => {
       if (!prev) return prev;
@@ -337,6 +480,16 @@ export function App() {
         }))
       };
     });
+
+    showToast(`Đã tự động gửi & in báo bếp thành công cho ${tableName} (${itemsToPrint.length} món)!`, 'success');
+
+    // Tự động in lệnh báo bếp ngầm định dạng khổ K80 chuẩn
+    printDirectKitchenSlip(tableName, itemsToPrint);
+  };
+
+  // Báo Bếp Modal (fallback)
+  const handleConfirmSendKitchen = async () => {
+    await handleDirectSendKitchen();
   };
 
   // In Tạm Tính
@@ -452,6 +605,23 @@ export function App() {
     }
   };
 
+  // Tách Đơn
+  const handleConfirmSplit = async (fromTableId, toTableId, splitItems) => {
+    try {
+      const res = await api.splitOrder(fromTableId, toTableId, splitItems);
+      showToast(res?.message || 'Đã tách đơn thành công!', 'success');
+      await loadData();
+      if (selectedTable?.id) {
+        const orderRes = await api.getTableOrder(selectedTable.id);
+        if (orderRes && orderRes.order) {
+          setOrder(orderRes.order);
+        }
+      }
+    } catch (err) {
+      showToast(err.response?.data?.message || 'Có lỗi xảy ra khi tách đơn', 'warning');
+    }
+  };
+
   // Chọn khách hàng & chiết khấu
   const handleSelectCustomer = async (custId) => {
     try {
@@ -497,6 +667,33 @@ export function App() {
         items: prev.items.map(it => it.id === itemId ? { ...it, note } : it)
       };
     });
+  };
+
+  // Áp dụng hoặc hủy khuyến mãi
+  const handleApplyPromotion = async (promoId) => {
+    if (!order?.id) return;
+    try {
+      const res = await api.applyOrderPromotion(order.id, promoId);
+      if (res && res.order) {
+        setOrder(res.order);
+        setTables(prev => prev.map(t => {
+          if (t.id === selectedTable?.id) {
+            return {
+              ...t,
+              order: {
+                ...t.order,
+                total_amount: res.order.total_amount,
+                subtotal: res.order.subtotal,
+                discount_amount: res.order.discount_amount
+              }
+            };
+          }
+          return t;
+        }));
+      }
+    } catch (err) {
+      console.warn('Apply promo error:', err);
+    }
   };
 
   // Huỷ đơn - mở popup xác nhận hoàn chỉnh
@@ -581,7 +778,7 @@ export function App() {
         setIsPaymentOpen(true);
       } else if (e.key === 'F10') {
         e.preventDefault();
-        setIsKitchenOpen(true);
+        handleDirectSendKitchen();
       } else if (e.key === 'Escape') {
         setIsMenuOpen(false);
         setIsKitchenOpen(false);
@@ -602,72 +799,178 @@ export function App() {
     return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
+  const formatMoney = (val) => Number(val || 0).toLocaleString('vi-VN') + ' đ';
+  const itemCount = order?.items?.reduce((acc, it) => acc + (it.quantity || 1), 0) || 0;
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflow: 'hidden' }}>
-      {/* 1. Header Bar (Có menu xổ xuống và nút Đăng Xuất) */}
-      <Header
-        activeTab={activeTab}
-        setActiveTab={setActiveTab}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        onResetDemo={handleResetDemo}
-        onOpenMenu={() => setIsMenuOpen(true)}
-        searchInputRef={searchInputRef}
-        currentUser={currentUser}
-        onLogout={handleLogout}
-        currentView={currentView}
-        setCurrentView={setCurrentView}
-      />
+      {/* 1. Header Bar (Chỉ hiển thị khi ở màn hình POS) */}
+      {currentView !== 'admin' && (
+        <Header
+          activeTab={activeTab}
+          setActiveTab={setActiveTab}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          onResetDemo={handleResetDemo}
+          onOpenMenu={() => setIsMenuOpen(true)}
+          searchInputRef={searchInputRef}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          currentView={currentView}
+          setCurrentView={setCurrentView}
+          isMobile={isMobile}
+          mobileTab={mobileTab}
+          setMobileTab={setMobileTab}
+          itemCount={itemCount}
+          selectedTable={selectedTable}
+          adminTab={adminTab}
+          setAdminTab={setAdminTab}
+        />
+      )}
 
       {/* 2. Main View (POS View HOẶC Admin Dashboard) */}
       {currentView === 'admin' && currentUser.role === 'admin' ? (
         <AdminDashboard
           currentUser={currentUser}
+          initialTab={adminTab}
           onBackToPos={() => setCurrentView('pos')}
+          onLogout={handleLogout}
         />
       ) : (
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          {/* Cột Trái: Bộ lọc khu vực & Lưới bàn */}
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-            <AreaFilterBar
-              areas={areas}
-              selectedArea={selectedArea}
-              onSelectArea={setSelectedArea}
-              summary={summary}
-              statusFilter={statusFilter}
-              onSelectStatusFilter={setStatusFilter}
-            />
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
+          {/* Cột Trái: Bộ lọc khu vực & Lưới bàn (Hiển thị nếu trên Desktop HOẶC trên Mobile tab tables) */}
+          {(!isMobile || mobileTab === 'tables') && (
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden', width: '100%' }}>
+              <AreaFilterBar
+                areas={areas}
+                selectedArea={selectedArea}
+                onSelectArea={setSelectedArea}
+                summary={summary}
+                statusFilter={statusFilter}
+                onSelectStatusFilter={setStatusFilter}
+              />
 
-            <TableGrid
-              tables={tables}
+              <TableGrid
+                tables={tables}
+                selectedTable={selectedTable}
+                onSelectTable={(table) => {
+                  handleSelectTable(table);
+                }}
+                selectedArea={selectedArea}
+                statusFilter={statusFilter}
+                searchQuery={searchQuery}
+              />
+
+              {/* Floating Sticky Order Bar on Mobile when Table is selected */}
+              {isMobile && selectedTable && (
+                <div
+                  onClick={() => setMobileTab('order')}
+                  style={{
+                    position: 'fixed',
+                    bottom: '62px',
+                    left: '10px',
+                    right: '10px',
+                    backgroundColor: '#0f172a',
+                    color: '#ffffff',
+                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    boxShadow: '0 8px 24px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.1)',
+                    zIndex: 40,
+                    cursor: 'pointer'
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{
+                      backgroundColor: '#009688',
+                      color: '#ffffff',
+                      padding: '4px 8px',
+                      borderRadius: '6px',
+                      fontWeight: 800,
+                      fontSize: '12px'
+                    }}>
+                      {formatTableName(selectedTable.name)}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#ffffff' }}>
+                        {itemCount} món • {formatMoney(order?.total_amount || 0)}
+                      </div>
+                      <div style={{ fontSize: '10.5px', color: '#94a3b8' }}>
+                        {selectedTable.status === 'billing' ? 'Đã in tạm tính' : selectedTable.status === 'occupied' ? 'Đang phục vụ' : 'Chạm để xem đơn / gọi món'}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsMenuOpen(true);
+                      }}
+                      style={{
+                        backgroundColor: 'rgba(255,255,255,0.15)',
+                        color: '#ffffff',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        fontSize: '11.5px',
+                        fontWeight: 600
+                      }}
+                    >
+                      + Món
+                    </button>
+                    <button
+                      onClick={() => setMobileTab('order')}
+                      style={{
+                        backgroundColor: '#009688',
+                        color: '#ffffff',
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        fontSize: '11.5px',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                      }}
+                    >
+                      <span>Xem đơn &gt;</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Cột Phải: Bảng Chi Tiết Order (Hiển thị nếu trên Desktop HOẶC trên Mobile tab order) */}
+          {(!isMobile || mobileTab === 'order') && (
+            <OrderPanel
               selectedTable={selectedTable}
-              onSelectTable={handleSelectTable}
-              selectedArea={selectedArea}
-              statusFilter={statusFilter}
-              searchQuery={searchQuery}
+              order={order}
+              onUpdateQuantity={handleUpdateQuantity}
+              onRemoveItem={handleRemoveItem}
+              onOpenKitchenModal={handleDirectSendKitchen}
+              onOpenPreBillModal={() => setIsPreBillOpen(true)}
+              onOpenCheckoutModal={() => setIsPaymentOpen(true)}
+              onOpenTransferModal={() => setIsTransferOpen(true)}
+              onOpenCustomerModal={() => setIsCustomerOpen(true)}
+              onOpenMenuModal={() => setIsMenuOpen(true)}
+              onClearOrder={handleClearOrder}
+              onEditItemNote={(item) => setEditingItem(item)}
+              onOpenPromotionModal={() => setIsPromotionOpen(true)}
+              onApplyPromotion={handleApplyPromotion}
+              onOpenSplitOrderModal={() => setIsSplitOrderOpen(true)}
+              onShowToast={showToast}
+              promotions={promotions}
+              isMobile={isMobile}
+              onBackToTables={() => setMobileTab('tables')}
             />
-          </div>
-
-          {/* Cột Phải: Bảng Chi Tiết Order */}
-          <OrderPanel
-            selectedTable={selectedTable}
-            order={order}
-            onUpdateQuantity={handleUpdateQuantity}
-            onRemoveItem={handleRemoveItem}
-            onOpenKitchenModal={() => setIsKitchenOpen(true)}
-            onOpenPreBillModal={() => setIsPreBillOpen(true)}
-            onOpenCheckoutModal={() => setIsPaymentOpen(true)}
-            onOpenTransferModal={() => setIsTransferOpen(true)}
-            onOpenCustomerModal={() => setIsCustomerOpen(true)}
-            onOpenMenuModal={() => setIsMenuOpen(true)}
-            onClearOrder={handleClearOrder}
-            onEditItemNote={(item) => setEditingItem(item)}
-          />
+          )}
         </div>
       )}
 
-      {/* 3. Bottom Shortcuts Footer */}
-      {currentView === 'pos' && (
+      {/* 3. Bottom Shortcuts Footer (Desktop) */}
+      {!isMobile && currentView === 'pos' && (
         <FooterShortcuts
           onTriggerShortcut={(key) => {
             if (key === 'F1') { setActiveTab('tables'); setIsMenuOpen(false); }
@@ -675,9 +978,117 @@ export function App() {
             if (key === 'F3') searchInputRef.current?.focus();
             if (key === 'F4') setIsCustomerOpen(true);
             if (key === 'F9') setIsPaymentOpen(true);
-            if (key === 'F10') setIsKitchenOpen(true);
+            if (key === 'F10') handleDirectSendKitchen();
           }}
         />
+      )}
+
+      {/* Mobile Bottom Navigation Bar (Điện thoại) */}
+      {isMobile && currentView === 'pos' && (
+        <nav style={{
+          height: '52px',
+          backgroundColor: '#0b1320',
+          borderTop: '1px solid #1a273e',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-around',
+          zIndex: 50,
+          flexShrink: 0
+        }}>
+          <button
+            onClick={() => setMobileTab('tables')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '2px',
+              color: mobileTab === 'tables' ? '#00c292' : '#94a3b8',
+              fontSize: '11px',
+              fontWeight: 600,
+              border: 'none',
+              background: 'none'
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>🪑</span>
+            <span>Sơ đồ bàn</span>
+          </button>
+
+          <button
+            onClick={() => setIsMenuOpen(true)}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '2px',
+              color: '#94a3b8',
+              fontSize: '11px',
+              fontWeight: 600,
+              border: 'none',
+              background: 'none'
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>📖</span>
+            <span>Thực đơn</span>
+          </button>
+
+          <button
+            onClick={() => setMobileTab('order')}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '2px',
+              color: mobileTab === 'order' ? '#00c292' : '#94a3b8',
+              fontSize: '11px',
+              fontWeight: 600,
+              position: 'relative',
+              border: 'none',
+              background: 'none'
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>📋</span>
+            <span>Đơn hàng</span>
+            {itemCount > 0 && (
+              <span style={{
+                position: 'absolute',
+                top: '-2px',
+                right: '-6px',
+                backgroundColor: '#ef4444',
+                color: '#fff',
+                borderRadius: '10px',
+                padding: '0 4px',
+                fontSize: '9.5px',
+                fontWeight: 800
+              }}>
+                {itemCount}
+              </span>
+            )}
+          </button>
+
+          <button
+            onClick={() => {
+              if (order?.id) {
+                handleDirectSendKitchen();
+              } else {
+                showToast('Vui lòng chọn bàn trước khi báo bếp!', 'warning');
+              }
+            }}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: '2px',
+              color: '#94a3b8',
+              fontSize: '11px',
+              fontWeight: 600,
+              border: 'none',
+              background: 'none'
+            }}
+          >
+            <span style={{ fontSize: '15px' }}>🔔</span>
+            <span>Báo bếp</span>
+          </button>
+        </nav>
       )}
 
       {/* Modals */}
@@ -736,6 +1147,25 @@ export function App() {
         onSaveNote={handleSaveItemNote}
       />
 
+      <PromotionModal
+        isOpen={isPromotionOpen}
+        onClose={() => setIsPromotionOpen(false)}
+        promotions={promotions}
+        currentPromotionId={order?.promotion_id}
+        orderSubtotal={order?.subtotal || 0}
+        onApplyPromotion={handleApplyPromotion}
+      />
+
+      {/* Modal Tách Đơn Hàng (Split Order Modal - Không dùng alert browser) */}
+      <SplitOrderModal
+        isOpen={isSplitOrderOpen}
+        onClose={() => setIsSplitOrderOpen(false)}
+        selectedTable={selectedTable}
+        order={order}
+        tables={tables}
+        onConfirmSplit={handleConfirmSplit}
+      />
+
       {/* Modal xác nhận huỷ toàn bộ đơn bàn (Custom Dialog hoàn chỉnh) */}
       <ConfirmDeleteModal
         isOpen={isClearOrderModalOpen}
@@ -748,6 +1178,31 @@ export function App() {
         confirmText={t('order.clearOrder')}
         cancelText={t('cancel')}
       />
+
+      {/* Toast Notification nổi trên màn hình (thay thế hoàn toàn alert localhost) */}
+      {toast && (
+        <div style={{
+          position: 'fixed',
+          top: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 9999,
+          backgroundColor: toast.type === 'warning' ? '#ea580c' : '#009688',
+          color: '#ffffff',
+          padding: '10px 22px',
+          borderRadius: '10px',
+          boxShadow: '0 10px 25px -5px rgba(0,0,0,0.3)',
+          fontSize: '13.5px',
+          fontWeight: 600,
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          pointerEvents: 'none'
+        }}>
+          {toast.type === 'warning' ? <AlertCircle size={18} /> : <CheckCircle2 size={18} />}
+          <span>{toast.message}</span>
+        </div>
+      )}
     </div>
   );
 }

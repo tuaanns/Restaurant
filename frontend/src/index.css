@@ -91,6 +91,37 @@ input, select, textarea {
   outline: none;
 }
 
+/* iOS Safari auto-zoom prevention: inputs must be 16px on mobile */
+@media screen and (max-width: 768px) {
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* Hide scrollbars for smooth touch swiping */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Responsive display helpers */
+@media (max-width: 900px) {
+  .desktop-only {
+    display: none !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .mobile-only {
+    display: none !important;
+  }
+}
+
 /* =========================================================
    PRINT STYLES FOR THERMAL PRINTER (K80 / POS-80C 80mm BILL & KITCHEN)
    ========================================================= */

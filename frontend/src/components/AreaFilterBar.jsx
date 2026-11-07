@@ -13,24 +13,34 @@ export function AreaFilterBar({
   return (
     <div style={{
       display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '12px 18px',
+      flexDirection: 'column',
+      gap: '8px',
+      padding: '10px 14px',
       backgroundColor: '#ffffff',
       borderBottom: '1px solid #e2e8f0'
     }}>
-      {/* Area Filter Pills */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+      {/* Area Filter Pills - Cuộn ngang mượt mà trên mobile */}
+      <div className="no-scrollbar" style={{
+        display: 'flex',
+        alignItems: 'center',
+        gap: '6px',
+        overflowX: 'auto',
+        whiteSpace: 'nowrap',
+        WebkitOverflowScrolling: 'touch',
+        paddingBottom: '2px'
+      }}>
         <button
           onClick={() => {
             onSelectArea('all');
             if (onSelectStatusFilter) onSelectStatusFilter('all');
           }}
           style={{
-            padding: '6px 14px',
+            padding: '6px 12px',
             borderRadius: '20px',
-            fontSize: '13px',
+            fontSize: '12.5px',
             fontWeight: 600,
+            whiteSpace: 'nowrap',
+            flexShrink: 0,
             backgroundColor: selectedArea === 'all' && statusFilter === 'all' ? '#0f172a' : '#f1f5f9',
             color: selectedArea === 'all' && statusFilter === 'all' ? '#ffffff' : '#475569',
             border: '1px solid',
@@ -51,10 +61,12 @@ export function AreaFilterBar({
                 if (onSelectStatusFilter) onSelectStatusFilter('all');
               }}
               style={{
-                padding: '6px 14px',
+                padding: '6px 12px',
                 borderRadius: '20px',
-                fontSize: '13px',
+                fontSize: '12.5px',
                 fontWeight: 600,
+                whiteSpace: 'nowrap',
+                flexShrink: 0,
                 backgroundColor: isActive ? '#0f172a' : '#f1f5f9',
                 color: isActive ? '#ffffff' : '#475569',
                 border: '1px solid',
@@ -69,7 +81,17 @@ export function AreaFilterBar({
       </div>
 
       {/* Legend & Quick Status Filters */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '16px', fontSize: '12.5px', fontWeight: 600 }}>
+      <div className="no-scrollbar" style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: '8px',
+        overflowX: 'auto',
+        fontSize: '11.5px',
+        fontWeight: 600,
+        paddingTop: '2px',
+        borderTop: '1px dashed #f1f5f9'
+      }}>
         {/* Trống */}
         <div
           onClick={() => onSelectStatusFilter(statusFilter === 'empty' ? 'all' : 'empty')}

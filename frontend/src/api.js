@@ -76,6 +76,11 @@ export const api = {
     return res.data;
   },
 
+  getReports: async (params = {}) => {
+    const res = await axios.get(`${API_ROOT}/admin/reports`, { params });
+    return res.data;
+  },
+
   addProduct: async (productData) => {
     const res = await axios.post(`${API_ROOT}/admin/products`, productData);
     return res.data;
@@ -190,6 +195,27 @@ export const api = {
     return res.data;
   },
 
+  // Quản lý Khuyến Mãi (Admin Promotions)
+  getAdminPromotions: async () => {
+    const res = await axios.get(`${API_ROOT}/admin/promotions`);
+    return res.data;
+  },
+
+  addAdminPromotion: async (data) => {
+    const res = await axios.post(`${API_ROOT}/admin/promotions`, data);
+    return res.data;
+  },
+
+  updateAdminPromotion: async (id, data) => {
+    const res = await axios.patch(`${API_ROOT}/admin/promotions/${id}`, data);
+    return res.data;
+  },
+
+  deleteAdminPromotion: async (id) => {
+    const res = await axios.delete(`${API_ROOT}/admin/promotions/${id}`);
+    return res.data;
+  },
+
   // === POS THU NGÂN ===
   // Lấy danh sách bàn, khu vực và thống kê
   getTables: async () => {
@@ -244,6 +270,18 @@ export const api = {
     return res.data;
   },
 
+  // Lấy danh sách khuyến mãi đang chạy (POS)
+  getPosPromotions: async () => {
+    const res = await axios.get(`${API_BASE}/promotions`);
+    return res.data;
+  },
+
+  // Áp dụng khuyến mãi vào order
+  applyOrderPromotion: async (orderId, promotionId) => {
+    const res = await axios.post(`${API_BASE}/orders/${orderId}/promotion`, { promotion_id: promotionId });
+    return res.data;
+  },
+
   // Báo bếp (F10)
   sendToKitchen: async (orderId) => {
     const res = await axios.post(`${API_BASE}/orders/${orderId}/send-kitchen`);
@@ -271,6 +309,16 @@ export const api = {
     return res.data;
   },
 
+  // Tách đơn sang bàn khác
+  splitOrder: async (fromTableId, toTableId, items) => {
+    const res = await axios.post(`${API_BASE}/tables/split-order`, {
+      from_table_id: fromTableId,
+      to_table_id: toTableId,
+      items: items,
+    });
+    return res.data;
+  },
+
   // Khôi phục dữ liệu mẫu
   resetDemo: async () => {
     const res = await axios.post(`${API_BASE}/reset-demo`);
@@ -280,6 +328,65 @@ export const api = {
   // Huỷ toàn bộ order (xoá sạch món, reset bàn về empty)
   clearOrder: async (orderId) => {
     const res = await axios.post(`${API_BASE}/orders/${orderId}/clear`);
+    return res.data;
+  },
+
+  // Quản lý Sổ Quỹ (Cash Transactions)
+  getCashTransactions: async (params = {}) => {
+    const res = await axios.get(`${API_ROOT}/admin/cash-transactions`, { params });
+    return res.data;
+  },
+
+  createCashTransaction: async (data) => {
+    const res = await axios.post(`${API_ROOT}/admin/cash-transactions`, data);
+    return res.data;
+  },
+
+  deleteCashTransaction: async (id) => {
+    const res = await axios.delete(`${API_ROOT}/admin/cash-transactions/${id}`);
+    return res.data;
+  },
+
+  // Quản lý Tài khoản ngân hàng (Bank Accounts & VietQR)
+  getBankAccounts: async () => {
+    const res = await axios.get(`${API_ROOT}/admin/bank-accounts`);
+    return res.data;
+  },
+
+  createBankAccount: async (data) => {
+    const res = await axios.post(`${API_ROOT}/admin/bank-accounts`, data);
+    return res.data;
+  },
+
+  updateBankAccount: async (id, data) => {
+    const res = await axios.put(`${API_ROOT}/admin/bank-accounts/${id}`, data);
+    return res.data;
+  },
+
+  deleteBankAccount: async (id) => {
+    const res = await axios.delete(`${API_ROOT}/admin/bank-accounts/${id}`);
+    return res.data;
+  },
+
+  setDefaultBankAccount: async (id) => {
+    const res = await axios.post(`${API_ROOT}/admin/bank-accounts/${id}/set-default`);
+    return res.data;
+  },
+
+  getDefaultBankAccount: async () => {
+    const res = await axios.get(`${API_BASE}/default-bank-account`);
+    return res.data;
+  },
+
+  // Kiểm tra trạng thái đơn hàng (Tự động phát hiện thanh toán VietQR)
+  checkOrderStatus: async (orderId) => {
+    const res = await axios.get(`${API_BASE}/orders/${orderId}/status`);
+    return res.data;
+  },
+
+  // Giả lập webhook nhận tiền thử nghiệm
+  simulatePaymentWebhook: async (data) => {
+    const res = await axios.post(`${API_ROOT}/payment/test-simulate`, data);
     return res.data;
   }
 };

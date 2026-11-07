@@ -49,10 +49,14 @@ export function ItemNoteModal({
     }}>
       <div style={{
         width: '420px',
+        maxWidth: '94vw',
+        maxHeight: '90vh',
         backgroundColor: '#ffffff',
         borderRadius: '12px',
         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         <div style={{
           padding: '14px 18px',

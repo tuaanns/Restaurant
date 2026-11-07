@@ -3,7 +3,8 @@ import {
   TrendingUp, DollarSign, Users, Utensils, Plus, Trash2, Pencil,
   ArrowLeft, CreditCard, Banknote, QrCode, Tag, X, ChevronDown,
   Shield, Clock, Gift, Calendar, Percent, CheckCircle, AlertCircle,
-  Search, Filter, UserCheck, Phone, Award, Upload, MapPin, LayoutGrid, FileSpreadsheet
+  Search, Filter, UserCheck, Phone, Award, Upload, MapPin, LayoutGrid, FileSpreadsheet,
+  LogOut, Store, LayoutDashboard, Settings
 } from 'lucide-react';
 import { api } from '../../api';
 import { useLanguage } from '../../i18n/LanguageContext';
@@ -13,6 +14,10 @@ import { ImportProductModal } from '../modals/ImportProductModal';
 import { ImportTableModal } from '../modals/ImportTableModal';
 import { ImportCustomerModal } from '../modals/ImportCustomerModal';
 import { ImportUserModal } from '../modals/ImportUserModal';
+import { ReportsView } from './ReportsView';
+import { CashBookView } from './CashBookView';
+import { BankAccountsView } from './BankAccountsView';
+import { SettingsView } from './SettingsView';
 
 const inputStyle = {
   width: '100%', padding: '8px 10px', borderRadius: '6px',
@@ -37,6 +42,23 @@ const NAV_ITEMS = [
     label: 'Tổng quan',
     children: [
       { key: 'overview', label: 'Báo cáo doanh thu' },
+    ]
+  },
+  {
+    key: 'reports_group',
+    label: 'Báo cáo',
+    children: [
+      { key: 'report_end_of_day', label: 'Báo cáo cuối ngày' },
+      { key: 'report_sales', label: 'Bán hàng' },
+      { key: 'report_goods', label: 'Hàng hóa' },
+    ]
+  },
+  {
+    key: 'cashbook_group',
+    label: 'Sổ quỹ',
+    children: [
+      { key: 'cashbook', label: 'Sổ quỹ thu chi' },
+      { key: 'bank_accounts', label: 'Thiết lập tài khoản ngân hàng' },
     ]
   },
   {
@@ -80,121 +102,203 @@ const PROMO_TYPES = [
   { value: 'fixed_price', labelKey: 'admin.promoFixedPriceTitle', descKey: 'admin.promoFixedPriceDesc' },
 ];
 
-// ── Dropdown Nav Component ──
-function NavItem({ item, activeTab, onSelect }) {
-  const [open, setOpen] = useState(false);
-  const ref = useRef(null);
-  const timerRef = useRef(null);
-  const isActive = item.children.some(c => c.key === activeTab);
+// ── Dropdown Nav Component (Instant switching, zero delay/lag) ──
+function AdminNavMenu({ navItems, activeTab, onSelect }) {
+  const [activeMenuKey, setActiveMenuKey] = useState(null);
+  const containerRef = useRef(null);
+  const leaveTimerRef = useRef(null);
 
-  const handleMouseEnter = () => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
+  // When hovering on any tab: instant switch without delay
+  const handleItemMouseEnter = (key, hasChildren) => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
     }
-    setOpen(true);
+    if (hasChildren) {
+      setActiveMenuKey(key);
+    } else {
+      setActiveMenuKey(null);
+    }
   };
 
-  const handleMouseLeave = () => {
-    timerRef.current = setTimeout(() => {
-      setOpen(false);
-    }, 180);
+  // When leaving the nav bar container entirely: graceful 120ms exit
+  const handleNavMouseLeave = () => {
+    if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
+    leaveTimerRef.current = setTimeout(() => {
+      setActiveMenuKey(null);
+    }, 120);
   };
 
+  const handleNavMouseEnter = () => {
+    if (leaveTimerRef.current) {
+      clearTimeout(leaveTimerRef.current);
+      leaveTimerRef.current = null;
+    }
+  };
+
+  // Click outside to close
   useEffect(() => {
-    const handler = (e) => {
-      if (ref.current && !ref.current.contains(e.target)) {
-        setOpen(false);
+    const handleClickOutside = (e) => {
+      if (containerRef.current && !containerRef.current.contains(e.target)) {
+        setActiveMenuKey(null);
       }
     };
-    document.addEventListener('mousedown', handler);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handler);
-      if (timerRef.current) clearTimeout(timerRef.current);
+      document.removeEventListener('mousedown', handleClickOutside);
+      if (leaveTimerRef.current) clearTimeout(leaveTimerRef.current);
     };
   }, []);
 
-  if (item.children.length === 1 && item.children[0].key === item.key) {
-    return (
-      <button
-        onClick={() => onSelect(item.children[0].key)}
-        style={{
-          padding: '0 14px', fontSize: '13.5px', fontWeight: 600,
-          color: isActive ? '#009688' : '#334155',
-          borderBottom: isActive ? '2px solid #009688' : '2px solid transparent',
-          cursor: 'pointer', background: 'none', border: 'none',
-          height: '52px', display: 'flex', alignItems: 'center',
-          transition: 'color 0.15s'
-        }}
-        onMouseEnter={e => e.currentTarget.style.color = '#009688'}
-        onMouseLeave={e => e.currentTarget.style.color = isActive ? '#009688' : '#334155'}
-      >
-        {item.label}
-      </button>
-    );
-  }
-
   return (
     <div
-      ref={ref}
-      onMouseEnter={handleMouseEnter}
-      onMouseLeave={handleMouseLeave}
-      style={{ position: 'relative', height: '52px', display: 'flex', alignItems: 'stretch' }}
+      ref={containerRef}
+      onMouseEnter={handleNavMouseEnter}
+      onMouseLeave={handleNavMouseLeave}
+      style={{ display: 'flex', alignItems: 'stretch', height: '56px', marginLeft: '8px' }}
     >
-      <button
-        onClick={() => {
-          if (item.children.length > 0) {
-            onSelect(item.children[0].key);
-          }
-          setOpen(false);
-        }}
-        style={{
-          padding: '0 14px', fontSize: '13.5px', fontWeight: 600,
-          color: isActive ? '#009688' : '#334155',
-          borderBottom: isActive ? '2px solid #009688' : '2px solid transparent',
-          cursor: 'pointer', background: 'none', border: 'none',
-          display: 'flex', alignItems: 'center', gap: '5px',
-          transition: 'color 0.15s', whiteSpace: 'nowrap'
-        }}
-        onMouseEnter={e => { e.currentTarget.style.color = '#009688'; }}
-        onMouseLeave={e => { e.currentTarget.style.color = isActive ? '#009688' : '#334155'; }}
-      >
-        {item.label}
-        <ChevronDown size={13} style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s', opacity: 0.6 }} />
-      </button>
+      {navItems.map(item => {
+        const isActive = activeTab === item.key || item.children?.some(c => c.key === activeTab);
+        const hasChildren = item.children && item.children.length > 0;
+        const isDirectSingle = item.children?.length === 1 && item.children[0].key === item.key;
+        const isOpen = activeMenuKey === item.key;
 
-      {open && (
-        <div style={{
-          position: 'absolute', top: '100%', left: 0,
-          paddingTop: '2px', zIndex: 250, minWidth: '200px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff', borderRadius: '8px',
-            boxShadow: '0 10px 25px rgba(0,0,0,0.15)', border: '1px solid #e2e8f0',
-            overflow: 'hidden'
-          }}>
-            {item.children.map(child => (
-              <button
-                key={child.key}
-                onClick={() => { onSelect(child.key); setOpen(false); }}
+        if (isDirectSingle) {
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onMouseEnter={() => handleItemMouseEnter(item.key, false)}
+              onClick={() => {
+                setActiveMenuKey(null);
+                onSelect(item.children[0].key);
+              }}
+              style={{
+                padding: '0 14px',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                color: isActive ? '#009688' : '#334155',
+                borderBottom: isActive ? '3px solid #009688' : '3px solid transparent',
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                height: '56px',
+                display: 'flex',
+                alignItems: 'center',
+                transition: 'color 0.12s',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={e => e.currentTarget.style.color = '#009688'}
+              onMouseLeave={e => e.currentTarget.style.color = isActive ? '#009688' : '#334155'}
+            >
+              {item.label}
+            </button>
+          );
+        }
+
+        return (
+          <div
+            key={item.key}
+            onMouseEnter={() => handleItemMouseEnter(item.key, hasChildren)}
+            style={{ position: 'relative', height: '56px', display: 'flex', alignItems: 'stretch' }}
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isOpen) {
+                  setActiveMenuKey(null);
+                } else if (hasChildren) {
+                  setActiveMenuKey(item.key);
+                }
+                if (hasChildren) {
+                  onSelect(item.children[0].key);
+                }
+              }}
+              style={{
+                padding: '0 14px',
+                fontSize: '13.5px',
+                fontWeight: 600,
+                color: isActive || isOpen ? '#009688' : '#334155',
+                borderBottom: isActive ? '3px solid #009688' : '3px solid transparent',
+                cursor: 'pointer',
+                background: isOpen ? '#f8fafc' : 'none',
+                border: 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '5px',
+                height: '56px',
+                transition: 'color 0.12s, background-color 0.12s',
+                whiteSpace: 'nowrap'
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#009688'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = isActive || isOpen ? '#009688' : '#334155'; }}
+            >
+              <span>{item.label}</span>
+              <ChevronDown
+                size={13}
                 style={{
-                  width: '100%', padding: '10px 16px', textAlign: 'left',
-                  fontSize: '13.5px', fontWeight: activeTab === child.key ? 700 : 500,
-                  color: activeTab === child.key ? '#009688' : '#334155',
-                  backgroundColor: activeTab === child.key ? '#e6f7f5' : 'transparent',
-                  cursor: 'pointer', border: 'none', display: 'block',
-                  borderLeft: activeTab === child.key ? '3px solid #009688' : '3px solid transparent',
-                  transition: 'background 0.1s'
+                  transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)',
+                  transition: 'transform 0.15s ease',
+                  opacity: 0.6
                 }}
-                onMouseEnter={e => { if (activeTab !== child.key) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-                onMouseLeave={e => { e.currentTarget.style.backgroundColor = activeTab === child.key ? '#e6f7f5' : 'transparent'; }}
+              />
+            </button>
+
+            {/* Dropdown Menu */}
+            {isOpen && hasChildren && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '56px',
+                  left: 0,
+                  zIndex: 9999,
+                  minWidth: '210px'
+                }}
               >
-                {child.label}
-              </button>
-            ))}
+                <div style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '8px',
+                  boxShadow: '0 12px 28px -4px rgba(0,0,0,0.18), 0 8px 10px -6px rgba(0,0,0,0.08)',
+                  border: '1px solid #e2e8f0',
+                  overflow: 'hidden',
+                  padding: '4px 0'
+                }}>
+                  {item.children.map(child => (
+                    <button
+                      key={child.key}
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onSelect(child.key);
+                        setActiveMenuKey(null);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '9px 16px',
+                        textAlign: 'left',
+                        fontSize: '13px',
+                        fontWeight: activeTab === child.key ? 700 : 500,
+                        color: activeTab === child.key ? '#009688' : '#334155',
+                        backgroundColor: activeTab === child.key ? '#e6f7f5' : 'transparent',
+                        cursor: 'pointer',
+                        border: 'none',
+                        display: 'block',
+                        borderLeft: activeTab === child.key ? '3px solid #009688' : '3px solid transparent',
+                        transition: 'background-color 0.1s'
+                      }}
+                      onMouseEnter={e => { if (activeTab !== child.key) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = activeTab === child.key ? '#e6f7f5' : 'transparent'; }}
+                    >
+                      {child.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })}
     </div>
   );
 }
@@ -213,8 +317,21 @@ function StatusBadge({ active }) {
   );
 }
 
-export function AdminDashboard({ onBackToPos, currentUser }) {
-  const { t, formatTableName, formatAreaName, formatDishName, formatCategoryName, formatDishUnit } = useLanguage();
+export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overview', onLogout = () => {} }) {
+  const { t, formatTableName, formatAreaName, formatDishName, formatCategoryName, formatDishUnit, formatPromoName } = useLanguage();
+
+  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const userDropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (userDropdownRef.current && !userDropdownRef.current.contains(e.target)) {
+        setUserDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Dynamic NAV_ITEMS using translations
   const NAV_ITEMS_DYNAMIC = [
@@ -222,6 +339,23 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
       key: 'overview',
       label: t('admin.overview'),
       children: [{ key: 'overview', label: t('admin.overview') }]
+    },
+    {
+      key: 'reports_group',
+      label: t('admin.reports.reports'),
+      children: [
+        { key: 'report_end_of_day', label: t('admin.reports.reportEndOfDay') },
+        { key: 'report_sales', label: t('admin.reports.reportSales') },
+        { key: 'report_goods', label: t('admin.reports.reportGoods') },
+      ]
+    },
+    {
+      key: 'cashbook_group',
+      label: t('admin.cashbook.title'),
+      children: [
+        { key: 'cashbook', label: t('admin.cashbook.tabCashbook') },
+        { key: 'bank_accounts', label: t('admin.cashbook.tabBankAccounts') || 'Thiết lập tài khoản ngân hàng' },
+      ]
     },
     {
       key: 'menu_group',
@@ -254,7 +388,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
     },
   ];
 
-  const [activeTab, setActiveTab] = useState('overview');
+  const [activeTab, setActiveTab] = useState(initialTab || 'overview');
   const [stats, setStats] = useState(null);
   const [users, setUsers] = useState([]);
   const [menuData, setMenuData] = useState({ categories: [], products: [] });
@@ -372,6 +506,10 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
       if (r?.customers && r.customers.length > 0) setCustomers(r.customers);
     } catch (e) {}
     try {
+      const r = await api.getAdminPromotions();
+      if (r?.promotions && r.promotions.length > 0) setPromotions(r.promotions);
+    } catch (e) {}
+    try {
       const r = await api.getAdminAreas();
       if (r?.areas && r.areas.length > 0) setAreas(r.areas);
       else setAreas([
@@ -446,11 +584,9 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
     setPromoToDate(p.to_date);
     setShowPromoModal(true);
   };
-  const handleSavePromo = (e) => {
+  const handleSavePromo = async (e) => {
     e.preventDefault();
     const newPromo = {
-      id: editingPromo?.id || Date.now(),
-      code: editingPromo?.code || `KM${String(promotions.length + 1).padStart(6, '0')}`,
       name: promoName,
       type: promoType,
       discount_value: Number(promoDiscountValue),
@@ -458,12 +594,21 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
       from_date: promoFromDate,
       to_date: promoToDate,
       is_active: true,
-      budget_used: editingPromo?.budget_used || 0,
     };
-    if (editingPromo) {
-      setPromotions(prev => prev.map(p => p.id === editingPromo.id ? newPromo : p));
-    } else {
-      setPromotions(prev => [newPromo, ...prev]);
+    try {
+      if (editingPromo) {
+        const res = await api.updateAdminPromotion(editingPromo.id, newPromo);
+        if (res?.promotion) {
+          setPromotions(prev => prev.map(p => p.id === editingPromo.id ? res.promotion : p));
+        }
+      } else {
+        const res = await api.addAdminPromotion(newPromo);
+        if (res?.promotion) {
+          setPromotions(prev => [res.promotion, ...prev]);
+        }
+      }
+    } catch (err) {
+      console.warn('Promo save error:', err);
     }
     setShowPromoModal(false);
   };
@@ -477,14 +622,23 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
       message: t('admin.confirmDeletePromo'),
       itemName: `${promo.name} (${promo.code})`,
       warningText: t('admin.confirmDeletePromoWarning'),
-      onConfirm: () => {
-        setPromotions(prev => prev.filter(item => item.id !== promo.id));
+      onConfirm: async () => {
+        try {
+          await api.deleteAdminPromotion(promo.id);
+          setPromotions(prev => prev.filter(item => item.id !== promo.id));
+        } catch (err) {}
         closeDeleteModal();
       }
     });
   };
-  const handleTogglePromo = (id) => {
-    setPromotions(prev => prev.map(p => p.id === id ? { ...p, is_active: !p.is_active } : p));
+  const handleTogglePromo = async (id) => {
+    const current = promotions.find(p => p.id === id);
+    if (!current) return;
+    const nextStatus = !current.is_active;
+    setPromotions(prev => prev.map(p => p.id === id ? { ...p, is_active: nextStatus } : p));
+    try {
+      await api.updateAdminPromotion(id, { is_active: nextStatus });
+    } catch (err) {}
   };
 
   // ── User management helpers ──
@@ -885,10 +1039,13 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
     return matchesSearch && matchesTier;
   });
 
-  const filteredPromos = promotions.filter(p =>
-    p.name.toLowerCase().includes(promoSearch.toLowerCase()) ||
-    p.code.toLowerCase().includes(promoSearch.toLowerCase())
-  );
+  const filteredPromos = promotions.filter(p => {
+    const q = promoSearch.toLowerCase();
+    const dName = formatPromoName(p.name).toLowerCase();
+    return p.name.toLowerCase().includes(q) ||
+           dName.includes(q) ||
+           p.code.toLowerCase().includes(q);
+  });
 
   const getPromoTypeLabel = (type) => {
     const pt = PROMO_TYPES.find(item => item.value === type);
@@ -913,64 +1070,389 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
     return shiftStr;
   };
 
+  const displayName = (currentUser?.name || 'Hoàng Nam').replace(/^(Quản lý|Thu ngân|Nhân viên|Admin|Manager|Cashier):\s*/i, '');
+  const initials = displayName.split(' ').map(n => n[0]).slice(-2).join('').toUpperCase() || 'AD';
+  const roleLabel = currentUser?.role === 'admin' ? (t('header.admin') || 'Quản Trị Viên') : (t('header.cashier') || 'Thu Ngân');
+  const shiftText = getShiftLabel(currentUser?.shift);
+
   return (
     <div style={{ flex: 1, backgroundColor: '#f1f5f9', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-      {/* ═══ HEADER NAV BAR (KiotViet style) ═══ */}
+      {/* ═══ UNIFIED ADMIN HEADER BAR ═══ */}
       <div style={{
         backgroundColor: '#ffffff',
         borderBottom: '1px solid #e2e8f0',
-        padding: '0 20px',
+        padding: '0 18px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: '52px',
-        flexShrink: 0
+        height: '56px',
+        flexShrink: 0,
+        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.05)',
+        zIndex: 50
       }}>
-        {/* Left: Back button + Nav items */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0' }}>
+        {/* Left side: Brand Logo + Về POS Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          {/* Logo & Brand */}
+          <div
+            onClick={onBackToPos}
+            title={t('header.backToPOS') || 'Về POS'}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
+          >
+            <img
+              src="/logo.png"
+              alt="QUÁN TRÀ Logo"
+              style={{
+                width: '34px',
+                height: '34px',
+                borderRadius: '8px',
+                border: '1.2px solid #d4af37',
+                boxShadow: '0 2px 6px rgba(212, 175, 55, 0.25)',
+                objectFit: 'cover'
+              }}
+            />
+            <div style={{
+              fontWeight: 800,
+              fontSize: '15px',
+              letterSpacing: '0.4px',
+              color: '#0f172a'
+            }}>
+              QUÁN TRÀ
+            </div>
+          </div>
+
+          {/* Vertical Separator */}
+          <div style={{ width: '1px', height: '22px', backgroundColor: '#e2e8f0', margin: '0 4px' }} />
+
+          {/* Nút Về POS */}
           <button
             onClick={onBackToPos}
             style={{
-              display: 'flex', alignItems: 'center', gap: '6px',
-              padding: '6px 14px', borderRadius: '6px',
-              backgroundColor: '#009688', color: '#ffffff',
-              fontSize: '12.5px', fontWeight: 700, border: 'none', cursor: 'pointer',
-              marginRight: '16px', whiteSpace: 'nowrap', flexShrink: 0
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '6px 12px',
+              borderRadius: '6px',
+              backgroundColor: '#009688',
+              color: '#ffffff',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              border: 'none',
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+              boxShadow: '0 2px 6px rgba(0, 150, 136, 0.25)',
+              transition: 'all 0.15s ease'
             }}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#00796b'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#009688'}
           >
-            <ArrowLeft size={15} />
-            {t('admin.backToPOS') || 'Về POS'}
+            <ArrowLeft size={14} />
+            <span>{t('admin.backToPOS') || 'Về POS'}</span>
           </button>
-
-          {/* Nav items with dropdowns */}
-          <div style={{ display: 'flex', alignItems: 'stretch', height: '52px' }}>
-            {NAV_ITEMS_DYNAMIC.map(item => (
-              <NavItem key={item.key} item={item} activeTab={activeTab} onSelect={setActiveTab} />
-            ))}
-          </div>
         </div>
 
-        {/* Right: User info */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
-          <div style={{
-            fontSize: '12px', color: '#64748b',
-            backgroundColor: '#f8fafc', padding: '5px 12px',
-            borderRadius: '6px', border: '1px solid #e2e8f0'
-          }}>
-            <Shield size={12} style={{ display: 'inline', marginRight: '5px', color: '#009688', verticalAlign: 'middle' }} />
-            <strong style={{ color: '#0f172a' }}>
-              {t('header.manager')}: {(currentUser?.name || 'Hoàng Nam').replace(/^(Quản lý|Thu ngân|Nhân viên|Admin|Manager|Cashier):\s*/i, '')}
-            </strong>
-            <span style={{ marginLeft: '4px', color: '#94a3b8' }}>
-              — {currentUser?.role === 'admin' ? (t('header.admin') || 'Quản Trị Viên') : (t('header.cashier') || 'Thu Ngân')}
-            </span>
+        {/* Center: Navigation Menu Tabs with Dropdowns */}
+        <AdminNavMenu navItems={NAV_ITEMS_DYNAMIC} activeTab={activeTab} onSelect={setActiveTab} />
+
+        {/* Right side: Language Switcher + User Account Dropdown */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+
+          {/* Language Switcher */}
+          <LanguageSwitcher variant="light" />
+
+          {/* Quick Settings Icon Button */}
+          <button
+            onClick={() => setActiveTab('settings')}
+            title={t('admin.settings.title') || 'Thiết lập'}
+            style={{
+              width: '32px',
+              height: '32px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              backgroundColor: activeTab === 'settings' ? '#e6f7f5' : '#ffffff',
+              color: activeTab === 'settings' ? '#009688' : '#64748b',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => {
+              if (activeTab !== 'settings') e.currentTarget.style.backgroundColor = '#f8fafc';
+            }}
+            onMouseLeave={(e) => {
+              if (activeTab !== 'settings') e.currentTarget.style.backgroundColor = '#ffffff';
+            }}
+          >
+            <Settings size={15} />
+          </button>
+
+          {/* User Account Dropdown Menu */}
+          <div ref={userDropdownRef} style={{ position: 'relative' }}>
+            <div
+              onClick={() => setUserDropdownOpen(!userDropdownOpen)}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                cursor: 'pointer',
+                padding: '4px 8px 4px 10px',
+                borderRadius: '8px',
+                backgroundColor: userDropdownOpen ? '#f1f5f9' : 'transparent',
+                transition: 'background-color 0.15s ease'
+              }}
+              onMouseEnter={(e) => { if (!userDropdownOpen) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
+              onMouseLeave={(e) => { if (!userDropdownOpen) e.currentTarget.style.backgroundColor = 'transparent'; }}
+            >
+              <div style={{ textAlign: 'right' }}>
+                <div style={{
+                  fontSize: '12.5px',
+                  fontWeight: 700,
+                  color: '#0f172a',
+                  lineHeight: '1.2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  justifyContent: 'flex-end'
+                }}>
+                  <span>{roleLabel}: {displayName}</span>
+                  <ChevronDown
+                    size={12}
+                    color="#64748b"
+                    style={{
+                      transform: userDropdownOpen ? 'rotate(180deg)' : 'none',
+                      transition: 'transform 0.2s'
+                    }}
+                  />
+                </div>
+                <div style={{ fontSize: '10.5px', color: '#64748b' }}>
+                  {shiftText}
+                </div>
+              </div>
+
+              <div style={{
+                width: '32px',
+                height: '32px',
+                borderRadius: '50%',
+                backgroundColor: '#009688',
+                color: '#ffffff',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 700,
+                fontSize: '12px',
+                boxShadow: '0 2px 6px rgba(0, 150, 136, 0.35)',
+                border: '1.5px solid #ffffff'
+              }}>
+                {initials}
+              </div>
+            </div>
+
+            {/* Dropdown Menu Box */}
+            {userDropdownOpen && (
+              <div style={{
+                position: 'absolute',
+                top: '46px',
+                right: '0',
+                width: '270px',
+                backgroundColor: '#ffffff',
+                border: '1px solid #e2e8f0',
+                borderRadius: '12px',
+                boxShadow: '0 12px 28px -4px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.08)',
+                overflow: 'hidden',
+                zIndex: 9999
+              }}>
+                {/* Profile Card Header */}
+                <div style={{
+                  padding: '12px 16px',
+                  backgroundColor: '#f8fafc',
+                  borderBottom: '1px solid #e2e8f0'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{
+                      width: '36px',
+                      height: '36px',
+                      borderRadius: '50%',
+                      backgroundColor: '#009688',
+                      color: '#ffffff',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontWeight: 800,
+                      fontSize: '13px'
+                    }}>
+                      {initials}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                        {displayName}
+                      </div>
+                      <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        fontSize: '10.5px',
+                        fontWeight: 700,
+                        backgroundColor: '#e6f7f5',
+                        color: '#00796b',
+                        padding: '1px 6px',
+                        borderRadius: '4px',
+                        marginTop: '2px'
+                      }}>
+                        <Shield size={10} />
+                        <span>{roleLabel}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    marginTop: '8px',
+                    paddingTop: '8px',
+                    borderTop: '1px solid #e2e8f0',
+                    fontSize: '11px',
+                    color: '#64748b',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '3px'
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <Clock size={11} color="#64748b" />
+                      <span>{shiftText}</span>
+                    </div>
+                    {currentUser?.email && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <Store size={11} color="#64748b" />
+                        <span>{currentUser.email}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Actions */}
+                <div style={{ padding: '6px' }}>
+                  <button
+                    id="btn-admin-settings"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      setActiveTab('settings');
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      color: activeTab === 'settings' ? '#009688' : '#334155',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      backgroundColor: activeTab === 'settings' ? '#e6f7f5' : 'transparent',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6f7f5'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = activeTab === 'settings' ? '#e6f7f5' : 'transparent'}
+                  >
+                    <Settings size={14} color="#009688" />
+                    <span>{t('admin.settings.title') || 'Thiết lập'}</span>
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      onBackToPos();
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12.5px',
+                      fontWeight: 600,
+                      color: '#009688',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6f7f5'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <LayoutDashboard size={14} />
+                    <span>{t('header.backToPOS') || 'Về màn hình POS'}</span>
+                  </button>
+
+                  <div style={{ height: '1px', backgroundColor: '#e2e8f0', margin: '4px 0' }} />
+
+                  <button
+                    id="btn-admin-logout"
+                    onClick={() => {
+                      setUserDropdownOpen(false);
+                      if (onLogout) onLogout();
+                    }}
+                    style={{
+                      width: '100%',
+                      textAlign: 'left',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12.5px',
+                      fontWeight: 700,
+                      color: '#ef4444',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      backgroundColor: 'transparent',
+                      border: 'none',
+                      cursor: 'pointer'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                  >
+                    <LogOut size={14} />
+                    <span>{t('header.logout') || 'Đăng xuất'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* ═══ CONTENT AREA ═══ */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '24px' }}>
+      <div style={{
+        flex: 1,
+        overflowY: ['report_end_of_day', 'report_sales', 'report_goods', 'cashbook', 'bank_accounts', 'settings'].includes(activeTab) ? 'hidden' : 'auto',
+        padding: ['report_end_of_day', 'report_sales', 'report_goods', 'cashbook', 'bank_accounts', 'settings'].includes(activeTab) ? '0' : '24px',
+        display: 'flex',
+        flexDirection: 'column'
+      }}>
+
+        {/* ─── TAB: THIẾT LẬP (SETTINGS) ─── */}
+        {activeTab === 'settings' && (
+          <SettingsView onBackToDashboard={() => setActiveTab('overview')} />
+        )}
+
+        {/* ─── TAB: SỔ QUỸ (CASHBOOK) ─── */}
+        {activeTab === 'cashbook' && (
+          <CashBookView currentUser={currentUser} />
+        )}
+
+        {/* ─── TAB: THIẾT LẬP TÀI KHOẢN NGÂN HÀNG (BANK ACCOUNTS) ─── */}
+        {activeTab === 'bank_accounts' && (
+          <BankAccountsView />
+        )}
+
+        {/* ─── TAB: REPORTS (Báo cáo cuối ngày, Bán hàng, Hàng hóa) ─── */}
+        {['report_end_of_day', 'report_sales', 'report_goods'].includes(activeTab) && (
+          <ReportsView
+            subTab={activeTab}
+            onSubTabChange={(tab) => setActiveTab(tab)}
+            currentUser={currentUser}
+          />
+        )}
 
         {/* ─── TAB: OVERVIEW ─── */}
         {activeTab === 'overview' && (
@@ -978,7 +1460,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
               {[
                 { label: t('admin.totalRevenue'), value: formatMoney(stats?.total_revenue || 3901700), icon: <DollarSign size={18} />, bg: '#e6f7f5', color: '#009688', sub: t('admin.allShiftsCalc'), subColor: '#10b981' },
-                { label: t('admin.totalOrders'), value: (stats?.total_orders_today || 5) + ' ' + t('admin.ordersUnit'), icon: <TrendingUp size={18} />, bg: '#e0f2fe', color: '#0284c7', sub: `${t('admin.activeOnTables')} 24 ${t('table.tables')}`, subColor: '#64748b' },
+                { label: t('admin.totalOrders'), value: (stats?.total_orders_today || 5) + ' ' + t('admin.ordersUnit'), icon: <TrendingUp size={18} />, bg: '#e6f7f5', color: '#009688', sub: `${t('admin.activeOnTables')} 24 ${t('table.tables')}`, subColor: '#64748b' },
                 { label: t('admin.tablesOccupied'), value: (stats?.occupied_tables || 6) + ' / 24 ' + t('table.tables'), icon: <Utensils size={18} />, bg: '#fef3c7', color: '#d97706', sub: `${stats?.billing_tables || 2} ${t('table.tables')} ${t('admin.waitingPayment')}`, subColor: '#d97706' },
                 { label: t('admin.staffCount'), value: users.length + ' ' + t('admin.accountsUnit'), icon: <Users size={18} />, bg: '#f3e8ff', color: '#9333ea', sub: t('admin.activeInDb'), subColor: '#64748b' },
               ].map((s, i) => (
@@ -1019,7 +1501,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                 <h3 style={{ fontSize: '15px', fontWeight: 800, marginBottom: '14px' }}>{t('admin.paymentMethods')}</h3>
                 {[
                   { icon: <Banknote size={20} color="#10b981" />, label: t('admin.cash'), sub: t('admin.atCounter'), value: '1.850.000 đ' },
-                  { icon: <QrCode size={20} color="#0284c7" />, label: t('admin.bankTransfer'), sub: 'MBBank', value: '1.450.000 đ' },
+                  { icon: <QrCode size={20} color="#009688" />, label: t('admin.bankTransfer'), sub: 'MBBank', value: '1.450.000 đ' },
                   { icon: <CreditCard size={20} color="#8b5cf6" />, label: t('admin.cardPayment'), sub: 'ATM/Visa', value: '601.700 đ' },
                 ].map((m, i) => (
                   <div key={i} style={{ padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -1089,13 +1571,13 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                   return (
                     <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '12px', fontWeight: 700 }}>{u.name}</td>
-                      <td style={{ padding: '12px', fontFamily: 'monospace', color: '#0284c7', fontSize: '12.5px' }}>{u.username}</td>
+                      <td style={{ padding: '12px', fontFamily: 'monospace', color: '#009688', fontSize: '12.5px' }}>{u.username}</td>
                       <td style={{ padding: '12px', color: '#64748b' }}>{u.email}</td>
                       <td style={{ padding: '12px' }}>
                         <span style={{
                           padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700,
                           backgroundColor: u.role === 'admin' ? 'rgba(56,189,248,0.15)' : 'rgba(0,150,136,0.15)',
-                          color: u.role === 'admin' ? '#0284c7' : '#009688'
+                          color: u.role === 'admin' ? '#009688' : '#009688'
                         }}>
                           {u.role === 'admin' ? t('admin.roleAdmin') : t('admin.roleCashier')}
                         </span>
@@ -1121,7 +1603,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                             title={t('edit')}
                             style={{
                               padding: '6px 8px', borderRadius: '6px',
-                              color: '#0284c7', backgroundColor: '#e0f2fe',
+                              color: '#009688', backgroundColor: '#e6f7f5',
                               border: 'none', cursor: 'pointer',
                               display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
                             }}
@@ -1196,13 +1678,13 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatDishName(p.name, p.code)}</div>
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                      <span style={{ backgroundColor: '#e0f2fe', color: '#0284c7', padding: '1px 6px', borderRadius: '4px', fontWeight: 700, marginRight: '6px' }}>{p.code}</span>
+                      <span style={{ backgroundColor: '#e6f7f5', color: '#009688', padding: '1px 6px', borderRadius: '4px', fontWeight: 700, marginRight: '6px' }}>{p.code}</span>
                       {t('menu.unit')}: {formatDishUnit(p.unit)}
                     </div>
                     <div style={{ fontSize: '13px', fontWeight: 800, color: '#009688', marginTop: '4px' }}>{formatMoney(p.price)}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '6px', marginLeft: '8px' }}>
-                    <button onClick={() => openEditProduct(p)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#0284c7', backgroundColor: '#e0f2fe', border: 'none', cursor: 'pointer' }}>
+                    <button onClick={() => openEditProduct(p)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}>
                       <Pencil size={13} />
                     </button>
                     <button onClick={() => handleDeleteProduct(p.id)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
@@ -1235,7 +1717,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>{c.products_count ?? c.products?.length ?? 0} {t('table.items')}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => openEditCat(c)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#0284c7', backgroundColor: '#e0f2fe', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
+                    <button onClick={() => openEditCat(c)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
                     <button onClick={() => handleDeleteCategory(c.id)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
@@ -1358,15 +1840,15 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                     const isDiamond = tier.includes('Kim Cương');
                     const isGold = tier.includes('Vàng');
                     const isSilver = tier.includes('Bạc');
-                    const tierBg = isDiamond ? '#f3e8ff' : isGold ? '#fef3c7' : isSilver ? '#e0f2fe' : '#f1f5f9';
-                    const tierColor = isDiamond ? '#7e22ce' : isGold ? '#b45309' : isSilver ? '#0369a1' : '#475569';
+                    const tierBg = isDiamond ? '#f3e8ff' : isGold ? '#fef3c7' : isSilver ? '#e6f7f5' : '#f1f5f9';
+                    const tierColor = isDiamond ? '#7e22ce' : isGold ? '#b45309' : isSilver ? '#00796b' : '#475569';
 
                     return (
                       <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#0284c7', fontWeight: 700, fontSize: '12.5px' }}>{custCode}</td>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#009688', fontWeight: 700, fontSize: '12.5px' }}>{custCode}</td>
                         <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>
@@ -1409,7 +1891,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                         </td>
                         <td style={{ padding: '12px 14px' }}>
                           <div style={{ display: 'flex', gap: '6px' }}>
-                            <button onClick={() => openEditCustomer(c)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#0284c7', backgroundColor: '#e0f2fe', border: 'none', cursor: 'pointer' }}>
+                            <button onClick={() => openEditCustomer(c)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}>
                               <Pencil size={13} />
                             </button>
                             <button onClick={() => handleDeleteCustomer(c.id)} title={t('delete')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
@@ -1435,7 +1917,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                 <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{t('admin.promoTitle')}</h2>
                 <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{t('admin.promoSubtitle')}</p>
               </div>
-              <button onClick={openAddPromo} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px', backgroundColor: '#1d6ed8' }}>
+              <button onClick={openAddPromo} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px', backgroundColor: '#009688' }}>
                 <Plus size={15} /> {t('admin.addPromo')}
               </button>
             </div>
@@ -1478,9 +1960,9 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#0284c7', fontWeight: 700, fontSize: '12.5px' }}>{p.code}</td>
+                      <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#009688', fontWeight: 700, fontSize: '12.5px' }}>{p.code}</td>
                       <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a', maxWidth: '180px' }}>
-                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.name}</div>
+                        <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatPromoName(p.name)}</div>
                       </td>
                       <td style={{ padding: '12px 14px', color: '#475569', maxWidth: '200px' }}>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontSize: '12.5px' }}>
@@ -1509,7 +1991,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                           >
                             {p.is_active ? <AlertCircle size={13} /> : <CheckCircle size={13} />}
                           </button>
-                          <button onClick={() => openEditPromo(p)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#0284c7', backgroundColor: '#e0f2fe', border: 'none', cursor: 'pointer' }}>
+                          <button onClick={() => openEditPromo(p)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}>
                             <Pencil size={13} />
                           </button>
                           <button onClick={() => handleDeletePromo(p.id)} title={t('delete')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
@@ -1568,7 +2050,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                 { label: t('admin.totalTables'), value: tables.length, bg: '#e6f7f5', color: '#009688', icon: <LayoutGrid size={18} /> },
                 { label: t('admin.emptyTables'), value: tables.filter(t => t.status === 'empty' || !t.status).length, bg: '#ecfdf5', color: '#059669', icon: <CheckCircle size={18} /> },
                 { label: t('admin.occupiedTables'), value: tables.filter(t => t.status === 'occupied').length, bg: '#fef3c7', color: '#d97706', icon: <Users size={18} /> },
-                { label: t('admin.areasCount'), value: areas.length, bg: '#f0f9ff', color: '#0284c7', icon: <MapPin size={18} /> },
+                { label: t('admin.areasCount'), value: areas.length, bg: '#e6f7f5', color: '#009688', icon: <MapPin size={18} /> },
               ].map((s, i) => (
                 <div key={i} style={{ backgroundColor: '#fff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
@@ -1626,7 +2108,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                         </span>
                       </div>
                       <div style={{ display: 'flex', gap: '6px', marginTop: '12px', justifyContent: 'flex-end' }}>
-                        <button onClick={() => openEditTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#0284c7', backgroundColor: '#e0f2fe', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
+                        <button onClick={() => openEditTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
                           <Pencil size={12} /> {t('edit')}
                         </button>
                         <button onClick={() => handleDeleteTable(tObj.id)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
@@ -1673,7 +2155,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      <button onClick={() => openEditArea(a)} title={t('edit')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#0284c7', backgroundColor: '#e0f2fe', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
+                      <button onClick={() => openEditArea(a)} title={t('edit')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
                       <button onClick={() => handleDeleteArea(a.id)} title={t('delete')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                     </div>
                   </div>
@@ -1818,7 +2300,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                     {t('login.password')}: {!editingUser && <span style={{ color: '#ef4444' }}>*</span>}
                   </label>
                   {editingUser && (
-                    <span style={{ fontSize: '11px', color: '#0284c7', fontStyle: 'italic' }}>
+                    <span style={{ fontSize: '11px', color: '#009688', fontStyle: 'italic' }}>
                       {t('admin.leaveBlankPassword')}
                     </span>
                   )}
@@ -1932,9 +2414,9 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
               </div>
             )}
             {editingProduct && (
-              <div style={{ backgroundColor: '#f0f9ff', border: '1px solid #bae6fd', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
-                <span style={{ fontSize: '12px', color: '#0284c7' }}>{t('admin.productCode')}: </span>
-                <strong style={{ color: '#0284c7', fontSize: '13px' }}>{editingProduct.code}</strong>
+              <div style={{ backgroundColor: '#e6f7f5', border: '1px solid #80cbc4', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
+                <span style={{ fontSize: '12px', color: '#009688' }}>{t('admin.productCode')}: </span>
+                <strong style={{ color: '#009688', fontSize: '13px' }}>{editingProduct.code}</strong>
               </div>
             )}
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -2044,11 +2526,11 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                       <div key={step} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <div style={{
                           width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          backgroundColor: promoStep >= step ? '#1d6ed8' : '#e2e8f0',
+                          backgroundColor: promoStep >= step ? '#009688' : '#e2e8f0',
                           color: promoStep >= step ? '#fff' : '#94a3b8',
                           fontSize: '11px', fontWeight: 700
                         }}>{step}</div>
-                        <span style={{ fontSize: '11.5px', color: promoStep >= step ? '#1d6ed8' : '#94a3b8', fontWeight: 600 }}>
+                        <span style={{ fontSize: '11.5px', color: promoStep >= step ? '#009688' : '#94a3b8', fontWeight: 600 }}>
                           {step === 1 ? t('admin.promoStep1') : t('admin.promoStep2')}
                         </span>
                         {step < 2 && <div style={{ width: '24px', height: '1px', backgroundColor: '#e2e8f0', margin: '0 2px' }} />}
@@ -2069,7 +2551,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                   onClick={() => setPromoType('order_discount')}
                   style={{
                     padding: '14px 16px', borderRadius: '8px', marginBottom: '8px', cursor: 'pointer',
-                    border: `1.5px solid ${promoType === 'order_discount' ? '#1d6ed8' : '#e2e8f0'}`,
+                    border: `1.5px solid ${promoType === 'order_discount' ? '#009688' : '#e2e8f0'}`,
                     backgroundColor: promoType === 'order_discount' ? '#eff6ff' : '#ffffff',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                   }}
@@ -2081,8 +2563,8 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                   </div>
                   <div style={{
                     width: '18px', height: '18px', borderRadius: '50%', border: '2px solid',
-                    borderColor: promoType === 'order_discount' ? '#1d6ed8' : '#cbd5e1',
-                    backgroundColor: promoType === 'order_discount' ? '#1d6ed8' : 'transparent',
+                    borderColor: promoType === 'order_discount' ? '#009688' : '#cbd5e1',
+                    backgroundColor: promoType === 'order_discount' ? '#009688' : 'transparent',
                     flexShrink: 0, marginLeft: '12px'
                   }} />
                 </div>
@@ -2095,7 +2577,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                     onClick={() => setPromoType(pt.value)}
                     style={{
                       padding: '14px 16px', borderRadius: '8px', marginBottom: '8px', cursor: 'pointer',
-                      border: `1.5px solid ${promoType === pt.value ? '#1d6ed8' : '#e2e8f0'}`,
+                      border: `1.5px solid ${promoType === pt.value ? '#009688' : '#e2e8f0'}`,
                       backgroundColor: promoType === pt.value ? '#eff6ff' : '#ffffff',
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                     }}
@@ -2106,8 +2588,8 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                     </div>
                     <div style={{
                       width: '18px', height: '18px', borderRadius: '50%', border: '2px solid',
-                      borderColor: promoType === pt.value ? '#1d6ed8' : '#cbd5e1',
-                      backgroundColor: promoType === pt.value ? '#1d6ed8' : 'transparent',
+                      borderColor: promoType === pt.value ? '#009688' : '#cbd5e1',
+                      backgroundColor: promoType === pt.value ? '#009688' : 'transparent',
                       flexShrink: 0, marginLeft: '12px'
                     }} />
                   </div>
@@ -2115,7 +2597,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
                   <button onClick={() => setShowPromoModal(false)} style={btnSecondary}>{t('skip')}</button>
-                  <button onClick={() => setPromoStep(2)} style={{ ...btnPrimary, backgroundColor: '#1d6ed8' }}>{t('next')}</button>
+                  <button onClick={() => setPromoStep(2)} style={{ ...btnPrimary, backgroundColor: '#009688' }}>{t('next')}</button>
                 </div>
               </div>
             )}
@@ -2125,7 +2607,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
               <form onSubmit={handleSavePromo} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {/* Selected type badge */}
                 <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Gift size={15} color="#1d6ed8" />
+                  <Gift size={15} color="#009688" />
                   <span style={{ fontSize: '13px', fontWeight: 700, color: '#1d40af' }}>{getPromoTypeLabel(promoType)}</span>
                 </div>
 
@@ -2164,7 +2646,7 @@ export function AdminDashboard({ onBackToPos, currentUser }) {
                   >
                     {editingPromo ? t('cancel') : t('back')}
                   </button>
-                  <button type="submit" style={{ ...btnPrimary, backgroundColor: '#1d6ed8', padding: '9px 24px' }}>
+                  <button type="submit" style={{ ...btnPrimary, backgroundColor: '#009688', padding: '9px 24px' }}>
                     {editingPromo ? t('admin.updatePromo') : t('admin.createPromo')}
                   </button>
                 </div>

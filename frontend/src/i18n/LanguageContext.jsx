@@ -120,6 +120,72 @@ export const AREA_MAP = {
   'san vuon': 'garden',
 };
 
+export const PROMO_MAP = {
+  'tri an khach hang': 'triAn',
+  'tri ân khách hàng': 'triAn',
+  'cà phê pha máy giảm 5%': 'coffee5',
+  'ca phe pha may giam 5%': 'coffee5',
+  '10 ly tặng 1 hộp (combo)': 'cup10box1',
+  '10 ly tang 1 hop (combo)': 'cup10box1',
+  'ctkm khai trương': 'grandOpening',
+  'ctkm khai truong': 'grandOpening',
+};
+
+export const CASH_CATEGORY_MAP = {
+  'thu tiền hóa đơn bán hàng (tự động vietqr)': 'autoSalesReceipt',
+  'thu tien hoa don ban hang (tu dong vietqr)': 'autoSalesReceipt',
+  'thu tiền hóa đơn bán hàng': 'salesReceiptBill',
+  'thu tien hoa don ban hang': 'salesReceiptBill',
+  'thu tiền bán hàng': 'salesReceipt',
+  'thu tien ban hang': 'salesReceipt',
+  'chi tiền mua nguyên vật liệu': 'material',
+  'chi tien mua nguyen vat lieu': 'material',
+  'chi trả tiền nhà / điện nước': 'utilities',
+  'chi tra tien nha / dien nuoc': 'utilities',
+  'chi trả lương nhân viên': 'salary',
+  'chi tra luong nhan vien': 'salary',
+  'chi sửa chữa & bảo trì thiết bị': 'repair',
+  'chi sua chua & bao tri thiet bi': 'repair',
+  'chi tiếp khách & quảng cáo': 'marketing',
+  'chi tiep khach & quang cao': 'marketing',
+  'chi phí quản lý & văn phòng phẩm': 'office',
+  'chi phi quan ly & van phong pham': 'office',
+  'thu tiền khách nợ': 'debtReceipt',
+  'thu tien khach no': 'debtReceipt',
+  'thu hoàn ứng nhân viên': 'refundStaff',
+  'thu hoan ung nhan vien': 'refundStaff',
+  'thu thanh lý tài sản': 'scrapReceipt',
+  'thu thanh ly tai san': 'scrapReceipt',
+  'thu tiền bồi thường': 'compensation',
+  'thu tien boi thuong': 'compensation',
+  'thu lãi tiền gửi ngân hàng': 'interest',
+  'thu lai tien gui ngan hang': 'interest',
+  'thu khác': 'otherReceipt',
+  'thu khac': 'otherReceipt',
+  'chi khác': 'otherPayment',
+  'chi khac': 'otherPayment',
+};
+
+export const CASH_TARGET_MAP = {
+  'khách thanh toán vietqr': 'targetVietQrCustomer',
+  'khach thanh toan vietqr': 'targetVietQrCustomer',
+  'khách lẻ / đối tác': 'defaultTarget',
+  'khach le / doi tac': 'defaultTarget',
+  'khách lẻ': 'retailCustomer',
+  'khach le': 'retailCustomer',
+  'nhà cung cấp': 'supplier',
+  'nha cung cap': 'supplier',
+  'nhân viên': 'staffTarget',
+  'nhan vien': 'staffTarget',
+};
+
+export const CASH_CREATOR_MAP = {
+  'hệ thống tự động (vietqr webhook)': 'autoSystemWebhook',
+  'he thong tu dong (vietqr webhook)': 'autoSystemWebhook',
+  'hệ thống tự động': 'autoSystem',
+  'he thong tu dong': 'autoSystem',
+};
+
 // ── Context ──
 const LanguageContext = createContext(null);
 
@@ -134,8 +200,8 @@ export function LanguageProvider({ children }) {
     localStorage.setItem('aura_lang', code);
   }, []);
 
-  // t('login.title') hoặc t('save')
-  const t = useCallback((key) => {
+  // t('login.title') hoặc t('payment.vatAndDiscount', { vat: 8, discount: 5 })
+  const t = useCallback((key, params) => {
     const dict = translations[lang] || translations['vi'];
     const parts = key.split('.');
     let val = dict;
@@ -151,7 +217,13 @@ export function LanguageProvider({ children }) {
         if (val === undefined) break;
       }
     }
-    return typeof val === 'string' ? val : key;
+    if (typeof val !== 'string') return key;
+    if (params && typeof params === 'object') {
+      return Object.entries(params).reduce((str, [k, v]) => {
+        return str.replaceAll(`{${k}}`, v !== undefined && v !== null ? v : '');
+      }, val);
+    }
+    return val;
   }, [lang]);
 
   // Format table name (BÀN 01 -> TABLE 01, MANG VỀ -> TAKEAWAY, VIP 01 -> VIP 01, VƯỜN 1 -> GARDEN 1)
@@ -244,12 +316,60 @@ export function LanguageProvider({ children }) {
     return rawUnit;
   }, [t]);
 
+  // Format promotion name (Tri ân khách hàng -> Customer Appreciation)
+  const formatPromoName = useCallback((rawName) => {
+    if (!rawName) return '';
+    const lower = String(rawName).toLowerCase().trim();
+    const key = PROMO_MAP[lower];
+    if (key) {
+      const translated = t(`promos.${key}`);
+      if (translated && translated !== `promos.${key}`) return translated;
+    }
+    return rawName;
+  }, [t]);
+
+  // Format cash category (Thu tiền bán hàng -> Sales revenue receipt)
+  const formatCashCategory = useCallback((rawCat) => {
+    if (!rawCat) return '';
+    const lower = String(rawCat).toLowerCase().trim();
+    const key = CASH_CATEGORY_MAP[lower];
+    if (key) {
+      const translated = t(`admin.cashbook.categories.${key}`);
+      if (translated && translated !== `admin.cashbook.categories.${key}`) return translated;
+    }
+    return rawCat;
+  }, [t]);
+
+  // Format cash target / payer / payee (Khách thanh toán VietQR -> Customer (VietQR Payment))
+  const formatCashTarget = useCallback((rawTarget) => {
+    if (!rawTarget) return '';
+    const lower = String(rawTarget).toLowerCase().trim();
+    const key = CASH_TARGET_MAP[lower];
+    if (key) {
+      const translated = t(`admin.cashbook.${key}`);
+      if (translated && translated !== `admin.cashbook.${key}`) return translated;
+    }
+    return rawTarget;
+  }, [t]);
+
+  // Format cash transaction creator
+  const formatCashCreatedBy = useCallback((rawCreator) => {
+    if (!rawCreator) return '';
+    const lower = String(rawCreator).toLowerCase().trim();
+    const key = CASH_CREATOR_MAP[lower];
+    if (key) {
+      const translated = t(`admin.cashbook.${key}`);
+      if (translated && translated !== `admin.cashbook.${key}`) return translated;
+    }
+    return rawCreator;
+  }, [t]);
+
   // Cập nhật document.title và lang attribute khi đổi ngôn ngữ
   useEffect(() => {
     document.documentElement.lang = lang;
     const subtitle = t('login.subtitle');
     if (subtitle && subtitle !== 'login.subtitle') {
-      document.title = `AURA RESTAURANT — ${subtitle}`;
+      document.title = `QUÁN TRÀ — ${subtitle}`;
     }
   }, [lang, t]);
 
@@ -263,7 +383,11 @@ export function LanguageProvider({ children }) {
       formatAreaName,
       formatDishName,
       formatCategoryName,
-      formatDishUnit
+      formatDishUnit,
+      formatPromoName,
+      formatCashCategory,
+      formatCashTarget,
+      formatCashCreatedBy
     }}>
       {children}
     </LanguageContext.Provider>

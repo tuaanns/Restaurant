@@ -36,7 +36,8 @@ export function TransferTableModal({
     }}>
       <div style={{
         width: '480px',
-        maxHeight: '80vh',
+        maxWidth: '94vw',
+        maxHeight: '88vh',
         backgroundColor: '#ffffff',
         borderRadius: '14px',
         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)',

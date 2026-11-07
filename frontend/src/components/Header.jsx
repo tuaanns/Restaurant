@@ -3,7 +3,6 @@ import {
   LayoutGrid,
   BookOpen,
   Search,
-  RotateCcw,
   UtensilsCrossed,
   ChevronDown,
   LogOut,
@@ -12,7 +11,8 @@ import {
   LayoutDashboard,
   Clock,
   Phone,
-  Store
+  Store,
+  FileSpreadsheet
 } from 'lucide-react';
 import { useLanguage } from '../i18n/LanguageContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
@@ -28,7 +28,14 @@ export function Header({
   currentUser,
   onLogout,
   currentView,
-  setCurrentView
+  setCurrentView,
+  isMobile = false,
+  mobileTab = 'tables',
+  setMobileTab = () => {},
+  itemCount = 0,
+  selectedTable = null,
+  adminTab = 'overview',
+  setAdminTab = () => {}
 }) {
   const { t } = useLanguage();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -72,7 +79,7 @@ export function Header({
       backgroundColor: '#0b1320',
       color: '#ffffff',
       height: '56px',
-      padding: '0 16px',
+      padding: isMobile ? '0 10px' : '0 16px',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -81,37 +88,34 @@ export function Header({
       zIndex: 50
     }}>
       {/* Left: Brand & Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '8px' : '20px' }}>
         {/* Brand */}
         <div
-          onClick={() => setCurrentView && setCurrentView('pos')}
-          style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }}
+          onClick={() => {
+            if (setCurrentView) setCurrentView('pos');
+            if (setMobileTab) setMobileTab('tables');
+          }}
+          style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}
         >
-          <div style={{
-            width: '34px',
-            height: '34px',
-            borderRadius: '8px',
-            backgroundColor: 'rgba(0, 168, 132, 0.15)',
-            border: '1px solid rgba(0, 168, 132, 0.4)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#00c292'
-          }}>
-            <UtensilsCrossed size={18} />
-          </div>
-          <div>
-            <div style={{ fontWeight: 800, fontSize: '15px', letterSpacing: '0.4px', lineHeight: '1.2' }}>
-              AURA RESTAURANT
-            </div>
-            <div style={{ fontSize: '11px', color: '#00b488', fontWeight: 500 }}>
-              {t('header.branch')}
-            </div>
+          <img
+            src="/logo.png"
+            alt="QUÁN TRÀ Logo"
+            style={{
+              width: isMobile ? '32px' : '36px',
+              height: isMobile ? '32px' : '36px',
+              borderRadius: '8px',
+              border: '1.2px solid #d4af37',
+              boxShadow: '0 2px 8px rgba(212, 175, 55, 0.25)',
+              objectFit: 'cover'
+            }}
+          />
+          <div style={{ fontWeight: 800, fontSize: isMobile ? '13px' : '16px', letterSpacing: '0.4px', color: '#ffffff' }}>
+            QUÁN TRÀ
           </div>
         </div>
 
-        {/* Navigation Tabs (Only in POS view) */}
-        {currentView === 'pos' && (
+        {/* Navigation Tabs (Only in Desktop POS view) */}
+        {!isMobile && currentView === 'pos' && (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginLeft: '12px' }}>
             <button
               id="tab-tables"
@@ -161,12 +165,12 @@ export function Header({
         {/* Admin Switcher indicator if in Admin view */}
         {currentView === 'admin' && (
           <div style={{
-            marginLeft: '12px',
+            marginLeft: '8px',
             backgroundColor: 'rgba(56, 189, 248, 0.15)',
             border: '1px solid #0284c7',
-            padding: '5px 12px',
+            padding: '4px 10px',
             borderRadius: '6px',
-            fontSize: '12.5px',
+            fontSize: '12px',
             color: '#38bdf8',
             fontWeight: 700,
             display: 'flex',
@@ -179,8 +183,60 @@ export function Header({
         )}
       </div>
 
-      {/* Middle: Search bar (in POS view) */}
-      {currentView === 'pos' ? (
+      {/* Middle: Search bar (in Desktop view) OR Mobile Switcher (in Mobile view) */}
+      {isMobile && currentView === 'pos' ? (
+        <div style={{
+          display: 'flex',
+          backgroundColor: '#111e33',
+          borderRadius: '8px',
+          padding: '2px',
+          border: '1px solid #1e314d'
+        }}>
+          <button
+            onClick={() => setMobileTab('tables')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 700,
+              backgroundColor: mobileTab === 'tables' ? '#009688' : 'transparent',
+              color: '#ffffff',
+              border: 'none'
+            }}
+          >
+            🪑 Bàn
+          </button>
+          <button
+            onClick={() => setMobileTab('order')}
+            style={{
+              padding: '5px 10px',
+              borderRadius: '6px',
+              fontSize: '12px',
+              fontWeight: 700,
+              backgroundColor: mobileTab === 'order' ? '#009688' : 'transparent',
+              color: '#ffffff',
+              border: 'none',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}
+          >
+            <span>Đơn</span>
+            {itemCount > 0 && (
+              <span style={{
+                backgroundColor: '#ef4444',
+                color: '#fff',
+                borderRadius: '10px',
+                padding: '0 5px',
+                fontSize: '10px',
+                fontWeight: 800
+              }}>
+                {itemCount}
+              </span>
+            )}
+          </button>
+        </div>
+      ) : !isMobile && currentView === 'pos' ? (
         <div style={{ flex: '1', maxWidth: '420px', margin: '0 20px' }}>
           <div style={{
             position: 'relative',
@@ -227,48 +283,13 @@ export function Header({
       )}
 
       {/* Right: Language switcher + Printer + Reset + Cashier */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: isMobile ? '6px' : '10px' }}>
         {/* Language Switcher */}
         <LanguageSwitcher variant="dark" />
 
-        {/* Printer status pill */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          backgroundColor: '#111e33',
-          border: '1px solid #1e314d',
-          padding: '5px 12px',
-          borderRadius: '20px',
-          fontSize: '12px',
-          color: '#cbd5e1'
-        }}>
-          <span style={{
-            width: '8px',
-            height: '8px',
-            borderRadius: '50%',
-            backgroundColor: '#10b981',
-            boxShadow: '0 0 8px #10b981'
-          }}></span>
-          <span>Printer: OK</span>
-        </div>
 
-        {/* Reset Demo button */}
-        <button
-          onClick={onResetDemo}
-          title={t('header.resetDemo')}
-          style={{
-            backgroundColor: 'rgba(255, 255, 255, 0.06)',
-            color: '#94a3b8',
-            padding: '6px',
-            borderRadius: '6px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <RotateCcw size={15} />
-        </button>
+
+
 
         {/* ==================================================== */}
         {/* CASHIER DROPDOWN MENU                                 */}
@@ -280,36 +301,38 @@ export function Header({
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: '10px',
+              gap: isMobile ? '4px' : '10px',
               cursor: 'pointer',
-              padding: '4px 8px',
+              padding: '4px',
               borderRadius: '8px',
               backgroundColor: dropdownOpen ? '#16253c' : 'transparent',
               transition: 'background-color 0.15s ease'
             }}
           >
-            <div style={{ textAlign: 'right' }}>
-              <div style={{
-                fontSize: '13px',
-                fontWeight: 600,
-                color: '#f8fafc',
-                lineHeight: '1.2',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-                justifyContent: 'flex-end'
-              }}>
-                <span>{roleLabel}: {displayName}</span>
-                <ChevronDown size={13} color="#94a3b8" />
+            {!isMobile && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  color: '#f8fafc',
+                  lineHeight: '1.2',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  justifyContent: 'flex-end'
+                }}>
+                  <span>{roleLabel}: {displayName}</span>
+                  <ChevronDown size={13} color="#94a3b8" />
+                </div>
+                <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                  {shiftText}
+                </div>
               </div>
-              <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                {shiftText}
-              </div>
-            </div>
+            )}
 
             <div style={{
-              width: '34px',
-              height: '34px',
+              width: isMobile ? '30px' : '34px',
+              height: isMobile ? '30px' : '34px',
               borderRadius: '50%',
               backgroundColor: isAdmin ? '#0284c7' : '#009688',
               color: '#ffffff',
@@ -317,7 +340,7 @@ export function Header({
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 700,
-              fontSize: '13px',
+              fontSize: isMobile ? '11px' : '13px',
               boxShadow: isAdmin ? '0 2px 6px rgba(2, 132, 199, 0.4)' : '0 2px 6px rgba(0, 150, 136, 0.4)',
               border: '2px solid rgba(255,255,255,0.2)'
             }}>

@@ -49,10 +49,14 @@ export function CustomerModal({
     }}>
       <div style={{
         width: '460px',
+        maxWidth: '94vw',
+        maxHeight: '92vh',
         backgroundColor: '#ffffff',
         borderRadius: '14px',
         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* Header */}
         <div style={{

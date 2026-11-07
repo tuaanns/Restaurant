@@ -51,6 +51,8 @@ export function MenuModal({
 
   const formatMoney = (val) => Number(val || 0).toLocaleString('vi-VN') + ' đ';
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <div style={{
       position: 'fixed',
@@ -64,10 +66,10 @@ export function MenuModal({
     }}>
       <div style={{
         width: '900px',
-        maxWidth: '95vw',
-        height: '85vh',
+        maxWidth: isMobile ? '100vw' : '95vw',
+        height: isMobile ? '100vh' : '85vh',
         backgroundColor: '#ffffff',
-        borderRadius: '16px',
+        borderRadius: isMobile ? '0px' : '16px',
         display: 'flex',
         flexDirection: 'column',
         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)',
@@ -75,7 +77,7 @@ export function MenuModal({
       }}>
         {/* Header */}
         <div style={{
-          padding: '16px 20px',
+          padding: isMobile ? '12px 14px' : '16px 20px',
           backgroundColor: '#0b1320',
           color: '#ffffff',
           display: 'flex',
@@ -95,8 +97,8 @@ export function MenuModal({
               <Utensils size={18} />
             </div>
             <div>
-              <h2 style={{ fontSize: '16px', fontWeight: 800 }}>{t('menu.title')} (F2)</h2>
-              <p style={{ fontSize: '12px', color: '#94a3b8' }}>
+              <h2 style={{ fontSize: isMobile ? '14px' : '16px', fontWeight: 800 }}>{t('menu.title')} (F2)</h2>
+              <p style={{ fontSize: '11px', color: '#94a3b8' }}>
                 {t('menu.addToOrder')}: <strong style={{ color: '#38bdf8' }}>{selectedTable ? formatTableName(selectedTable.name) : t('table.selectTable')}</strong>
               </p>
             </div>
@@ -117,29 +119,29 @@ export function MenuModal({
 
         {/* Search & Note Quick Chips */}
         <div style={{
-          padding: '12px 20px',
+          padding: isMobile ? '8px 12px' : '12px 20px',
           borderBottom: '1px solid #e2e8f0',
           backgroundColor: '#f8fafc',
           display: 'flex',
           flexDirection: 'column',
-          gap: '10px'
+          gap: '8px'
         }}>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: isMobile ? 'wrap' : 'nowrap' }}>
             <div style={{
-              flex: 1,
+              flex: '1 1 180px',
               position: 'relative',
               display: 'flex',
               alignItems: 'center',
               backgroundColor: '#ffffff',
               border: '1px solid #cbd5e1',
               borderRadius: '8px',
-              padding: '0 12px',
-              height: '38px'
+              padding: '0 10px',
+              height: '36px'
             }}>
-              <Search size={16} color="#94a3b8" style={{ marginRight: '8px' }} />
+              <Search size={15} color="#94a3b8" style={{ marginRight: '6px', flexShrink: 0 }} />
               <input
                 type="text"
-                autoFocus
+                autoFocus={!isMobile}
                 placeholder={t('menu.searchPlaceholder')}
                 value={searchWord}
                 onChange={(e) => setSearchWord(e.target.value)}
@@ -154,20 +156,27 @@ export function MenuModal({
               value={activeNote}
               onChange={(e) => setActiveNote(e.target.value)}
               style={{
-                width: '320px',
-                height: '38px',
+                flex: isMobile ? '1 1 100%' : '0 0 280px',
+                height: '36px',
                 backgroundColor: '#ffffff',
                 border: '1px solid #cbd5e1',
                 borderRadius: '8px',
-                padding: '0 12px',
-                fontSize: '12.5px'
+                padding: '0 10px',
+                fontSize: '12px'
               }}
             />
           </div>
 
           {/* Preset Note Chips */}
-          <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600 }}>{t('notePresets.noteSuggestion')}</span>
+          <div className="no-scrollbar" style={{
+            display: 'flex',
+            gap: '6px',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            alignItems: 'center',
+            paddingBottom: '2px'
+          }}>
+            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 600, flexShrink: 0 }}>{t('notePresets.noteSuggestion')}</span>
             {notePresets.map((note) => (
               <button
                 key={note.key}
@@ -178,7 +187,8 @@ export function MenuModal({
                   borderRadius: '12px',
                   backgroundColor: activeNote === note.label ? '#009688' : '#e2e8f0',
                   color: activeNote === note.label ? '#ffffff' : '#475569',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  flexShrink: 0
                 }}
               >
                 {note.label}
@@ -187,37 +197,68 @@ export function MenuModal({
           </div>
         </div>
 
-        {/* Content: Left Category Sidebar & Right Dishes Grid */}
-        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
-          {/* Categories Sidebar */}
-          <div style={{
-            width: '200px',
+        {/* Content: Categories (Horizontal on mobile, Sidebar on desktop) */}
+        {isMobile && (
+          <div className="no-scrollbar" style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            overflowX: 'auto',
+            whiteSpace: 'nowrap',
+            padding: '8px 12px',
             backgroundColor: '#f1f5f9',
-            borderRight: '1px solid #e2e8f0',
-            overflowY: 'auto',
-            padding: '10px 8px'
+            borderBottom: '1px solid #e2e8f0',
+            flexShrink: 0
           }}>
             <button
               onClick={() => setSelectedCatId('all')}
               style={{
-                width: '100%',
-                textAlign: 'left',
-                padding: '9px 12px',
-                borderRadius: '8px',
-                fontSize: '12.5px',
+                padding: '6px 12px',
+                borderRadius: '20px',
+                fontSize: '12px',
                 fontWeight: 600,
-                marginBottom: '4px',
-                backgroundColor: selectedCatId === 'all' ? '#009688' : 'transparent',
-                color: selectedCatId === 'all' ? '#ffffff' : '#334155'
+                backgroundColor: selectedCatId === 'all' ? '#009688' : '#ffffff',
+                color: selectedCatId === 'all' ? '#ffffff' : '#334155',
+                border: '1px solid #e2e8f0',
+                flexShrink: 0
               }}
             >
               {t('menu.allCategories')} ({allProducts.length})
             </button>
-
             {menuCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => setSelectedCatId(cat.id)}
+                style={{
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  backgroundColor: selectedCatId === cat.id ? '#009688' : '#ffffff',
+                  color: selectedCatId === cat.id ? '#ffffff' : '#334155',
+                  border: '1px solid #e2e8f0',
+                  flexShrink: 0
+                }}
+              >
+                {formatCategoryName(cat.name)} ({cat.products ? cat.products.length : 0})
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Content: Left Category Sidebar & Right Dishes Grid */}
+        <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
+          {/* Categories Sidebar (Desktop only) */}
+          {!isMobile && (
+            <div style={{
+              width: '200px',
+              backgroundColor: '#f1f5f9',
+              borderRight: '1px solid #e2e8f0',
+              overflowY: 'auto',
+              padding: '10px 8px'
+            }}>
+              <button
+                onClick={() => setSelectedCatId('all')}
                 style={{
                   width: '100%',
                   textAlign: 'left',
@@ -226,26 +267,46 @@ export function MenuModal({
                   fontSize: '12.5px',
                   fontWeight: 600,
                   marginBottom: '4px',
-                  backgroundColor: selectedCatId === cat.id ? '#009688' : 'transparent',
-                  color: selectedCatId === cat.id ? '#ffffff' : '#334155'
+                  backgroundColor: selectedCatId === 'all' ? '#009688' : 'transparent',
+                  color: selectedCatId === 'all' ? '#ffffff' : '#334155'
                 }}
               >
-                {formatCategoryName(cat.name)} ({cat.products ? cat.products.length : 0})
+                {t('menu.allCategories')} ({allProducts.length})
               </button>
-            ))}
-          </div>
+
+              {menuCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => setSelectedCatId(cat.id)}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '9px 12px',
+                    borderRadius: '8px',
+                    fontSize: '12.5px',
+                    fontWeight: 600,
+                    marginBottom: '4px',
+                    backgroundColor: selectedCatId === cat.id ? '#009688' : 'transparent',
+                    color: selectedCatId === cat.id ? '#ffffff' : '#334155'
+                  }}
+                >
+                  {formatCategoryName(cat.name)} ({cat.products ? cat.products.length : 0})
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Dishes Grid */}
           <div style={{
             flex: 1,
             overflowY: 'auto',
-            padding: '16px',
+            padding: isMobile ? '10px' : '16px',
             backgroundColor: '#ffffff'
           }}>
             <div style={{
               display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-              gap: '12px'
+              gridTemplateColumns: isMobile ? 'repeat(auto-fill, minmax(140px, 1fr))' : 'repeat(auto-fill, minmax(200px, 1fr))',
+              gap: isMobile ? '8px' : '12px'
             }}>
               {filteredProducts.map((p) => {
                 const isJustAdded = lastAddedId === p.id;

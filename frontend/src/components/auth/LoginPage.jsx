@@ -7,6 +7,7 @@ import {
   Eye,
   EyeOff,
   Store,
+  MapPin,
   Phone,
   ShieldCheck,
   AlertCircle,
@@ -85,29 +86,25 @@ export function LoginPage({ onLoginSuccess }) {
       }}>
         {/* Bên trái: Thương hiệu & Trạng thái */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            width: '34px',
-            height: '34px',
-            backgroundColor: '#064e3b',
-            borderRadius: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: '#ffffff',
-            fontWeight: 900,
-            fontSize: '18px',
-            letterSpacing: '-0.5px',
-            boxShadow: '0 2px 6px rgba(6, 78, 59, 0.25)'
-          }}>
-            A
-          </div>
+          <img
+            src="/logo.png"
+            alt="QUÁN TRÀ Logo"
+            style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '8px',
+              border: '1.2px solid #d4af37',
+              boxShadow: '0 2px 8px rgba(212, 175, 55, 0.25)',
+              objectFit: 'cover'
+            }}
+          />
           <div style={{
             fontSize: '17px',
-            fontWeight: 700,
+            fontWeight: 800,
             color: '#0f172a',
             letterSpacing: '-0.3px'
           }}>
-            Aura POS
+            QUÁN TRÀ
           </div>
 
           {/* Badge trạng thái hệ thống tiếng Việt */}
@@ -216,38 +213,55 @@ export function LoginPage({ onLoginSuccess }) {
           padding: '36px 36px 26px 36px',
           boxSizing: 'border-box'
         }}>
-          {/* Icon Dao Nĩa ẩm thực */}
+          {/* Logo QUÁN TRÀ */}
           <div style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '12px',
-            backgroundColor: '#064e3b',
-            color: '#ffffff',
             display: 'flex',
-            alignItems: 'center',
             justifyContent: 'center',
-            margin: '0 auto 16px auto',
-            boxShadow: '0 4px 12px rgba(6, 78, 59, 0.25)'
+            marginBottom: '16px'
           }}>
-            <UtensilsCrossed size={22} />
+            <img
+              src="/logo.png"
+              alt="QUÁN TRÀ Logo"
+              style={{
+                width: '68px',
+                height: '68px',
+                borderRadius: '16px',
+                border: '1.5px solid #d4af37',
+                boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25)',
+                objectFit: 'cover'
+              }}
+            />
           </div>
 
           {/* Tiêu đề & phụ đề */}
           <h1 style={{
-            fontSize: '21px',
-            fontWeight: 700,
+            fontSize: '22px',
+            fontWeight: 800,
             color: '#111827',
             textAlign: 'center',
-            marginBottom: '6px',
+            marginBottom: '4px',
             letterSpacing: '-0.2px'
           }}>
-            {t('login.title')}
+            {t('login.restaurantBrand')}
           </h1>
           <p style={{
-            fontSize: '13px',
+            fontSize: '11.5px',
+            color: '#047857',
+            fontWeight: 600,
+            textAlign: 'center',
+            marginBottom: '6px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '4px'
+          }}>
+            <MapPin size={13} color="#047857" /> {t('login.branchDetail')}
+          </p>
+          <p style={{
+            fontSize: '12.5px',
             color: '#6b7280',
             textAlign: 'center',
-            marginBottom: '24px'
+            marginBottom: '20px'
           }}>
             {t('login.subtitle')}
           </p>
@@ -454,7 +468,7 @@ export function LoginPage({ onLoginSuccess }) {
           </form>
 
           {/* Chú thích hotline dưới thẻ */}
-          <div style={{ marginTop: '22px', textAlign: 'center' }}>
+          <div style={{ marginTop: '16px', textAlign: 'center' }}>
             <p style={{ fontSize: '11.5px', color: '#6b7280', marginBottom: '4px' }}>
               {t('login.needSupport')}
             </p>

@@ -13,6 +13,10 @@ class Order extends Model
         'order_code',
         'table_id',
         'customer_id',
+        'promotion_id',
+        'promotion_code',
+        'promotion_name',
+        'promotion_discount_amount',
         'cashier_name',
         'shift',
         'order_type',
@@ -34,6 +38,7 @@ class Order extends Model
         'subtotal' => 'float',
         'discount_percent' => 'float',
         'discount_amount' => 'float',
+        'promotion_discount_amount' => 'float',
         'vat_percent' => 'float',
         'vat_amount' => 'float',
         'total_amount' => 'float',
@@ -43,6 +48,13 @@ class Order extends Model
         'paid_at' => 'datetime',
     ];
 
+    protected $appends = ['created_time'];
+
+    public function getCreatedTimeAttribute()
+    {
+        return $this->created_at ? $this->created_at->timezone('Asia/Ho_Chi_Minh')->format('H:i') : null;
+    }
+
     public function table()
     {
         return $this->belongsTo(DiningTable::class, 'table_id');
@@ -51,6 +63,11 @@ class Order extends Model
     public function customer()
     {
         return $this->belongsTo(Customer::class, 'customer_id');
+    }
+
+    public function promotion()
+    {
+        return $this->belongsTo(Promotion::class, 'promotion_id');
     }
 
     public function items()
@@ -65,17 +82,38 @@ class Order extends Model
 
     public function recalculateTotals(): void
     {
-        $subtotal = $this->items()->sum('subtotal');
-        $discountAmount = ($subtotal * ($this->discount_percent / 100));
-        $taxableAmount = $subtotal - $discountAmount;
-        $vatAmount = ($taxableAmount * ($this->vat_percent / 100));
-        $totalAmount = $taxableAmount + $vatAmount;
+        $subtotal = (float)$this->items()->sum('subtotal');
+        
+        // 1. Giảm giá Hội viên (tính theo % chiết khấu của khách)
+        $memberDiscountAmount = round($subtotal * (((float)$this->discount_percent) / 100));
+        
+        // 2. Giảm giá từ Chương trình Khuyến Mãi (CTKM)
+        $promoDiscountAmount = 0;
+        if ($this->promotion_id) {
+            $promo = $this->promotion;
+            if ($promo && $promo->is_active) {
+                // Kiểm tra điều kiện đơn tối thiểu
+                if ($subtotal >= (float)$promo->min_order) {
+                    if ($promo->type === 'order_discount' || $promo->type === 'percent') {
+                        $promoDiscountAmount = round($subtotal * (((float)$promo->discount_value) / 100));
+                    } elseif ($promo->type === 'fixed_amount' || $promo->type === 'fixed_price') {
+                        $promoDiscountAmount = round(min($subtotal, (float)$promo->discount_value));
+                    }
+                }
+            }
+        }
+
+        $totalDiscountAmount = min($subtotal, $memberDiscountAmount + $promoDiscountAmount);
+        $taxableAmount = max(0, $subtotal - $totalDiscountAmount);
+        $vatAmount = round($taxableAmount * (((float)$this->vat_percent) / 100));
+        $totalAmount = round($taxableAmount + $vatAmount);
 
         $this->update([
             'subtotal' => $subtotal,
-            'discount_amount' => round($discountAmount),
-            'vat_amount' => round($vatAmount),
-            'total_amount' => round($totalAmount),
+            'discount_amount' => $totalDiscountAmount,
+            'promotion_discount_amount' => $promoDiscountAmount,
+            'vat_amount' => $vatAmount,
+            'total_amount' => $totalAmount,
         ]);
     }
 }

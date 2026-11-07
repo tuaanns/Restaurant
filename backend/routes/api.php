@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PosController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AdminController;
+use App\Http\Controllers\Api\PaymentWebhookController;
 
 /*
 |--------------------------------------------------------------------------
@@ -26,6 +27,7 @@ Route::prefix('auth')->group(function () {
 // Admin Management Routes (Thống kê doanh thu, Quản lý thực đơn)
 Route::prefix('admin')->group(function () {
     Route::get('/stats', [AdminController::class, 'getStats']);
+    Route::get('/reports', [AdminController::class, 'getReports']);
 
     // Quản lý Món Ăn (Products)
     Route::post('/products', [AdminController::class, 'addProduct']);
@@ -58,10 +60,30 @@ Route::prefix('admin')->group(function () {
     Route::post('/areas', [AdminController::class, 'addArea']);
     Route::patch('/areas/{id}', [AdminController::class, 'updateArea']);
     Route::delete('/areas/{id}', [AdminController::class, 'deleteArea']);
+
+    // Quản lý Khuyến Mãi (Promotions) - Danh sách, Thêm/Sửa/Xóa
+    Route::get('/promotions', [AdminController::class, 'getPromotions']);
+    Route::post('/promotions', [AdminController::class, 'addPromotion']);
+    Route::patch('/promotions/{id}', [AdminController::class, 'updatePromotion']);
+    Route::delete('/promotions/{id}', [AdminController::class, 'deletePromotion']);
+
+    // Quản lý Sổ Quỹ (Cash Transactions) - Phiếu Thu / Phiếu Chi
+    Route::get('/cash-transactions', [AdminController::class, 'getCashTransactions']);
+    Route::post('/cash-transactions', [AdminController::class, 'createCashTransaction']);
+    Route::delete('/cash-transactions/{id}', [AdminController::class, 'deleteCashTransaction']);
+
+    // Quản lý Tài Khoản Ngân Hàng (Bank Accounts) - Thiết lập tài khoản ngân hàng & VietQR
+    Route::get('/bank-accounts', [AdminController::class, 'getBankAccounts']);
+    Route::post('/bank-accounts', [AdminController::class, 'createBankAccount']);
+    Route::put('/bank-accounts/{id}', [AdminController::class, 'updateBankAccount']);
+    Route::post('/bank-accounts/{id}/set-default', [AdminController::class, 'setDefaultBankAccount']);
+    Route::delete('/bank-accounts/{id}', [AdminController::class, 'deleteBankAccount']);
 });
 
 // POS Cashier Routes (Sơ đồ bàn, gọi món, báo bếp, in bill, thanh toán)
 Route::prefix('pos')->group(function () {
+    // Tài khoản ngân hàng mặc định cho POS VietQR
+    Route::get('/default-bank-account', [AdminController::class, 'getDefaultBankAccount']);
     // Sơ đồ bàn, khu vực và trạng thái
     Route::get('/tables', [PosController::class, 'getTables']);
     
@@ -89,8 +111,16 @@ Route::prefix('pos')->group(function () {
     // Gán khách hàng cho order (để tính % giảm giá thành viên)
     Route::post('/orders/{orderId}/customer', [PosController::class, 'updateCustomer']);
 
-    // Báo bếp (F10)
+    // Danh sách chương trình khuyến mãi đang chạy (POS)
+    Route::get('/promotions', [PosController::class, 'getPromotions']);
+
+    // Áp dụng hoặc hủy khuyến mãi cho order
+    Route::post('/orders/{orderId}/promotion', [PosController::class, 'applyPromotion']);
+
+    // Báo bếp (F10) & Quản lý bếp KDS
     Route::post('/orders/{orderId}/send-kitchen', [PosController::class, 'sendToKitchen']);
+    Route::get('/kitchen/items', [PosController::class, 'getKitchenItems']);
+    Route::patch('/kitchen/items/{itemId}/status', [PosController::class, 'updateKitchenItemStatus']);
 
     // In tạm tính
     Route::post('/orders/{orderId}/print-prebill', [PosController::class, 'printPreBill']);
@@ -101,6 +131,16 @@ Route::prefix('pos')->group(function () {
     // Chuyển bàn
     Route::post('/tables/transfer', [PosController::class, 'transferTable']);
 
+    // Tách đơn sang bàn khác
+    Route::post('/tables/split-order', [PosController::class, 'splitOrder']);
+
     // Khôi phục dữ liệu mẫu
     Route::post('/reset-demo', [PosController::class, 'resetDemo']);
+
+    // Kiểm tra trạng thái đơn hàng (Polling tự động đóng modal khi nhận tiền VietQR)
+    Route::get('/orders/{orderId}/status', [PaymentWebhookController::class, 'getOrderStatus']);
 });
+
+// Cổng tiếp nhận Webhook ngân hàng tự động (SePay, Casso, Android App Gateway)
+Route::post('/payment/webhook', [PaymentWebhookController::class, 'handleWebhook']);
+Route::post('/payment/test-simulate', [PaymentWebhookController::class, 'simulateWebhook']);

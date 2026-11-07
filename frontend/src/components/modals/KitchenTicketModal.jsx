@@ -1,6 +1,27 @@
 import React from 'react';
-import { X, Printer, CheckCircle, Bell } from 'lucide-react';
+import { X, Printer, Bell } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { getRestaurantSettings } from '../../utils/restaurantSettings';
+
+function playKitchenChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.6);
+  } catch (e) {
+    console.warn('Audio chime error:', e);
+  }
+}
 
 export function KitchenTicketModal({
   isOpen,
@@ -20,9 +41,18 @@ export function KitchenTicketModal({
   const timeStr = now.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
   const dateStr = now.toLocaleDateString('vi-VN');
 
-  const handlePrint = () => {
+  const handlePrintAndSend = () => {
     onConfirmSendKitchen();
-    window.print();
+    const settings = getRestaurantSettings();
+    if (settings.kitchenAlertSound !== false) {
+      playKitchenChime();
+    }
+    if (settings.autoPrintKitchenTicket !== false) {
+      setTimeout(() => {
+        window.print();
+      }, 100);
+    }
+    onClose();
   };
 
   return (
@@ -38,13 +68,17 @@ export function KitchenTicketModal({
     }}>
       <div style={{
         width: '420px',
+        maxWidth: '95vw',
+        maxHeight: '94vh',
         backgroundColor: '#ffffff',
         borderRadius: '12px',
         boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column'
       }}>
         {/* Modal Header */}
-        <div style={{
+        <div className="no-print" style={{
           padding: '14px 18px',
           backgroundColor: '#0b1320',
           color: '#ffffff',
@@ -56,7 +90,7 @@ export function KitchenTicketModal({
             <Bell size={18} color="#00a884" />
             <span style={{ fontSize: '15px', fontWeight: 800 }}>{t('kitchen.sendKitchenModalTitle')}</span>
           </div>
-          <button onClick={onClose} style={{ color: '#94a3b8' }}>
+          <button onClick={onClose} style={{ color: '#94a3b8', background: 'none', border: 'none', cursor: 'pointer' }}>
             <X size={18} />
           </button>
         </div>
@@ -78,7 +112,7 @@ export function KitchenTicketModal({
           >
             {/* Header */}
             <div style={{ textAlign: 'center', marginBottom: '12px' }}>
-              <div style={{ fontSize: '15px', fontWeight: 900 }}>AURA RESTAURANT</div>
+              <div style={{ fontSize: '15px', fontWeight: 900 }}>QUÁN TRÀ</div>
               <div style={{ fontSize: '11px' }}>{t('header.branch')}</div>
               <div style={{
                 fontSize: '14px',
@@ -147,8 +181,8 @@ export function KitchenTicketModal({
           </div>
         </div>
 
-        {/* Modal Actions */}
-        <div style={{
+        {/* Modal Actions: In & Gửi Bếp (Single Primary Button) */}
+        <div className="no-print" style={{
           padding: '12px 18px',
           borderTop: '1px solid #e2e8f0',
           display: 'flex',
@@ -159,57 +193,40 @@ export function KitchenTicketModal({
           <button
             onClick={onClose}
             style={{
-              padding: '8px 14px',
+              padding: '8px 16px',
               borderRadius: '6px',
               border: '1px solid #cbd5e1',
               color: '#475569',
               fontSize: '13px',
-              fontWeight: 600
+              fontWeight: 600,
+              cursor: 'pointer',
+              background: '#ffffff'
             }}
           >
             {t('close')}
           </button>
 
-          <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              onClick={() => {
-                onConfirmSendKitchen();
-                onClose();
-              }}
-              style={{
-                padding: '8px 14px',
-                borderRadius: '6px',
-                backgroundColor: '#009688',
-                color: '#ffffff',
-                fontSize: '13px',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <CheckCircle size={15} />
-              <span>{t('kitchen.sendKitchenNoPrint')}</span>
-            </button>
-
-            <button
-              onClick={handlePrint}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '6px',
-                backgroundColor: '#0f172a',
-                color: '#ffffff',
-                fontSize: '13px',
-                fontWeight: 700,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px'
-              }}
-            >
-              <Printer size={15} />
-              <span>{t('kitchen.printKitchenK80')}</span>
-            </button>
-          </div>
+          <button
+            id="btn-print-and-send-kitchen"
+            onClick={handlePrintAndSend}
+            style={{
+              padding: '9px 20px',
+              borderRadius: '6px',
+              backgroundColor: '#009688',
+              color: '#ffffff',
+              fontSize: '13.5px',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '7px',
+              border: 'none',
+              cursor: 'pointer',
+              boxShadow: '0 3px 10px rgba(0, 150, 136, 0.3)'
+            }}
+          >
+            <Printer size={16} />
+            <span>{t('kitchen.printAndSendKitchen')}</span>
+          </button>
         </div>
       </div>
     </div>

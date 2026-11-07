@@ -1,56 +1,46 @@
 @echo off
-chcp 65001 > nul
-title KHỞI CHẠY HỆ THỐNG POS NHÀ HÀNG AURA (HỖ TRỢ MẠNG LAN)
+title AURA RESTAURANT POS
 cls
 echo ================================================================
-echo    HỆ THỐNG THU NGÂN POS NHÀ HÀNG AURA RESTAURANT
-echo    Hỗ trợ đa thiết bị trong mạng nội bộ LAN / Wi-Fi
+echo    HE THONG THU NGAN POS NHA HANG AURA
 echo ================================================================
 echo.
 
-:: Lấy địa chỉ IP mạng nội bộ của máy chủ
-set LOCAL_IP=127.0.0.1
-for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /r /c:"IPv4.*192\." /c:"IPv4.*10\." /c:"IPv4.*172\."') do (
-    if not defined DETECTED_IP (
-        set DETECTED_IP=%%a
-    )
-)
-if defined DETECTED_IP (
-    set LOCAL_IP=%DETECTED_IP: =%
-)
-
-:: Kiểm tra và khởi động MySQL (XAMPP) nếu chưa chạy
-netstat -ano | findstr 3306 > nul
+REM Kiem tra MySQL (Chinh xac cong 3306, tranh nham voi 33060)
+netstat -ano | findstr /r ":3306[^0-9]" >nul
 if errorlevel 1 (
     if exist "C:\xampp\mysql\bin\mysqld.exe" (
-        echo [*] Đang khởi động MySQL CSDL...
-        start "MySQL Database" /min "C:\xampp\mysql\bin\mysqld.exe" --defaults-file="C:\xampp\mysql\bin\my.ini" --standalone
-        timeout /t 2 > nul
+        echo [*] Dang khoi dong CSDL MySQL...
+        start "MySQL_Aura" /min "C:\xampp\mysql\bin\mysqld.exe" --defaults-file="C:\xampp\mysql\bin\my.ini" --standalone
+        ping 127.0.0.1 -n 4 >nul
     )
 )
 
-echo [1/2] Đang khởi động Backend Laravel API (Port 8000, Host 0.0.0.0) ...
-start "Backend Laravel API (Port 8000)" cmd /k "cd /d %~dp0backend && php artisan serve --host=0.0.0.0 --port=8000"
+echo [1/2] Dang khoi dong Backend API tai cong 8000...
+start "Aura_Backend_API" cmd /k "cd /d %~dp0backend && php artisan serve --host=0.0.0.0 --port=8000"
 
-timeout /t 2 > nul
+ping 127.0.0.1 -n 3 >nul
 
-echo [2/2] Đang khởi động Frontend ReactJS (Port 5173, Host 0.0.0.0) ...
-start "Frontend React Vite (Port 5173)" cmd /k "cd /d %~dp0frontend && npm run dev"
+echo [2/2] Dang khoi dong Frontend POS tai cong 5173...
+start "Aura_Frontend_POS" cmd /k "cd /d %~dp0frontend && npm run dev"
 
-timeout /t 3 > nul
+ping 127.0.0.1 -n 3 >nul
 
 echo.
 echo ================================================================
-echo  ĐÃ KHỞI CHẠY THÀNH CÔNG!
+echo    HE THONG DA KHOI DONG THANH CONG!
 echo.
-echo  * Trên máy thu ngân chính:
-echo    - Truy cập: http://localhost:5173
-echo.
-echo  * Trên các máy khác (iPad, điện thoại nhân viên, máy bàn phụ):
-echo    - Kết nối chung mạng Wi-Fi với máy chủ này
-echo    - Mở trình duyệt và truy cập: http://%LOCAL_IP%:5173
+echo    * May thu ngan: http://localhost:5173
+echo    * Thiet bi khac (iPad, Dien thoai): 
+echo      Xem dia chi IP hien thi trong cua so Aura_Frontend_POS
 echo ================================================================
 echo.
+echo Dang tu dong mo trinh duyet...
 
-start http://localhost:5173
+REM Mo dung 1 tab trinh duyet duy nhat
+start "" "http://localhost:5173"
+
+echo.
+echo He thong dang hoat dong. KHONG TAT CUA SO NAY trong gio ban hang.
+echo.
 pause

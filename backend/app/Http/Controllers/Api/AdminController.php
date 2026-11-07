@@ -12,12 +12,23 @@ use App\Models\DiningTable;
 use App\Models\Area;
 use App\Models\User;
 use App\Models\Customer;
+use App\Models\Promotion;
+use App\Models\CashTransaction;
+use App\Models\BankAccount;
+use App\Services\CashBookService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
+    protected CashBookService $cashBookService;
+
+    public function __construct(CashBookService $cashBookService)
+    {
+        $this->cashBookService = $cashBookService;
+    }
+
     /**
      * Báo cáo thống kê doanh thu & hoạt động nhà hàng
      */
@@ -680,6 +691,465 @@ class AdminController extends Controller
         return response()->json([
             'success' => true,
             'message' => 'Đã xóa khu vực!'
+        ]);
+    }
+
+    /**
+     * Quản lý Khuyến Mãi (Admin)
+     */
+    public function getPromotions()
+    {
+        $promotions = Promotion::orderBy('id', 'desc')->get();
+        return response()->json([
+            'success' => true,
+            'promotions' => $promotions
+        ]);
+    }
+
+    public function addPromotion(Request $request)
+    {
+        $request->validate([
+            'name' => 'required|string|max:150',
+            'type' => 'required|string',
+            'discount_value' => 'required|numeric|min:0',
+            'min_order' => 'nullable|numeric|min:0',
+        ]);
+
+        $lastPromo = Promotion::orderBy('id', 'desc')->first();
+        $nextNum = $lastPromo ? ($lastPromo->id + 1) : 1;
+        $autoCode = 'KM' . str_pad($nextNum, 6, '0', STR_PAD_LEFT);
+
+        $promotion = Promotion::create([
+            'code' => $request->input('code') ?: $autoCode,
+            'name' => $request->name,
+            'type' => $request->type,
+            'discount_value' => $request->discount_value,
+            'min_order' => $request->input('min_order', 0),
+            'from_date' => $request->input('from_date', date('d/m/Y')),
+            'to_date' => $request->input('to_date', '31/12/2026'),
+            'is_active' => $request->input('is_active', true),
+            'budget_used' => 0,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã thêm chương trình khuyến mãi!',
+            'promotion' => $promotion
+        ]);
+    }
+
+    public function updatePromotion(Request $request, $id)
+    {
+        $promo = Promotion::findOrFail($id);
+        $promo->update($request->only([
+            'name', 'type', 'discount_value', 'min_order',
+            'from_date', 'to_date', 'is_active', 'budget_used'
+        ]));
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã cập nhật chương trình khuyến mãi!',
+            'promotion' => $promo
+        ]);
+    }
+
+    public function deletePromotion($id)
+    {
+        $promo = Promotion::findOrFail($id);
+        $promo->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã xóa chương trình khuyến mãi!'
+        ]);
+    }
+
+    /**
+     * Báo cáo chi tiết: Báo cáo cuối ngày, Bán hàng, Hàng hóa
+     */
+    public function getReports(Request $request)
+    {
+        $type = $request->input('type', 'sales'); // 'end_of_day', 'sales', 'goods'
+        $date = $request->input('date'); // YYYY-MM-DD
+        $search = $request->input('search');
+        $status = $request->input('status'); // all, paid, active
+        $fromTime = trim($request->input('from_time') ?: '00:00');
+        $toTime = trim($request->input('to_time') ?: '23:59');
+        $fromTimeFormatted = strlen($fromTime) === 5 ? "{$fromTime}:00" : $fromTime;
+        $toTimeFormatted = strlen($toTime) === 5 ? "{$toTime}:59" : $toTime;
+
+        $query = Order::with(['items.product.category', 'table.area', 'customer', 'promotion']);
+
+        if ($date) {
+            $fromDateTime = "{$date} {$fromTimeFormatted}";
+            $toDateTime = "{$date} {$toTimeFormatted}";
+            $query->whereBetween('created_at', [$fromDateTime, $toDateTime]);
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('order_code', 'like', "%{$search}%")
+                  ->orWhereHas('customer', function ($cq) use ($search) {
+                      $cq->where('name', 'like', "%{$search}%")
+                         ->orWhere('phone', 'like', "%{$search}%");
+                  })
+                  ->orWhereHas('table', function ($tq) use ($search) {
+                      $tq->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        if ($status && $status !== 'all') {
+            $query->where('status', $status);
+        }
+
+        $orders = $query->orderBy('id', 'desc')->get();
+
+        // Nếu ngày được chọn chưa có đơn nào, lấy thêm đơn hôm nay hoặc đơn gần nhất để báo cáo luôn có dữ liệu thật
+        if ($orders->isEmpty() && !$date) {
+            $orders = Order::with(['items.product.category', 'table.area', 'customer', 'promotion'])
+                ->orderBy('id', 'desc')
+                ->limit(20)
+                ->get();
+        }
+
+        // Calculate summary statistics
+        $totalRevenue = 0;
+        $totalItems = 0;
+        $totalDiscount = 0;
+        $totalVat = 0;
+        $totalPaid = 0;
+        $paymentMethods = [
+            'cash' => 0,
+            'qr_banking' => 0,
+            'card' => 0,
+            'other' => 0,
+        ];
+
+        // Format orders for report
+        $formattedOrders = [];
+        $goodsMap = [];
+
+        foreach ($orders as $order) {
+            $itemCount = $order->items ? $order->items->sum('quantity') : 0;
+            $rev = (float)$order->total_amount;
+            if ($rev == 0 && $order->subtotal > 0) {
+                $rev = (float)$order->subtotal;
+            }
+            $totalRevenue += $rev;
+            $totalItems += (int)$itemCount;
+            $totalDiscount += (float)($order->discount_amount + $order->promotion_discount_amount);
+            $totalVat += (float)$order->vat_amount;
+            $totalPaid += (float)($order->paid_amount ?: $rev);
+
+            $pm = $order->payment_method ?: 'cash';
+            if (isset($paymentMethods[$pm])) {
+                $paymentMethods[$pm] += $rev;
+            } else {
+                $paymentMethods['other'] += $rev;
+            }
+
+            $created = $order->created_at ? $order->created_at->copy()->timezone('Asia/Ho_Chi_Minh') : \Carbon\Carbon::now('Asia/Ho_Chi_Minh');
+
+            $orderRow = [
+                'id' => $order->id,
+                'order_code' => $order->order_code ?: ('ORD-' . str_pad($order->id, 5, '0', STR_PAD_LEFT)),
+                'created_at' => $created->format('d/m/Y H:i'),
+                'created_time' => $created->format('H:i'),
+                'table_name' => $order->table ? $order->table->name : 'Mang về',
+                'area_name' => ($order->table && $order->table->area) ? $order->table->area->name : 'Sảnh chính',
+                'customer_name' => $order->customer ? $order->customer->name : 'Khách lẻ',
+                'customer_phone' => $order->customer ? $order->customer->phone : '',
+                'cashier_name' => $order->cashier_name ?: 'Thu Hằng',
+                'shift' => $order->shift ?: 'Toàn ca (Quản lý nhà hàng)',
+                'total_items_count' => (int)$itemCount,
+                'subtotal' => (float)$order->subtotal,
+                'other_fee' => (float)($order->surcharge_amount ?? 0),
+                'vat_amount' => (float)$order->vat_amount,
+                'discount_amount' => (float)($order->discount_amount + $order->promotion_discount_amount),
+                'total_amount' => $rev,
+                'paid_amount' => (float)($order->paid_amount ?: $rev),
+                'payment_method' => $order->payment_method ?: 'cash',
+                'status' => $order->status,
+                'items' => $order->items ? $order->items->map(function ($it) {
+                    return [
+                        'id' => $it->id,
+                        'product_id' => $it->product_id,
+                        'product_name' => $it->product_name,
+                        'product_code' => ($it->product && $it->product->code) ? $it->product->code : ('MON' . str_pad($it->product_id ?: $it->id, 3, '0', STR_PAD_LEFT)),
+                        'category_name' => ($it->product && $it->product->category) ? $it->product->category->name : 'Món ăn',
+                        'quantity' => (int)$it->quantity,
+                        'price' => (float)$it->price,
+                        'subtotal' => (float)$it->subtotal,
+                        'unit' => ($it->product && $it->product->unit) ? $it->product->unit : 'phần',
+                    ];
+                }) : []
+            ];
+
+            $formattedOrders[] = $orderRow;
+
+            // Aggregate goods
+            foreach ($orderRow['items'] as $item) {
+                $pName = $item['product_name'];
+                if (!isset($goodsMap[$pName])) {
+                    $goodsMap[$pName] = [
+                        'product_code' => $item['product_code'],
+                        'product_name' => $pName,
+                        'category_name' => $item['category_name'],
+                        'unit' => $item['unit'],
+                        'quantity' => 0,
+                        'price' => $item['price'],
+                        'revenue' => 0,
+                    ];
+                }
+                $goodsMap[$pName]['quantity'] += $item['quantity'];
+                $goodsMap[$pName]['revenue'] += $item['subtotal'];
+            }
+        }
+
+        // Calculate goods share percentage
+        $goodsList = array_values($goodsMap);
+        usort($goodsList, function ($a, $b) {
+            return $b['quantity'] <=> $a['quantity'];
+        });
+
+        foreach ($goodsList as &$g) {
+            $g['percentage'] = $totalRevenue > 0 ? round(($g['revenue'] / $totalRevenue) * 100, 1) : 0;
+        }
+
+        // 4. Hạch toán số liệu Thu / Chi trong Sổ Quỹ có ghi nhận vào Kết quả kinh doanh
+        $reportDate = $date ?: Carbon::today()->format('Y-m-d');
+        $cashExpenseQuery = CashTransaction::where('type', 'payment')
+            ->where('is_business_result', true)
+            ->whereBetween('transacted_at', ["{$reportDate} 00:00:00", "{$reportDate} 23:59:59"]);
+        $cashIncomeQuery = CashTransaction::where('type', 'receipt')
+            ->where('is_business_result', true)
+            ->whereBetween('transacted_at', ["{$reportDate} 00:00:00", "{$reportDate} 23:59:59"]);
+
+        $operatingExpenses = (float)$cashExpenseQuery->sum('amount');
+        $otherIncome = (float)$cashIncomeQuery->sum('amount');
+        $netProfit = $totalRevenue + $otherIncome - $operatingExpenses;
+
+        return response()->json([
+            'success' => true,
+            'report_type' => $type,
+            'date' => $reportDate,
+            'orders' => $formattedOrders,
+            'goods' => $goodsList,
+            'summary' => [
+                'total_orders' => count($formattedOrders),
+                'total_revenue' => $totalRevenue,
+                'total_items' => $totalItems,
+                'total_discount' => $totalDiscount,
+                'total_vat' => $totalVat,
+                'total_paid' => $totalPaid,
+                'payment_breakdown' => $paymentMethods,
+                'operating_expenses' => $operatingExpenses,
+                'other_income' => $otherIncome,
+                'net_profit' => $netProfit,
+                'branch_name' => 'QUÁN TRÀ',
+                'branch_address' => '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang',
+            ]
+        ]);
+    }
+
+    /**
+     * Lấy danh sách phiếu thu / phiếu chi trong Sổ quỹ
+     */
+    public function getCashTransactions(Request $request)
+    {
+        $result = $this->cashBookService->getTransactionsSummary($request->all());
+        return response()->json(array_merge(['success' => true], $result));
+    }
+
+    /**
+     * Tạo phiếu thu / phiếu chi mới
+     */
+    public function createCashTransaction(Request $request)
+    {
+        $request->validate([
+            'type' => 'required|in:receipt,payment',
+            'payment_method' => 'required|in:cash,bank',
+            'category' => 'required|string',
+            'amount' => 'required|numeric|min:0',
+        ]);
+
+        $transaction = $this->cashBookService->createTransaction($request->all());
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Lập ' . ($transaction->type === 'receipt' ? 'phiếu thu' : 'phiếu chi') . ' thành công!',
+            'transaction' => $transaction
+        ]);
+    }
+
+    /**
+     * Xóa phiếu thu / chi
+     */
+    public function deleteCashTransaction($id)
+    {
+        $item = CashTransaction::findOrFail($id);
+        $code = $item->code;
+        $this->cashBookService->deleteTransaction((int)$id);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã xóa phiếu {$code} thành công!"
+        ]);
+    }
+
+    /**
+     * Danh sách tài khoản ngân hàng của quán
+     */
+    public function getBankAccounts()
+    {
+        $accounts = BankAccount::orderBy('is_default', 'desc')
+            ->orderBy('id', 'desc')
+            ->get();
+
+        return response()->json([
+            'success' => true,
+            'bank_accounts' => $accounts
+        ]);
+    }
+
+    /**
+     * Lấy tài khoản ngân hàng mặc định đang áp dụng (dùng cho POS VietQR)
+     */
+    public function getDefaultBankAccount()
+    {
+        $account = BankAccount::where('is_default', true)->where('is_active', true)->first();
+        if (!$account) {
+            $account = BankAccount::where('is_active', true)->first();
+        }
+
+        return response()->json([
+            'success' => true,
+            'bank_account' => $account
+        ]);
+    }
+
+    /**
+     * Thêm tài khoản ngân hàng mới
+     */
+    public function createBankAccount(Request $request)
+    {
+        $request->validate([
+            'bank_name' => 'required|string|max:191',
+            'bank_code' => 'required|string|max:50',
+            'bin' => 'required|string|max:20',
+            'account_number' => 'required|string|max:50',
+            'account_name' => 'required|string|max:191',
+        ]);
+
+        $isDefault = filter_var($request->input('is_default', false), FILTER_VALIDATE_BOOLEAN);
+
+        // Nếu đặt làm mặc định hoặc hệ thống chưa có tài khoản mặc định nào
+        $hasAnyDefault = BankAccount::where('is_default', true)->exists();
+        if ($isDefault || !$hasAnyDefault) {
+            BankAccount::query()->update(['is_default' => false]);
+            $isDefault = true;
+        }
+
+        $account = BankAccount::create([
+            'bank_name' => trim($request->input('bank_name')),
+            'bank_code' => strtoupper(trim($request->input('bank_code'))),
+            'bin' => trim($request->input('bin')),
+            'account_number' => trim($request->input('account_number')),
+            'account_name' => strtoupper(trim($request->input('account_name'))),
+            'branch' => $request->input('branch'),
+            'is_default' => $isDefault,
+            'is_active' => filter_var($request->input('is_active', true), FILTER_VALIDATE_BOOLEAN),
+            'qr_template' => $request->input('qr_template', 'compact2'),
+            'notes' => $request->input('notes'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã thêm tài khoản ngân hàng thành công!',
+            'bank_account' => $account
+        ]);
+    }
+
+    /**
+     * Cập nhật thông tin tài khoản ngân hàng
+     */
+    public function updateBankAccount(Request $request, $id)
+    {
+        $account = BankAccount::findOrFail($id);
+
+        $request->validate([
+            'bank_name' => 'required|string|max:191',
+            'bank_code' => 'required|string|max:50',
+            'bin' => 'required|string|max:20',
+            'account_number' => 'required|string|max:50',
+            'account_name' => 'required|string|max:191',
+        ]);
+
+        $isDefault = filter_var($request->input('is_default', $account->is_default), FILTER_VALIDATE_BOOLEAN);
+
+        if ($isDefault && !$account->is_default) {
+            BankAccount::where('id', '!=', $id)->update(['is_default' => false]);
+        }
+
+        $account->update([
+            'bank_name' => trim($request->input('bank_name')),
+            'bank_code' => strtoupper(trim($request->input('bank_code'))),
+            'bin' => trim($request->input('bin')),
+            'account_number' => trim($request->input('account_number')),
+            'account_name' => strtoupper(trim($request->input('account_name'))),
+            'branch' => $request->input('branch'),
+            'is_default' => $isDefault,
+            'is_active' => filter_var($request->input('is_active', $account->is_active), FILTER_VALIDATE_BOOLEAN),
+            'qr_template' => $request->input('qr_template', $account->qr_template ?: 'compact2'),
+            'notes' => $request->input('notes'),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Đã cập nhật thông tin tài khoản ngân hàng!',
+            'bank_account' => $account
+        ]);
+    }
+
+    /**
+     * Đặt tài khoản làm mặc định nhận tiền VietQR
+     */
+    public function setDefaultBankAccount($id)
+    {
+        $account = BankAccount::findOrFail($id);
+
+        BankAccount::query()->update(['is_default' => false]);
+        $account->update(['is_default' => true, 'is_active' => true]);
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã đặt tài khoản {$account->bank_code} - {$account->account_number} làm mặc định nhận thanh toán QR!",
+            'bank_account' => $account
+        ]);
+    }
+
+    /**
+     * Xóa tài khoản ngân hàng
+     */
+    public function deleteBankAccount($id)
+    {
+        $account = BankAccount::findOrFail($id);
+        $wasDefault = $account->is_default;
+        $name = "{$account->bank_code} - {$account->account_number}";
+
+        $account->delete();
+
+        if ($wasDefault) {
+            $fallback = BankAccount::where('is_active', true)->first();
+            if ($fallback) {
+                $fallback->update(['is_default' => true]);
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Đã xóa tài khoản ngân hàng {$name} thành công!"
         ]);
     }
 }

@@ -39,13 +39,13 @@ export function TableGrid({
     <div style={{
       flex: 1,
       overflowY: 'auto',
-      padding: '16px 20px',
+      padding: '10px 12px 90px 12px',
       backgroundColor: '#f8fafc'
     }}>
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))',
-        gap: '14px',
+        gap: '10px',
         alignItems: 'start'
       }}>
         {filteredTables.map((table) => (

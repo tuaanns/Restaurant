@@ -46,6 +46,8 @@ frontend/dist/
 frontend/dist-ssr/
 frontend/*.local
 frontend/.oxlint_cache/
+*.apk
+frontend/public/*.apk
 
 # Mobile App (Flutter)
 mobile_app/.dart_tool/

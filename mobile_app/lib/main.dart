@@ -2,7 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'models/models.dart';
 import 'services/api_service.dart';
+import 'services/i18n_service.dart';
 import 'screens/order_detail_sheet.dart';
+import 'screens/login_screen.dart';
+import 'screens/menu_screen.dart';
+import 'screens/kitchen_screen.dart';
+import 'screens/orders_list_screen.dart';
+import 'screens/profile_screen.dart';
+import 'services/print_service.dart';
+import 'widgets/kitchen_ticket_dialog.dart';
 
 void main() {
   runApp(const AuraPosMobileApp());
@@ -13,35 +21,100 @@ class AuraPosMobileApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Aura Restaurant POS',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Roboto',
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF009688),
-          primary: const Color(0xFF009688),
-          surface: const Color(0xFFF8FAFC),
-        ),
-        scaffoldBackgroundColor: const Color(0xFFF1F5F9),
-        useMaterial3: true,
-      ),
-      home: const PosMainScreen(),
+    return ValueListenableBuilder<String>(
+      valueListenable: I18n.currentLocale,
+      builder: (context, locale, _) {
+        return MaterialApp(
+          title: 'QUÁN TRÀ - POS',
+          debugShowCheckedModeBanner: false,
+          theme: ThemeData(
+            fontFamily: 'Roboto',
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFF009688),
+              primary: const Color(0xFF009688),
+              surface: const Color(0xFFF8FAFC),
+            ),
+            scaffoldBackgroundColor: const Color(0xFFF1F5F9),
+            useMaterial3: true,
+          ),
+          home: const PosRootController(),
+        );
+      },
+    );
+  }
+}
+
+class PosRootController extends StatefulWidget {
+  const PosRootController({super.key});
+
+  @override
+  State<PosRootController> createState() => _PosRootControllerState();
+}
+
+class _PosRootControllerState extends State<PosRootController> {
+  bool _isLoggedIn = true; // Mặc định đã có phiên đăng nhập sẵn (có thể bấm Đăng xuất ở tab Cá nhân)
+
+  @override
+  void initState() {
+    super.initState();
+    I18n.currentLocale.addListener(_onLocaleChanged);
+    // Default initial user
+    ApiService.currentUser ??= User(
+      id: 2,
+      name: 'Thu Hằng',
+      username: 'thuhang',
+      role: 'cashier',
+      shift: 'Ca sáng (07:00 - 15:00)',
+      phone: '0912.345.678',
+      email: 'thuhang@aura.vn',
+    );
+  }
+
+  @override
+  void dispose() {
+    I18n.currentLocale.removeListener(_onLocaleChanged);
+    super.dispose();
+  }
+
+  void _onLocaleChanged() {
+    if (mounted) setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (!_isLoggedIn) {
+      return LoginScreen(
+        onLoginSuccess: (user) {
+          setState(() {
+            _isLoggedIn = true;
+          });
+        },
+      );
+    }
+
+    return PosMainScreen(
+      onLogout: () {
+        setState(() {
+          _isLoggedIn = false;
+        });
+      },
     );
   }
 }
 
 class PosMainScreen extends StatefulWidget {
-  const PosMainScreen({super.key});
+  final VoidCallback onLogout;
+
+  const PosMainScreen({super.key, required this.onLogout});
 
   @override
   State<PosMainScreen> createState() => _PosMainScreenState();
 }
 
 class _PosMainScreenState extends State<PosMainScreen> {
-  int _selectedNavIndex = 0;
+  int _selectedNavIndex = 0; // 0: Bàn, 1: Thực đơn, 2: Bếp & Bar, 3: Đơn hàng, 4: Cá nhân
   String _selectedArea = 'all';
-  int _selectedTableId = 3; // BÀN 03 mặc định được chọn
+  int _selectedTableId = 1; // BÀN 01 mặc định
   bool _isLoading = false;
 
   List<DiningTable> _tables = [];
@@ -50,16 +123,29 @@ class _PosMainScreenState extends State<PosMainScreen> {
   @override
   void initState() {
     super.initState();
+    I18n.currentLocale.addListener(_onLocaleChanged);
     _loadTables();
+  }
+
+  @override
+  void dispose() {
+    I18n.currentLocale.removeListener(_onLocaleChanged);
+    super.dispose();
+  }
+
+  void _onLocaleChanged() {
+    if (mounted) setState(() {});
   }
 
   Future<void> _loadTables() async {
     setState(() => _isLoading = true);
     final data = await ApiService.fetchTables();
-    setState(() {
-      _tables = data;
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _tables = data;
+        _isLoading = false;
+      });
+    }
   }
 
   void _openOrderDetail(DiningTable table) {
@@ -69,7 +155,78 @@ class _PosMainScreenState extends State<PosMainScreen> {
       backgroundColor: Colors.transparent,
       builder: (ctx) => OrderDetailSheet(
         table: table,
+        allTables: _tables,
         onOrderUpdated: _loadTables,
+        onOpenMenu: () {
+          setState(() {
+            _selectedTableId = table.id;
+            _selectedNavIndex = 1; // Chuyển sang tab Thực đơn
+          });
+        },
+      ),
+    );
+  }
+
+  Future<void> _handleDirectSendKitchen(DiningTable table) async {
+    final items = ApiService.getTableItems(table.id);
+    if (items.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Bàn chưa có món nào để báo bếp!'),
+          backgroundColor: Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final pendingItems = items.where((it) => it.status == 'new_pending').toList();
+    final itemsToPrint = pendingItems.isNotEmpty ? pendingItems : items;
+
+    // 1. Gửi lệnh báo bếp lên hệ thống & KDS
+    await ApiService.sendToKitchen(table.id, orderId: table.orderId, tableName: table.name);
+
+    // 2. Kích hoạt in lệnh báo bếp trực tiếp K80 ngầm, không mở popup hỏi khổ in
+    try {
+      await PrintService.autoPrintKitchenTicket(
+        table: table,
+        items: itemsToPrint,
+      );
+    } catch (_) {}
+
+    _loadTables();
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: [
+              const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  'Đã tự động gửi & in báo bếp thành công cho ${I18n.formatTableName(table.name)} (${itemsToPrint.length} món)!',
+                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                ),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF009688),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+    }
+  }
+
+  void _openKitchenTicket(DiningTable table) {
+    final items = ApiService.getTableItems(table.id);
+    showDialog(
+      context: context,
+      builder: (ctx) => KitchenTicketDialog(
+        table: table,
+        items: items,
+        onSentSuccess: _loadTables,
       ),
     );
   }
@@ -78,7 +235,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
   Widget build(BuildContext context) {
     final selectedTable = _tables.firstWhere(
       (t) => t.id == _selectedTableId,
-      orElse: () => ApiService.getMockTables()[2],
+      orElse: () => _tables.isNotEmpty ? _tables.first : ApiService.getMockTables()[0],
     );
 
     final filteredTables = _tables.where((t) {
@@ -88,70 +245,127 @@ class _PosMainScreenState extends State<PosMainScreen> {
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Column(
-              children: [
-                // 1. Top App Header Bar (Dark Navy #0B1320)
-                _buildTopAppBar(),
+      body: IndexedStack(
+        index: _selectedNavIndex,
+        children: [
+          // 0. Tab Phòng bàn (Sơ đồ bàn)
+          _buildRoomTab(selectedTable, filteredTables),
 
-                // 2. View Switcher (Sơ đồ bàn / Thực đơn món)
-                _buildViewSwitcher(),
+          // 1. Tab Thực đơn món
+          MenuScreen(
+            tables: _tables,
+            selectedTableId: _selectedTableId,
+            onTableSelected: (tableId) {
+              setState(() => _selectedTableId = tableId);
+            },
+            onOrderUpdated: _loadTables,
+            onOpenOrderDetail: () => _openOrderDetail(selectedTable),
+          ),
 
-                // 3. Floor / Area Filter Chips
-                _buildAreaFilterChips(),
+          // 2. Tab Bếp & Bar (KDS)
+          KitchenScreen(
+            tables: _tables,
+            onRefresh: _loadTables,
+          ),
 
-                // 4. Status Stats Bar
-                _buildStatusBar(),
+          // 3. Tab Đơn hàng
+          OrdersListScreen(
+            tables: _tables,
+            onSelectTable: (table) {
+              setState(() {
+                _selectedTableId = table.id;
+              });
+              _openOrderDetail(table);
+            },
+          ),
 
-                // 5. 2-Column Tables Grid
-                Expanded(
-                  child: _isLoading
-                      ? const Center(
-                          child: CircularProgressIndicator(color: Color(0xFF009688)),
-                        )
-                      : RefreshIndicator(
-                          onRefresh: _loadTables,
-                          color: const Color(0xFF009688),
-                          child: GridView.builder(
-                            padding: const EdgeInsets.fromLTRB(14, 8, 14, 140),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 12,
-                              mainAxisSpacing: 12,
-                              childAspectRatio: 1.08,
-                            ),
-                            itemCount: filteredTables.length,
-                            itemBuilder: (context, index) {
-                              final table = filteredTables[index];
-                              return _buildTableCard(table);
-                            },
+          // 4. Tab Cá nhân
+          ProfileScreen(
+            onLogout: widget.onLogout,
+          ),
+        ],
+      ),
+
+      // Bottom Navigation Bar (5 tabs)
+      bottomNavigationBar: _buildBottomNavigationBar(),
+    );
+  }
+
+  // --- TAB 0: SƠ ĐỒ PHÒNG BÀN ---
+  Widget _buildRoomTab(DiningTable selectedTable, List<DiningTable> filteredTables) {
+    final tableItems = ApiService.getTableItems(selectedTable.id);
+    final tableTotal = tableItems.isNotEmpty
+        ? tableItems.fold(0, (sum, it) => sum + it.subtotal)
+        : selectedTable.totalAmount;
+    final tableCount = tableItems.isNotEmpty
+        ? tableItems.fold(0, (sum, it) => sum + it.quantity)
+        : selectedTable.itemCount;
+
+    return SafeArea(
+      child: Stack(
+        children: [
+          Column(
+            children: [
+              // 1. Top App Header Bar
+              _buildTopAppBar(),
+
+              // 2. View Switcher (Sơ đồ bàn F1 / Thực đơn món F2)
+              _buildViewSwitcher(),
+
+              // 3. Floor / Area Filter Chips
+              _buildAreaFilterChips(),
+
+              // 4. Status Stats Bar
+              _buildStatusBar(),
+
+              // 5. 2-Column Tables Grid
+              Expanded(
+                child: _isLoading
+                    ? const Center(
+                        child: CircularProgressIndicator(color: Color(0xFF009688)),
+                      )
+                    : RefreshIndicator(
+                        onRefresh: _loadTables,
+                        color: const Color(0xFF009688),
+                        child: GridView.builder(
+                          padding: const EdgeInsets.fromLTRB(14, 8, 14, 140),
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            crossAxisSpacing: 12,
+                            mainAxisSpacing: 12,
+                            childAspectRatio: 1.08,
                           ),
+                          itemCount: filteredTables.length,
+                          itemBuilder: (context, index) {
+                            final table = filteredTables[index];
+                            return _buildTableCard(table);
+                          },
                         ),
-                ),
-              ],
-            ),
+                      ),
+              ),
+            ],
+          ),
 
-            // 6. Floating Sticky Order Bar (Bottom Summary)
+          // 6. Floating Sticky Order Bar (Bottom Summary) - Chỉ hiển thị khi bàn có món hoặc đang phục vụ
+          if (tableCount > 0 || selectedTable.status != 'empty')
             Positioned(
               left: 12,
               right: 12,
               bottom: 8,
-              child: _buildFloatingOrderBar(selectedTable),
+              child: _buildFloatingOrderBar(selectedTable, tableTotal, tableCount),
             ),
-          ],
-        ),
+        ],
       ),
-
-      // 7. Bottom Navigation Bar (5 tabs)
-      bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
 
   // --- TOP APP BAR ---
   Widget _buildTopAppBar() {
+    final user = ApiService.currentUser;
+    final initials = user != null
+        ? user.name.split(' ').last.substring(0, 1).toUpperCase()
+        : 'TH';
+
     return Container(
       color: const Color(0xFF0B1320),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -160,16 +374,17 @@ class _PosMainScreenState extends State<PosMainScreen> {
         children: [
           Row(
             children: [
-              // Logo icon
               Container(
                 width: 38,
                 height: 38,
                 decoration: BoxDecoration(
-                  color: const Color(0xFF004D40),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFF00796B), width: 1.2),
+                  border: Border.all(color: const Color(0xFFD4AF37), width: 1.2),
                 ),
-                child: const Icon(Icons.menu_book, color: Color(0xFF00C292), size: 20),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(7),
+                  child: Image.asset('assets/images/logo.png', fit: BoxFit.cover),
+                ),
               ),
               const SizedBox(width: 10),
               Column(
@@ -177,9 +392,9 @@ class _PosMainScreenState extends State<PosMainScreen> {
                 children: [
                   Row(
                     children: [
-                      const Text(
-                        'AURA RESTAURANT',
-                        style: TextStyle(
+                      Text(
+                        I18n.t('appName'),
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w800,
                           fontSize: 14.5,
@@ -197,9 +412,9 @@ class _PosMainScreenState extends State<PosMainScreen> {
                       ),
                     ],
                   ),
-                  const Text(
-                    'Chi nhánh 01 - Tràng Tiền',
-                    style: TextStyle(
+                  Text(
+                    I18n.t('branchName'),
+                    style: const TextStyle(
                       color: Color(0xFF00B488),
                       fontSize: 11.5,
                       fontWeight: FontWeight.w500,
@@ -213,40 +428,31 @@ class _PosMainScreenState extends State<PosMainScreen> {
           // Action buttons & Avatar
           Row(
             children: [
-              _circleButton(Icons.search, () {}),
+              _circleButton(Icons.refresh, () => _loadTables()),
               const SizedBox(width: 8),
-              Stack(
-                children: [
-                  _circleButton(Icons.notifications_none, () {}),
-                  Positioned(
-                    top: 6,
-                    right: 6,
-                    child: Container(
-                      width: 6,
-                      height: 6,
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF10B981),
-                        shape: BoxShape.circle,
-                      ),
-                    ),
+              _circleButton(Icons.notifications_none, () {
+                setState(() => _selectedNavIndex = 2); // Đến Bếp & Bar
+              }),
+              const SizedBox(width: 8),
+              GestureDetector(
+                onTap: () {
+                  setState(() => _selectedNavIndex = 4); // Đến Cá nhân
+                },
+                child: Container(
+                  width: 32,
+                  height: 32,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF00897B),
+                    shape: BoxShape.circle,
                   ),
-                ],
-              ),
-              const SizedBox(width: 8),
-              Container(
-                width: 32,
-                height: 32,
-                decoration: const BoxDecoration(
-                  color: Color(0xFF00897B),
-                  shape: BoxShape.circle,
-                ),
-                alignment: Alignment.center,
-                child: const Text(
-                  'TH',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w700,
-                    fontSize: 12,
+                  alignment: Alignment.center,
+                  child: Text(
+                    initials,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                      fontSize: 12,
+                    ),
                   ),
                 ),
               ),
@@ -287,50 +493,64 @@ class _PosMainScreenState extends State<PosMainScreen> {
         child: Row(
           children: [
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF009688),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.grid_view, color: Colors.white, size: 15),
-                    SizedBox(width: 6),
-                    Text(
-                      'Sơ đồ bàn (F1)',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12.5,
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedNavIndex = 0),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  decoration: BoxDecoration(
+                    color: _selectedNavIndex == 0 ? const Color(0xFF009688) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.grid_view,
+                        color: _selectedNavIndex == 0 ? Colors.white : const Color(0xFF94A3B8),
+                        size: 15,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        I18n.t('f1TablePlan'),
+                        style: TextStyle(
+                          color: _selectedNavIndex == 0 ? Colors.white : const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 7),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.menu_book_outlined,
-                        color: Color(0xFF94A3B8), size: 15),
-                    SizedBox(width: 6),
-                    Text(
-                      'Thực đơn món (F2)',
-                      style: TextStyle(
-                        color: Color(0xFF94A3B8),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 12.5,
+              child: GestureDetector(
+                onTap: () => setState(() => _selectedNavIndex = 1),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  decoration: BoxDecoration(
+                    color: _selectedNavIndex == 1 ? const Color(0xFF009688) : Colors.transparent,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.menu_book_outlined,
+                        color: _selectedNavIndex == 1 ? Colors.white : const Color(0xFF94A3B8),
+                        size: 15,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 6),
+                      Text(
+                        I18n.t('f2Menu'),
+                        style: TextStyle(
+                          color: _selectedNavIndex == 1 ? Colors.white : const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12.5,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
@@ -343,11 +563,11 @@ class _PosMainScreenState extends State<PosMainScreen> {
   // --- AREA FILTER HORIZONTAL CHIPS ---
   Widget _buildAreaFilterChips() {
     final areas = [
-      {'code': 'all', 'label': 'Tất cả (24)'},
-      {'code': 'floor_1', 'label': 'Tầng 1 (8)'},
-      {'code': 'floor_2', 'label': 'Tầng 2 (8)'},
-      {'code': 'vip', 'label': 'Phòng VIP (4)'},
-      {'code': 'garden', 'label': 'Sân vườn (4)'},
+      {'code': 'all', 'label': I18n.t('allAreas')},
+      {'code': 'floor_1', 'label': I18n.t('floor1')},
+      {'code': 'floor_2', 'label': I18n.t('floor2')},
+      {'code': 'vip', 'label': I18n.t('vipRoom')},
+      {'code': 'garden', 'label': I18n.t('garden')},
     ];
 
     return Container(
@@ -389,6 +609,10 @@ class _PosMainScreenState extends State<PosMainScreen> {
 
   // --- STATS BAR ---
   Widget _buildStatusBar() {
+    final emptyCount = _tables.where((t) => t.status == 'empty').length;
+    final occupiedCount = _tables.where((t) => t.status == 'occupied').length;
+    final billingCount = _tables.where((t) => t.status == 'billing').length;
+
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
@@ -397,23 +621,23 @@ class _PosMainScreenState extends State<PosMainScreen> {
         children: [
           Row(
             children: [
-              _statusIndicator(const Color(0xFF94A3B8), 'Trống: 16'),
+              _statusIndicator(const Color(0xFF94A3B8), '${I18n.t('statusEmpty')}: $emptyCount'),
               const SizedBox(width: 10),
-              _statusIndicator(const Color(0xFF009688), 'Có khách: 6'),
+              _statusIndicator(const Color(0xFF009688), '${I18n.t('statusOccupied')}: $occupiedCount'),
               const SizedBox(width: 10),
-              _statusIndicator(const Color(0xFFF59E0B), 'Chờ thanh toán: 2'),
+              _statusIndicator(const Color(0xFFF59E0B), '${I18n.t('statusBilling')}: $billingCount'),
             ],
           ),
           GestureDetector(
             onTap: _loadTables,
-            child: const Row(
+            child: Row(
               children: [
                 Text(
-                  'Làm mới',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF64748B)),
+                  I18n.t('refresh'),
+                  style: const TextStyle(fontSize: 11, color: Color(0xFF64748B)),
                 ),
-                SizedBox(width: 2),
-                Icon(Icons.refresh, size: 13, color: Color(0xFF64748B)),
+                const SizedBox(width: 2),
+                const Icon(Icons.refresh, size: 13, color: Color(0xFF64748B)),
               ],
             ),
           ),
@@ -448,6 +672,14 @@ class _PosMainScreenState extends State<PosMainScreen> {
     final isTakeaway = table.isTakeaway;
     final isVip = table.isVip;
 
+    final tableItems = ApiService.getTableItems(table.id);
+    final displayAmount = tableItems.isNotEmpty
+        ? tableItems.fold(0, (sum, it) => sum + it.subtotal)
+        : table.totalAmount;
+    final displayCount = tableItems.isNotEmpty
+        ? tableItems.fold(0, (sum, it) => sum + it.quantity)
+        : table.itemCount;
+
     // Card Colors
     Color cardBg = Colors.white;
     Color borderColor = const Color(0xFFE2E8F0);
@@ -471,9 +703,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
     return GestureDetector(
       onTap: () {
         setState(() => _selectedTableId = table.id);
-        if (!isEmpty) {
-          _openOrderDetail(table);
-        }
+        _openOrderDetail(table);
       },
       child: Stack(
         clipBehavior: Clip.none,
@@ -508,12 +738,11 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     Row(
                       children: [
                         if (isTakeaway) ...[
-                          const Icon(Icons.shopping_bag_outlined,
-                              size: 14, color: Color(0xFF38BDF8)),
+                          const Icon(Icons.shopping_bag_outlined, size: 14, color: Color(0xFF38BDF8)),
                           const SizedBox(width: 4),
-                          const Text(
-                            'MANG VỀ',
-                            style: TextStyle(
+                          Text(
+                            I18n.formatTableName(table.name),
+                            style: const TextStyle(
                               color: Color(0xFF38BDF8),
                               fontWeight: FontWeight.w800,
                               fontSize: 13,
@@ -523,7 +752,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                           const Icon(Icons.star, size: 13, color: Color(0xFFF59E0B)),
                           const SizedBox(width: 4),
                           Text(
-                            table.name,
+                            I18n.formatTableName(table.name),
                             style: TextStyle(
                               color: textColor,
                               fontWeight: FontWeight.w800,
@@ -532,7 +761,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                           ),
                         ] else ...[
                           Text(
-                            table.name,
+                            I18n.formatTableName(table.name),
                             style: TextStyle(
                               color: textColor,
                               fontWeight: FontWeight.w800,
@@ -543,158 +772,141 @@ class _PosMainScreenState extends State<PosMainScreen> {
                       ],
                     ),
 
-                    // Badge
                     if (table.duration != null && !isTakeaway)
                       Container(
                         padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
                         decoration: BoxDecoration(
                           color: isBilling
-                              ? const Color(0xFFFEF3C7)
-                              : const Color(0xFFE6F7F5),
+                              ? const Color(0xFFFEF08A)
+                              : const Color(0xFFDCFCE7),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           table.duration!,
                           style: TextStyle(
                             fontSize: 10,
-                            fontWeight: FontWeight.bold,
+                            fontWeight: FontWeight.w700,
                             color: isBilling
-                                ? const Color(0xFFB45309)
-                                : const Color(0xFF00796B),
-                          ),
-                        ),
-                      )
-                    else if (isTakeaway)
-                      const Text(
-                        'Đơn #108',
-                        style: TextStyle(fontSize: 10, color: Color(0xFF93C5FD)),
-                      )
-                    else if (isBilling)
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFEF3C7),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                        child: const Text(
-                          'Chờ tính',
-                          style: TextStyle(
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            color: Color(0xFFB45309),
+                                ? const Color(0xFF854D0E)
+                                : const Color(0xFF15803D),
                           ),
                         ),
                       )
                     else if (isEmpty)
                       Text(
-                        '${table.capacity} chỗ',
-                        style: TextStyle(fontSize: 10, color: subtextColor),
+                        '${table.capacity} ${I18n.t('tableSeats')}',
+                        style: TextStyle(fontSize: 10.5, color: subtextColor),
                       ),
                   ],
                 ),
 
-                // Middle: Selected label or Guests / Notes
+                // Center Content: Status & Note
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    if (isSelected)
-                      const Text(
-                        '(ĐANG CHỌN)',
-                        style: TextStyle(
+                    if (isSelected && (isOccupied || isBilling)) ...[
+                      Text(
+                        I18n.t('tableSelected'),
+                        style: const TextStyle(
                           color: Color(0xFF009688),
                           fontSize: 10.5,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
-                    if (!isEmpty && !isTakeaway)
-                      Text(
-                        '👥 ${table.guestCount} khách${table.itemCount > 0 ? ' • ${table.itemCount} món' : ''}',
-                        style: TextStyle(fontSize: 11, color: subtextColor),
-                      ),
-                    if (table.notes != null)
-                      Text(
-                        table.notes!,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 11,
-                          color: isBilling
-                              ? const Color(0xFFA16207)
-                              : subtextColor,
-                        ),
-                      ),
+                      const SizedBox(height: 2),
+                    ],
                     if (isEmpty)
                       Text(
-                        'Bàn trống',
-                        style: TextStyle(fontSize: 11, color: subtextColor),
+                        I18n.t('tableEmpty'),
+                        style: TextStyle(
+                          color: subtextColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      )
+                    else ...[
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.people_outline,
+                            size: 13,
+                            color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF009688),
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            '${table.guestCount > 0 ? table.guestCount : 2} ${I18n.t('tableGuests')} • $displayCount ${I18n.t('tableItems')}',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: subtextColor,
+                            ),
+                          ),
+                        ],
                       ),
+                      if (table.notes != null)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 2),
+                          child: Text(
+                            table.notes!,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 10.5, color: subtextColor),
+                          ),
+                        ),
+                    ],
                   ],
                 ),
 
-                // Bottom row: Amount & Dot indicator
+                // Bottom Line: Total Price & Detail Link
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    if (!isEmpty)
-                      Text(
-                        currencyFormat.format(table.totalAmount),
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w800,
-                          color: textColor,
-                        ),
-                      )
-                    else
+                    if (isEmpty)
                       Text(
                         '--',
-                        style: TextStyle(fontSize: 13, color: subtextColor),
-                      ),
-
-                    // Dot indicator
-                    if (isSelected)
-                      GestureDetector(
-                        onTap: () => _openOrderDetail(table),
-                        child: const Text(
-                          'CHI TIẾT →',
-                          style: TextStyle(
-                            color: Color(0xFF009688),
-                            fontWeight: FontWeight.w700,
-                            fontSize: 10.5,
-                          ),
+                        style: TextStyle(
+                          color: subtextColor,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 12,
                         ),
                       )
                     else
-                      Container(
-                        width: 7,
-                        height: 7,
-                        decoration: BoxDecoration(
-                          color: isOccupied
-                              ? const Color(0xFF009688)
-                              : isBilling
-                                  ? const Color(0xFFF59E0B)
-                                  : const Color(0xFFCBD5E1),
-                          shape: BoxShape.circle,
+                      Text(
+                        currencyFormat.format(displayAmount),
+                        style: TextStyle(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 13,
+                          color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF0F172A),
                         ),
                       ),
+                    Text(
+                      I18n.t('tableDetails'),
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w700,
+                        color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF009688),
+                      ),
+                    ),
                   ],
                 ),
               ],
             ),
           ),
 
-          // Green checkmark badge on top right for selected card
+          // Selected Checkmark Badge
           if (isSelected)
             Positioned(
               top: -6,
               right: -6,
               child: Container(
-                width: 18,
-                height: 18,
+                width: 20,
+                height: 20,
                 decoration: const BoxDecoration(
                   color: Color(0xFF009688),
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.check, color: Colors.white, size: 12),
+                child: const Icon(Icons.check, color: Colors.white, size: 13),
               ),
             ),
         ],
@@ -702,20 +914,20 @@ class _PosMainScreenState extends State<PosMainScreen> {
     );
   }
 
-  // --- FLOATING STICKY ORDER BAR ---
-  Widget _buildFloatingOrderBar(DiningTable table) {
+  // --- FLOATING ORDER BAR ---
+  Widget _buildFloatingOrderBar(DiningTable table, int totalAmount, int itemCount) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
       decoration: BoxDecoration(
-        color: const Color(0xFF0F1D30),
+        color: const Color(0xFF0B1422),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFF1E3557), width: 1.2),
+        border: Border.all(color: const Color(0xFF1E2D4A), width: 1.2),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.35),
-            blurRadius: 16,
+            blurRadius: 14,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -737,7 +949,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    '${table.name} • ${table.itemCount > 0 ? table.itemCount : 4} món',
+                    '${I18n.formatTableName(table.name)} • $itemCount ${I18n.t('tableItems')}',
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
@@ -748,12 +960,12 @@ class _PosMainScreenState extends State<PosMainScreen> {
               ),
               Row(
                 children: [
-                  const Text(
-                    'TỔNG THANH TOÁN: ',
-                    style: TextStyle(color: Color(0xFF94A3B8), fontSize: 10.5),
+                  Text(
+                    I18n.t('totalPayment'),
+                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10.5),
                   ),
                   Text(
-                    currencyFormat.format(table.totalAmount > 0 ? table.totalAmount : 461700),
+                    currencyFormat.format(totalAmount),
                     style: const TextStyle(
                       color: Color(0xFF38BDF8),
                       fontWeight: FontWeight.w900,
@@ -765,11 +977,11 @@ class _PosMainScreenState extends State<PosMainScreen> {
             ],
           ),
           const SizedBox(height: 2),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'Anh Hoàng (0912.888.xxx)',
-              style: TextStyle(color: Color(0xFF64748B), fontSize: 10.5),
+              table.notes != null && table.notes!.isNotEmpty ? table.notes! : '${I18n.t('servingAt')} ${I18n.formatTableName(table.name)}',
+              style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 10.5),
             ),
           ),
           const SizedBox(height: 8),
@@ -780,7 +992,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
               Expanded(
                 child: OutlinedButton.icon(
                   icon: const Icon(Icons.notifications_none, size: 14),
-                  label: const Text('Báo Bếp'),
+                  label: Text(I18n.t('btnKitchen')),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: Colors.white,
                     side: const BorderSide(color: Color(0xFF243B5C)),
@@ -788,14 +1000,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     backgroundColor: const Color(0xFF172942),
                     textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
                   ),
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('🔔 Đã gửi thông báo cho quầy bếp!'),
-                        backgroundColor: Color(0xFF009688),
-                      ),
-                    );
-                  },
+                  onPressed: () => _handleDirectSendKitchen(table),
                 ),
               ),
               const SizedBox(width: 8),
@@ -809,17 +1014,17 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () => _openOrderDetail(table),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.receipt_long, size: 14),
-                      SizedBox(width: 6),
+                      const Icon(Icons.receipt_long, size: 14),
+                      const SizedBox(width: 6),
                       Text(
-                        'Xem Đơn & Tính Tiền',
-                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
+                        I18n.t('btnCheckout'),
+                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold),
                       ),
-                      SizedBox(width: 4),
-                      Icon(Icons.chevron_right, size: 16),
+                      const SizedBox(width: 4),
+                      const Icon(Icons.chevron_right, size: 16),
                     ],
                   ),
                 ),
@@ -840,24 +1045,29 @@ class _PosMainScreenState extends State<PosMainScreen> {
       ),
       child: BottomNavigationBar(
         currentIndex: _selectedNavIndex,
-        onTap: (index) => setState(() => _selectedNavIndex = index),
+        onTap: (index) {
+          setState(() => _selectedNavIndex = index);
+          if (index == 2) {
+            _loadTables();
+          }
+        },
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF009688),
         unselectedItemColor: const Color(0xFF94A3B8),
         selectedFontSize: 10.5,
         unselectedFontSize: 10.5,
         type: BottomNavigationBarType.fixed,
-        items: const [
+        items: [
           BottomNavigationBarItem(
-            icon: Icon(Icons.grid_view),
-            label: 'Phòng bàn',
+            icon: const Icon(Icons.grid_view),
+            label: I18n.t('navTables'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.menu_book),
-            label: 'Thực đơn',
+            icon: const Icon(Icons.menu_book),
+            label: I18n.t('navMenu'),
           ),
           BottomNavigationBarItem(
-            icon: Stack(
+            icon: const Stack(
               clipBehavior: Clip.none,
               children: [
                 Icon(Icons.local_fire_department),
@@ -871,15 +1081,15 @@ class _PosMainScreenState extends State<PosMainScreen> {
                 )
               ],
             ),
-            label: 'Bếp & Bar',
+            label: I18n.t('navKitchen'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.receipt_outlined),
-            label: 'Đơn hàng',
+            icon: const Icon(Icons.receipt_outlined),
+            label: I18n.t('navOrders'),
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            label: 'Cá nhân',
+            icon: const Icon(Icons.person_outline),
+            label: I18n.t('navProfile'),
           ),
         ],
       ),

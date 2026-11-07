@@ -693,6 +693,50 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     setLoading(false);
   };
 
+  const [lastSyncTime, setLastSyncTime] = useState(new Date());
+
+  // ── Real-time live polling & sync for Overview Dashboard ──
+  const refreshLiveStats = async () => {
+    try {
+      const r = await api.getAdminStats();
+      if (r?.stats) {
+        setStats(r.stats);
+        setLastSyncTime(new Date());
+      }
+    } catch (e) {}
+
+    try {
+      const tRes = await api.getAdminTables();
+      if (tRes?.tables && Array.isArray(tRes.tables)) {
+        setTables(tRes.tables);
+      }
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    // Tự động polling định kỳ mỗi 3 giây khi đang ở màn hình Tổng quan
+    const timer = setInterval(() => {
+      if (activeTab === 'overview' && document.visibilityState === 'visible') {
+        refreshLiveStats();
+      }
+    }, 3000);
+
+    const handleSync = () => {
+      refreshLiveStats();
+    };
+
+    window.addEventListener('aura_pos_data_changed', handleSync);
+    window.addEventListener('storage', handleSync);
+    window.addEventListener('focus', handleSync);
+
+    return () => {
+      clearInterval(timer);
+      window.removeEventListener('aura_pos_data_changed', handleSync);
+      window.removeEventListener('storage', handleSync);
+      window.removeEventListener('focus', handleSync);
+    };
+  }, [activeTab]);
+
   useEffect(() => { loadAdminData(); }, []);
 
   // ── Product helpers ──
@@ -1824,6 +1868,8 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
             menuData={menuData}
             formatMoney={formatMoney}
             formatDishName={formatDishName}
+            lastSyncTime={lastSyncTime}
+            onManualRefresh={refreshLiveStats}
           />
         )}
 

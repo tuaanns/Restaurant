@@ -65,6 +65,50 @@ class AdminController extends Controller
         $billingTables = DiningTable::where('status', 'billing')->count();
         $emptyTables = DiningTable::where('status', 'empty')->count();
 
+        // Biểu đồ theo giờ trong ngày hôm nay (08:00 - 22:00)
+        $hourlySlots = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
+        $hourlyData = [];
+        foreach ($hourlySlots as $slot) {
+            $h = (int)substr($slot, 0, 2);
+            $slotOrders = $todayOrders->filter(function ($order) use ($h) {
+                $orderHour = Carbon::parse($order->created_at)->hour;
+                return $orderHour >= $h && $orderHour < ($h + 2);
+            });
+            $hourlyData[] = [
+                'time' => $slot,
+                'revenue' => (float)$slotOrders->sum('total_amount'),
+                'orders' => $slotOrders->count(),
+            ];
+        }
+
+        // Biểu đồ 7 ngày gần nhất
+        $sevenDaysData = [];
+        $dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+        for ($i = 6; $i >= 0; $i--) {
+            $d = Carbon::today()->subDays($i);
+            $dayOrders = Order::whereDate('created_at', $d)->get();
+            $label = $i === 0 ? 'Hôm nay' : ($dayNames[$d->dayOfWeek] . ' ' . $d->format('d/m'));
+            $sevenDaysData[] = [
+                'time' => $label,
+                'revenue' => (float)$dayOrders->sum('total_amount'),
+                'orders' => $dayOrders->count(),
+            ];
+        }
+
+        // Biểu đồ 30 ngày gần nhất (nhóm theo 4 tuần)
+        $thirtyDaysData = [];
+        for ($w = 3; $w >= 0; $w--) {
+            $startWeek = Carbon::today()->subDays($w * 7 + 6)->startOfDay();
+            $endWeek = Carbon::today()->subDays($w * 7)->endOfDay();
+            $weekOrders = Order::whereBetween('created_at', [$startWeek, $endWeek])->get();
+            $label = $w === 0 ? 'Tuần này' : ('Tuần ' . (4 - $w) . ' (' . $startWeek->format('d/m') . ')');
+            $thirtyDaysData[] = [
+                'time' => $label,
+                'revenue' => (float)$weekOrders->sum('total_amount'),
+                'orders' => $weekOrders->count(),
+            ];
+        }
+
         return response()->json([
             'success' => true,
             'stats' => [
@@ -78,6 +122,9 @@ class AdminController extends Controller
                 'top_products' => $topProducts,
                 'payment_breakdown' => $paymentMethods,
                 'cashiers_count' => User::where('role', 'cashier')->count(),
+                'hourly_data' => $hourlyData,
+                'seven_days_data' => $sevenDaysData,
+                'thirty_days_data' => $thirtyDaysData,
             ]
         ]);
     }

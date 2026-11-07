@@ -552,6 +552,10 @@ export function App() {
     try {
       await api.checkout(order.id, paymentData);
       loadData();
+      try {
+        window.dispatchEvent(new CustomEvent('aura_pos_data_changed'));
+        localStorage.setItem('aura_pos_sync_timestamp', String(Date.now()));
+      } catch (e) {}
     } catch (err) {}
 
     setTables(prev => prev.map(t => {

@@ -1,6 +1,7 @@
 import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
-import { TabsList, TabsTrigger, Badge } from './ui';
+import { TabsList, TabsTrigger } from './ui/Tabs.jsx';
+import { Badge } from './ui/Badge.jsx';
 
 export function AreaFilterBar({
   areas = [],

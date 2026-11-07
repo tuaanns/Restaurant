@@ -18,7 +18,7 @@ import { ReportsView } from './ReportsView';
 import { CashBookView } from './CashBookView';
 import { BankAccountsView } from './BankAccountsView';
 import { SettingsView } from './SettingsView';
-import { Card, CardHeader, CardContent, Badge, Button, Input } from '../ui';
+import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
 
 const inputStyle = {
   width: '100%', padding: '8px 10px', borderRadius: '6px',

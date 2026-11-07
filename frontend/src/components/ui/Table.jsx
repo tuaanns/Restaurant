@@ -106,3 +106,4 @@ export function TableCell({ className = '', style = {}, children, align = 'left'
     </td>
   );
 }
+

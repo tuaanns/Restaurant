@@ -18,6 +18,7 @@ import { ReportsView } from './ReportsView';
 import { CashBookView } from './CashBookView';
 import { BankAccountsView } from './BankAccountsView';
 import { SettingsView } from './SettingsView';
+import { Card, CardHeader, CardContent, Badge, Button, Input } from '../ui';
 
 const inputStyle = {
   width: '100%', padding: '8px 10px', borderRadius: '6px',
@@ -1464,14 +1465,16 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 { label: t('admin.tablesOccupied'), value: (stats?.occupied_tables || 6) + ' / 24 ' + t('table.tables'), icon: <Utensils size={18} />, bg: '#fef3c7', color: '#d97706', sub: `${stats?.billing_tables || 2} ${t('table.tables')} ${t('admin.waitingPayment')}`, subColor: '#d97706' },
                 { label: t('admin.staffCount'), value: users.length + ' ' + t('admin.accountsUnit'), icon: <Users size={18} />, bg: '#f3e8ff', color: '#9333ea', sub: t('admin.activeInDb'), subColor: '#64748b' },
               ].map((s, i) => (
-                <div key={i} style={{ backgroundColor: '#fff', padding: '18px 20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700, letterSpacing: '0.3px' }}>{s.label}</span>
-                    <div style={{ padding: '6px', backgroundColor: s.bg, color: s.color, borderRadius: '8px' }}>{s.icon}</div>
-                  </div>
-                  <div style={{ fontSize: '22px', fontWeight: 900, color: '#0f172a', marginTop: '10px' }}>{s.value}</div>
-                  <div style={{ fontSize: '11.5px', color: s.subColor, marginTop: '4px', fontWeight: 600 }}>{s.sub}</div>
-                </div>
+                <Card key={i}>
+                  <CardHeader style={{ padding: '16px 20px 8px 20px', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>{s.label}</span>
+                    <div style={{ padding: '6px', backgroundColor: s.bg, color: s.color, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s.icon}</div>
+                  </CardHeader>
+                  <CardContent style={{ padding: '0 20px 16px 20px' }}>
+                    <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>{s.value}</div>
+                    <div style={{ fontSize: '11.5px', color: s.subColor, marginTop: '4px', fontWeight: 500 }}>{s.sub}</div>
+                  </CardContent>
+                </Card>
               ))}
             </div>
 

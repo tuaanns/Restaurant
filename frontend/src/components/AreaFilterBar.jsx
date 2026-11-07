@@ -1,5 +1,6 @@
 import React from 'react';
 import { useLanguage } from '../i18n/LanguageContext';
+import { TabsList, TabsTrigger, Badge } from './ui';
 
 export function AreaFilterBar({
   areas = [],
@@ -15,72 +16,49 @@ export function AreaFilterBar({
       display: 'flex',
       flexDirection: 'column',
       gap: '8px',
-      padding: '10px 14px',
+      padding: '8px 14px',
       backgroundColor: '#ffffff',
-      borderBottom: '1px solid #e2e8f0'
+      borderBottom: '1px solid var(--border)'
     }}>
-      {/* Area Filter Pills - Cuộn ngang mượt mà trên mobile */}
+      {/* Area Filter Tabs - shadcn Tabs Pill Style */}
       <div className="no-scrollbar" style={{
         display: 'flex',
         alignItems: 'center',
-        gap: '6px',
         overflowX: 'auto',
         whiteSpace: 'nowrap',
         WebkitOverflowScrolling: 'touch',
         paddingBottom: '2px'
       }}>
-        <button
-          onClick={() => {
-            onSelectArea('all');
-            if (onSelectStatusFilter) onSelectStatusFilter('all');
-          }}
-          style={{
-            padding: '6px 12px',
-            borderRadius: '20px',
-            fontSize: '12.5px',
-            fontWeight: 600,
-            whiteSpace: 'nowrap',
-            flexShrink: 0,
-            backgroundColor: selectedArea === 'all' && statusFilter === 'all' ? '#0f172a' : '#f1f5f9',
-            color: selectedArea === 'all' && statusFilter === 'all' ? '#ffffff' : '#475569',
-            border: '1px solid',
-            borderColor: selectedArea === 'all' && statusFilter === 'all' ? '#0f172a' : '#e2e8f0',
-            transition: 'all 0.15s ease'
-          }}
-        >
-          {t('table.allAreas')} ({summary.total})
-        </button>
+        <TabsList style={{ width: 'auto' }}>
+          <TabsTrigger
+            active={selectedArea === 'all' && statusFilter === 'all'}
+            onClick={() => {
+              onSelectArea('all');
+              if (onSelectStatusFilter) onSelectStatusFilter('all');
+            }}
+          >
+            {t('table.allAreas')} ({summary.total})
+          </TabsTrigger>
 
-        {areas.map((area) => {
-          const isActive = selectedArea === area.code && statusFilter === 'all';
-          return (
-            <button
-              key={area.code}
-              onClick={() => {
-                onSelectArea(area.code);
-                if (onSelectStatusFilter) onSelectStatusFilter('all');
-              }}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '20px',
-                fontSize: '12.5px',
-                fontWeight: 600,
-                whiteSpace: 'nowrap',
-                flexShrink: 0,
-                backgroundColor: isActive ? '#0f172a' : '#f1f5f9',
-                color: isActive ? '#ffffff' : '#475569',
-                border: '1px solid',
-                borderColor: isActive ? '#0f172a' : '#e2e8f0',
-                transition: 'all 0.15s ease'
-              }}
-            >
-              {formatAreaName(area)} ({area.tables ? area.tables.length : (area.code === 'floor_1' || area.code === 'floor_2' ? 8 : 4)})
-            </button>
-          );
-        })}
+          {areas.map((area) => {
+            const isActive = selectedArea === area.code && statusFilter === 'all';
+            return (
+              <TabsTrigger
+                key={area.code}
+                active={isActive}
+                onClick={() => {
+                  onSelectArea(area.code);
+                  if (onSelectStatusFilter) onSelectStatusFilter('all');
+                }}
+              >
+                {formatAreaName(area)} ({area.tables ? area.tables.length : (area.code === 'floor_1' || area.code === 'floor_2' ? 8 : 4)})
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
       </div>
 
-      {/* Legend & Quick Status Filters */}
+      {/* Legend & Quick Status Filters (shadcn Badge Style) */}
       <div className="no-scrollbar" style={{
         display: 'flex',
         alignItems: 'center',
@@ -88,62 +66,40 @@ export function AreaFilterBar({
         gap: '8px',
         overflowX: 'auto',
         fontSize: '11.5px',
-        fontWeight: 600,
         paddingTop: '2px',
         borderTop: '1px dashed #f1f5f9'
       }}>
         {/* Trống */}
         <div
           onClick={() => onSelectStatusFilter(statusFilter === 'empty' ? 'all' : 'empty')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            borderRadius: '6px',
-            backgroundColor: statusFilter === 'empty' ? '#f1f5f9' : 'transparent',
-            color: '#64748b'
-          }}
+          style={{ cursor: 'pointer' }}
         >
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: '#94a3b8' }}></span>
-          <span>{t('table.empty')}: <strong style={{ color: '#0f172a' }}>{summary.empty}</strong></span>
+          <Badge variant={statusFilter === 'empty' ? 'secondary' : 'outline'} style={{ cursor: 'pointer', padding: '4px 10px' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#94a3b8' }}></span>
+            <span>{t('table.empty')}: <strong style={{ color: '#0f172a' }}>{summary.empty}</strong></span>
+          </Badge>
         </div>
 
         {/* Có khách */}
         <div
           onClick={() => onSelectStatusFilter(statusFilter === 'occupied' ? 'all' : 'occupied')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            borderRadius: '6px',
-            backgroundColor: statusFilter === 'occupied' ? '#e6f7f5' : 'transparent',
-            color: '#0d9488'
-          }}
+          style={{ cursor: 'pointer' }}
         >
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: '#0d9488' }}></span>
-          <span>{t('table.occupied')}: <strong style={{ color: '#0f172a' }}>{summary.occupied}</strong></span>
+          <Badge variant={statusFilter === 'occupied' ? 'default' : 'outline'} style={{ cursor: 'pointer', padding: '4px 10px' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#009688' }}></span>
+            <span>{t('table.occupied')}: <strong style={{ color: '#0f172a' }}>{summary.occupied}</strong></span>
+          </Badge>
         </div>
 
         {/* Chờ thanh toán */}
         <div
           onClick={() => onSelectStatusFilter(statusFilter === 'billing' ? 'all' : 'billing')}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            cursor: 'pointer',
-            padding: '4px 8px',
-            borderRadius: '6px',
-            backgroundColor: statusFilter === 'billing' ? '#fef3c7' : 'transparent',
-            color: '#d97706'
-          }}
+          style={{ cursor: 'pointer' }}
         >
-          <span style={{ width: '9px', height: '9px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
-          <span>{t('table.billing')}: <strong style={{ color: '#0f172a' }}>{summary.billing}</strong></span>
+          <Badge variant={statusFilter === 'billing' ? 'warning' : 'outline'} style={{ cursor: 'pointer', padding: '4px 10px' }}>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#f59e0b' }}></span>
+            <span>{t('table.billing')}: <strong style={{ color: '#0f172a' }}>{summary.billing}</strong></span>
+          </Badge>
         </div>
       </div>
     </div>

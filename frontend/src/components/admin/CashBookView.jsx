@@ -627,43 +627,43 @@ export function CashBookView({ currentUser = null }) {
           flexDirection: 'column',
           overflow: 'hidden'
         }}>
-          {/* THANH TỔNG HỢP SỐ LIỆU (QUỸ ĐẦU KỲ, TỔNG THU, TỔNG CHI, TỒN QUỸ) */}
+          {/* THANH TỔNG HỢP SỐ LIỆU (QUỸ ĐẦU KỲ, TỔNG THU, TỔNG CHI, TỒN QUỸ) - SHADCN METRIC STYLE */}
           <div style={{
             backgroundColor: '#ffffff',
             borderBottom: '1px solid #e2e8f0',
-            padding: '14px 20px',
+            padding: '12px 20px',
             display: 'grid',
             gridTemplateColumns: 'repeat(4, 1fr)',
-            gap: '16px'
+            gap: '12px'
           }}>
             {/* Quỹ đầu kỳ */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>{t('admin.cashbook.openingBalance')}</div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a', marginTop: '2px' }}>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px' }}>
+              <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 600 }}>{t('admin.cashbook.openingBalance')}</div>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a', marginTop: '3px', letterSpacing: '-0.3px' }}>
                 {formatMoney(summary.opening_balance)}
               </div>
             </div>
 
             {/* Tổng thu */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#047857', fontWeight: 600 }}>{t('admin.cashbook.totalReceipt')}</div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: '#047857', marginTop: '2px' }}>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px' }}>
+              <div style={{ fontSize: '11.5px', color: '#047857', fontWeight: 600 }}>{t('admin.cashbook.totalReceipt')}</div>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: '#047857', marginTop: '3px', letterSpacing: '-0.3px' }}>
                 {formatMoney(summary.total_receipt)}
               </div>
             </div>
 
             {/* Tổng chi */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#dc2626', fontWeight: 600 }}>{t('admin.cashbook.totalPayment')}</div>
-              <div style={{ fontSize: '18px', fontWeight: 800, color: '#dc2626', marginTop: '2px' }}>
+            <div style={{ backgroundColor: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '8px', padding: '10px 14px' }}>
+              <div style={{ fontSize: '11.5px', color: '#dc2626', fontWeight: 600 }}>{t('admin.cashbook.totalPayment')}</div>
+              <div style={{ fontSize: '17px', fontWeight: 800, color: '#dc2626', marginTop: '3px', letterSpacing: '-0.3px' }}>
                 {formatMoney(summary.total_payment)}
               </div>
             </div>
 
             {/* Tồn quỹ */}
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '12px', color: '#009688', fontWeight: 700 }}>{t('admin.cashbook.closingBalance')}</div>
-              <div style={{ fontSize: '19px', fontWeight: 900, color: '#009688', marginTop: '2px' }}>
+            <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '8px', padding: '10px 14px' }}>
+              <div style={{ fontSize: '11.5px', color: '#00796b', fontWeight: 700 }}>{t('admin.cashbook.closingBalance')}</div>
+              <div style={{ fontSize: '18px', fontWeight: 900, color: '#009688', marginTop: '3px', letterSpacing: '-0.3px' }}>
                 {formatMoney(summary.closing_balance)}
               </div>
             </div>

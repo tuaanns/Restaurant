@@ -376,7 +376,10 @@ export function LanguageProvider({ children }) {
         if (val === undefined) break;
       }
     }
-    if (typeof val !== 'string') return key;
+    if (typeof val !== 'string') {
+      if (typeof params === 'string') return params;
+      return undefined;
+    }
     if (params && typeof params === 'object') {
       return Object.entries(params).reduce((str, [k, v]) => {
         return str.replaceAll(`{${k}}`, v !== undefined && v !== null ? v : '');

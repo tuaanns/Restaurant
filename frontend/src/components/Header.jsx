@@ -53,7 +53,7 @@ export function Header({
   }, []);
 
   const isAdmin = currentUser?.role === 'admin';
-  const rawName = currentUser?.name || 'Thu Hằng';
+  const rawName = currentUser?.name || currentUser?.username || 'Thu Hằng';
   // Clean prefix like "Quản lý:" so it does not repeat roleLabel
   const cleanName = rawName.replace(/^(Quản lý|Thu ngân|Nhân viên):\s*/i, '');
   const displayName = cleanName || rawName;
@@ -72,7 +72,7 @@ export function Header({
   };
 
   const shiftText = formatShift(currentUser?.shift);
-  const initials = displayName.split(' ').map(n => n[0]).join('').slice(-2).toUpperCase() || 'TH';
+  const initials = displayName.split(' ').filter(Boolean).map(n => n[0]).slice(-2).join('').toUpperCase() || 'AD';
 
   return (
     <header style={{

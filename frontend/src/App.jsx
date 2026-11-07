@@ -134,13 +134,24 @@ export function App() {
         setPromotions(promoRes.promotions);
       }
     } catch (err) {}
+
+    // Đồng bộ thông tin user mới nhất từ CSDL
+    try {
+      const meRes = await api.getMe();
+      if (meRes && meRes.user) {
+        setCurrentUser(prev => ({ ...prev, ...meRes.user }));
+        try {
+          sessionStorage.setItem('pos_user', JSON.stringify(meRes.user));
+        } catch (e) {}
+      }
+    } catch (err) {}
   };
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser?.id) {
       loadData();
     }
-  }, [currentUser]);
+  }, [currentUser?.id]);
 
   // Auth Handlers
   const handleLoginSuccess = (user) => {
@@ -846,6 +857,12 @@ export function App() {
       {currentView === 'admin' && currentUser.role === 'admin' ? (
         <AdminDashboard
           currentUser={currentUser}
+          onUpdateCurrentUser={(updatedUser) => {
+            setCurrentUser(updatedUser);
+            try {
+              sessionStorage.setItem('pos_user', JSON.stringify(updatedUser));
+            } catch (e) {}
+          }}
           initialTab={adminTab}
           onBackToPos={() => setCurrentView('pos')}
           onLogout={handleLogout}

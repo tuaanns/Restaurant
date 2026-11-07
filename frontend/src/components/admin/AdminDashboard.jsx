@@ -318,7 +318,7 @@ function StatusBadge({ active }) {
   );
 }
 
-export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overview', onLogout = () => {} }) {
+export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overview', onLogout = () => {}, onUpdateCurrentUser }) {
   const { t, formatTableName, formatAreaName, formatDishName, formatCategoryName, formatDishUnit, formatPromoName } = useLanguage();
 
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -689,6 +689,19 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
         const res = await api.updateUser(editingUser.id, payload);
         const updated = res?.user || { ...editingUser, ...payload };
         setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...updated } : u));
+
+        // Nếu sửa chính tài khoản đang đăng nhập, lập tức cập nhật state cha và sessionStorage
+        const isSelf = (currentUser?.id && editingUser.id === currentUser.id) ||
+                       (currentUser?.username && editingUser.username === currentUser.username);
+        if (isSelf) {
+          const merged = { ...currentUser, ...updated };
+          try {
+            sessionStorage.setItem('pos_user', JSON.stringify(merged));
+          } catch (e) {}
+          if (onUpdateCurrentUser) {
+            onUpdateCurrentUser(merged);
+          }
+        }
       } else {
         if (!newUserPassword.trim() || newUserPassword.trim().length < 6) {
           alert('Vui lòng nhập mật khẩu tối thiểu 6 ký tự!');
@@ -1071,10 +1084,20 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     return shiftStr;
   };
 
-  const displayName = (currentUser?.name || 'Hoàng Nam').replace(/^(Quản lý|Thu ngân|Nhân viên|Admin|Manager|Cashier):\s*/i, '');
-  const initials = displayName.split(' ').map(n => n[0]).slice(-2).join('').toUpperCase() || 'AD';
-  const roleLabel = currentUser?.role === 'admin' ? (t('header.admin') || 'Quản Trị Viên') : (t('header.cashier') || 'Thu Ngân');
-  const shiftText = getShiftLabel(currentUser?.shift);
+  // ─── TỰ ĐỘNG ĐỒNG BỘ THÔNG TIN USER ĐANG ĐĂNG NHẬP ───
+  // Luôn ưu tiên lấy thông tin mới nhất từ danh sách users trong state (để khi vừa bấm Sửa nhân viên, góc phải lập tức đổi ngay)
+  const currentInList = users.find(u => 
+    (currentUser?.id && u.id === currentUser.id) || 
+    (currentUser?.username && u.username === currentUser.username)
+  );
+  const activeUser = currentInList || currentUser;
+
+  const rawName = activeUser?.name || activeUser?.username || '';
+  const cleanName = rawName.replace(/^(Quản lý|Thu ngân|Nhân viên|Admin|Manager|Cashier):\s*/i, '');
+  const displayName = cleanName || rawName || 'Admin';
+  const initials = displayName.split(' ').filter(Boolean).map(n => n[0]).slice(-2).join('').toUpperCase() || 'AD';
+  const roleLabel = activeUser?.role === 'admin' ? (t('header.admin') || 'Quản Trị Viên') : (t('header.cashier') || 'Thu Ngân');
+  const shiftText = getShiftLabel(activeUser?.shift);
 
   return (
     <div style={{ flex: 1, backgroundColor: '#f1f5f9', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -1320,10 +1343,10 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       <Clock size={11} color="#64748b" />
                       <span>{shiftText}</span>
                     </div>
-                    {currentUser?.email && (
+                    {activeUser?.email && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                         <Store size={11} color="#64748b" />
-                        <span>{currentUser.email}</span>
+                        <span>{activeUser.email}</span>
                       </div>
                     )}
                   </div>

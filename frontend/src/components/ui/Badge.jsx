@@ -9,9 +9,9 @@ export function Badge({
 }) {
   const variantStyles = {
     default: {
-      backgroundColor: '#e6f6f4',
-      color: '#00796b',
-      border: '1px solid #b2dfdb'
+      backgroundColor: '#E8F5E9',
+      color: '#1B5E20',
+      border: '1px solid #A5D6A7'
     },
     secondary: {
       backgroundColor: '#f1f5f9',

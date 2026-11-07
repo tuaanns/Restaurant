@@ -270,7 +270,7 @@ export function BankAccountsView() {
               alignItems: 'center',
               gap: '10px'
             }}>
-              <CreditCard size={24} color="#009688" />
+              <CreditCard size={24} color="#1B5E20" />
               <span>{t('admin.cashbook.bankAccountsTitle') || 'Thiết lập tài khoản ngân hàng & VietQR'}</span>
             </h1>
             <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
@@ -285,7 +285,7 @@ export function BankAccountsView() {
               display: 'flex',
               alignItems: 'center',
               gap: '8px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               color: '#ffffff',
               border: 'none',
               borderRadius: '8px',
@@ -293,11 +293,11 @@ export function BankAccountsView() {
               fontSize: '13.5px',
               fontWeight: 600,
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0, 150, 136, 0.3)',
+              boxShadow: '0 2px 6px rgba(27, 94, 32, 0.3)',
               transition: 'background-color 0.15s'
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#00796b'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#009688'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2E7D32'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1B5E20'}
           >
             <Plus size={18} />
             <span>{t('admin.cashbook.addBankAccount') || 'Thêm tài khoản ngân hàng'}</span>
@@ -325,7 +325,7 @@ export function BankAccountsView() {
         {/* Bank Accounts Grid / Cards */}
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: '#64748b' }}>
-            <RefreshCw size={32} className="animate-spin" style={{ margin: '0 auto 12px auto', color: '#009688' }} />
+            <RefreshCw size={32} className="animate-spin" style={{ margin: '0 auto 12px auto', color: '#1B5E20' }} />
             <div>Đang tải danh sách tài khoản ngân hàng...</div>
           </div>
         ) : bankAccounts.length === 0 ? (
@@ -347,7 +347,7 @@ export function BankAccountsView() {
               type="button"
               onClick={handleOpenAdd}
               style={{
-                backgroundColor: '#009688',
+                backgroundColor: '#1B5E20',
                 color: '#ffffff',
                 border: 'none',
                 borderRadius: '8px',
@@ -368,7 +368,7 @@ export function BankAccountsView() {
           }}>
             {bankAccounts.map((acc) => {
               const bankInfo = VIETNAM_BANKS.find(b => b.code === acc.bank_code) || {
-                color: '#009688',
+                color: '#1B5E20',
                 shortName: acc.bank_code
               };
               const isDefault = !!acc.is_default;
@@ -379,8 +379,8 @@ export function BankAccountsView() {
                   style={{
                     backgroundColor: '#ffffff',
                     borderRadius: '12px',
-                    border: isDefault ? '2px solid #009688' : '1px solid #e2e8f0',
-                    boxShadow: isDefault ? '0 8px 20px -4px rgba(0, 150, 136, 0.18)' : '0 2px 6px rgba(0,0,0,0.04)',
+                    border: isDefault ? '2px solid #1B5E20' : '1px solid #e2e8f0',
+                    boxShadow: isDefault ? '0 8px 20px -4px rgba(27, 94, 32, 0.18)' : '0 2px 6px rgba(0,0,0,0.04)',
                     overflow: 'hidden',
                     display: 'flex',
                     flexDirection: 'column',
@@ -422,7 +422,7 @@ export function BankAccountsView() {
                       width: '44px',
                       height: '44px',
                       borderRadius: '10px',
-                      backgroundColor: bankInfo.color || '#009688',
+                      backgroundColor: bankInfo.color || '#1B5E20',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
@@ -541,7 +541,7 @@ export function BankAccountsView() {
                         cursor: 'pointer'
                       }}
                     >
-                      <QrCode size={14} color="#009688" />
+                      <QrCode size={14} color="#1B5E20" />
                       <span>{t('admin.cashbook.qrPreview') || 'Mã VietQR'}</span>
                     </button>
 
@@ -637,12 +637,12 @@ export function BankAccountsView() {
                 width: '36px',
                 height: '36px',
                 borderRadius: '8px',
-                backgroundColor: '#e6f7f5',
+                backgroundColor: '#E8F5E9',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <Zap size={20} color="#009688" />
+                <Zap size={20} color="#1B5E20" />
               </div>
               <div>
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
@@ -690,7 +690,7 @@ export function BankAccountsView() {
                   flex: 1,
                   fontSize: '13.5px',
                   fontFamily: 'monospace',
-                  color: '#009688',
+                  color: '#1B5E20',
                   fontWeight: 700,
                   wordBreak: 'break-all'
                 }}>
@@ -706,7 +706,7 @@ export function BankAccountsView() {
                     padding: '8px 14px',
                     borderRadius: '6px',
                     border: 'none',
-                    backgroundColor: webhookCopied ? '#059669' : '#009688',
+                    backgroundColor: webhookCopied ? '#059669' : '#1B5E20',
                     color: '#ffffff',
                     fontSize: '12.5px',
                     fontWeight: 600,
@@ -864,7 +864,7 @@ export function BankAccountsView() {
               backgroundColor: '#f8fafc'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <CreditCard size={20} color="#009688" />
+                <CreditCard size={20} color="#1B5E20" />
                 <h3 style={{ fontSize: '16px', fontWeight: 700, color: '#0f172a', margin: 0 }}>
                   {editingAccount
                     ? (t('admin.cashbook.editBankAccount') || 'Chỉnh sửa tài khoản ngân hàng')
@@ -1041,7 +1041,7 @@ export function BankAccountsView() {
                   id="is_default_checkbox"
                   checked={formData.is_default}
                   onChange={e => setFormData({ ...formData, is_default: e.target.checked })}
-                  style={{ width: '16px', height: '16px', accentColor: '#009688', cursor: 'pointer' }}
+                  style={{ width: '16px', height: '16px', accentColor: '#1B5E20', cursor: 'pointer' }}
                 />
                 <label htmlFor="is_default_checkbox" style={{ fontSize: '13px', fontWeight: 600, color: '#1e293b', cursor: 'pointer' }}>
                   {t('admin.cashbook.isDefaultAccount') || 'Đặt làm tài khoản nhận tiền mặc định (VietQR POS)'}
@@ -1111,12 +1111,12 @@ export function BankAccountsView() {
                     padding: '9px 22px',
                     borderRadius: '8px',
                     border: 'none',
-                    backgroundColor: '#009688',
+                    backgroundColor: '#1B5E20',
                     color: '#ffffff',
                     fontSize: '13.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(0, 150, 136, 0.3)'
+                    boxShadow: '0 2px 6px rgba(27, 94, 32, 0.3)'
                   }}
                 >
                   {submitting ? 'Đang lưu...' : (editingAccount ? 'Cập nhật tài khoản' : 'Thêm tài khoản')}
@@ -1162,7 +1162,7 @@ export function BankAccountsView() {
               backgroundColor: '#f8fafc'
             }}>
               <div style={{ fontSize: '15px', fontWeight: 700, color: '#0f172a', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <QrCode size={18} color="#009688" />
+                <QrCode size={18} color="#1B5E20" />
                 <span>Mã VietQR mẫu - {selectedAccount.bank_code}</span>
               </div>
               <button
@@ -1180,7 +1180,7 @@ export function BankAccountsView() {
                 display: 'inline-block',
                 padding: '12px',
                 backgroundColor: '#ffffff',
-                border: '2px solid #009688',
+                border: '2px solid #1B5E20',
                 borderRadius: '14px',
                 boxShadow: '0 4px 14px rgba(0,0,0,0.08)',
                 marginBottom: '16px'
@@ -1283,7 +1283,7 @@ export function BankAccountsView() {
                     gap: '6px',
                     padding: '9px 18px',
                     borderRadius: '8px',
-                    backgroundColor: '#009688',
+                    backgroundColor: '#1B5E20',
                     color: '#ffffff',
                     fontSize: '13px',
                     fontWeight: 600

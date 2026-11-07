@@ -30,8 +30,8 @@ class AuraPosMobileApp extends StatelessWidget {
           theme: ThemeData(
             fontFamily: 'Roboto',
             colorScheme: ColorScheme.fromSeed(
-              seedColor: const Color(0xFF009688),
-              primary: const Color(0xFF009688),
+              seedColor: const Color(0xFF1B5E20),
+              primary: const Color(0xFF1B5E20),
               surface: const Color(0xFFF8FAFC),
             ),
             scaffoldBackgroundColor: const Color(0xFFF1F5F9),
@@ -204,7 +204,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF009688),
+          backgroundColor: const Color(0xFF1B5E20),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
         ),
@@ -315,11 +315,11 @@ class _PosMainScreenState extends State<PosMainScreen> {
               Expanded(
                 child: _isLoading
                     ? const Center(
-                        child: CircularProgressIndicator(color: Color(0xFF009688)),
+                        child: CircularProgressIndicator(color: Color(0xFF1B5E20)),
                       )
                     : RefreshIndicator(
                         onRefresh: _loadTables,
-                        color: const Color(0xFF009688),
+                        color: const Color(0xFF1B5E20),
                         child: GridView.builder(
                           padding: const EdgeInsets.fromLTRB(14, 8, 14, 140),
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -491,7 +491,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 7),
                   decoration: BoxDecoration(
-                    color: _selectedNavIndex == 0 ? const Color(0xFF009688) : Colors.transparent,
+                    color: _selectedNavIndex == 0 ? const Color(0xFF1B5E20) : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -522,7 +522,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                 child: Container(
                   padding: const EdgeInsets.symmetric(vertical: 7),
                   decoration: BoxDecoration(
-                    color: _selectedNavIndex == 1 ? const Color(0xFF009688) : Colors.transparent,
+                    color: _selectedNavIndex == 1 ? const Color(0xFF1B5E20) : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
                   ),
                   child: Row(
@@ -616,7 +616,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
             children: [
               _statusIndicator(const Color(0xFF94A3B8), '${I18n.t('statusEmpty')}: $emptyCount'),
               const SizedBox(width: 10),
-              _statusIndicator(const Color(0xFF009688), '${I18n.t('statusOccupied')}: $occupiedCount'),
+              _statusIndicator(const Color(0xFF1B5E20), '${I18n.t('statusOccupied')}: $occupiedCount'),
               const SizedBox(width: 10),
               _statusIndicator(const Color(0xFFF59E0B), '${I18n.t('statusBilling')}: $billingCount'),
             ],
@@ -690,7 +690,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
       textColor = const Color(0xFF713F12);
       subtextColor = const Color(0xFFA16207);
     } else if (isSelected) {
-      borderColor = const Color(0xFF009688);
+      borderColor = const Color(0xFF1B5E20);
     }
 
     return GestureDetector(
@@ -707,13 +707,13 @@ class _PosMainScreenState extends State<PosMainScreen> {
               color: cardBg,
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: isSelected ? const Color(0xFF009688) : borderColor,
+                color: isSelected ? const Color(0xFF1B5E20) : borderColor,
                 width: isSelected ? 2.2 : 1.2,
               ),
               boxShadow: [
                 BoxShadow(
                   color: isSelected
-                      ? const Color(0xFF009688).withValues(alpha: 0.18)
+                      ? const Color(0xFF1B5E20).withValues(alpha: 0.18)
                       : Colors.black.withValues(alpha: 0.02),
                   blurRadius: 6,
                   offset: const Offset(0, 2),
@@ -801,7 +801,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                       Text(
                         I18n.t('tableSelected'),
                         style: const TextStyle(
-                          color: Color(0xFF009688),
+                          color: Color(0xFF1B5E20),
                           fontSize: 10.5,
                           fontWeight: FontWeight.w800,
                         ),
@@ -823,7 +823,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                           Icon(
                             Icons.people_outline,
                             size: 13,
-                            color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF009688),
+                            color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF1B5E20),
                           ),
                           const SizedBox(width: 4),
                           Text(
@@ -878,7 +878,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                       style: TextStyle(
                         fontSize: 10,
                         fontWeight: FontWeight.w700,
-                        color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF009688),
+                        color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF1B5E20),
                       ),
                     ),
                   ],
@@ -896,7 +896,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                 width: 20,
                 height: 20,
                 decoration: const BoxDecoration(
-                  color: Color(0xFF009688),
+                  color: Color(0xFF1B5E20),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.check, color: Colors.white, size: 13),
@@ -1001,7 +1001,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                 flex: 2,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF009688),
+                    backgroundColor: const Color(0xFF1B5E20),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -1045,7 +1045,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
           }
         },
         backgroundColor: Colors.white,
-        selectedItemColor: const Color(0xFF009688),
+        selectedItemColor: const Color(0xFF1B5E20),
         unselectedItemColor: const Color(0xFF94A3B8),
         selectedFontSize: 10.5,
         unselectedFontSize: 10.5,

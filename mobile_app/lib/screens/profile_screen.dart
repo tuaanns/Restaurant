@@ -117,12 +117,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 width: 58,
                                 height: 58,
                                 decoration: BoxDecoration(
-                                  color: isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF009688),
+                                  color: isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF1B5E20),
                                   shape: BoxShape.circle,
                                   border: Border.all(color: Colors.white24, width: 2),
                                   boxShadow: [
                                     BoxShadow(
-                                      color: (isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF009688)).withOpacity(0.35),
+                                      color: (isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF1B5E20)).withOpacity(0.35),
                                       blurRadius: 10,
                                       offset: const Offset(0, 4),
                                     ),
@@ -176,7 +176,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2.5),
                                       decoration: BoxDecoration(
-                                        color: isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF009688),
+                                        color: isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF1B5E20),
                                         borderRadius: BorderRadius.circular(4),
                                       ),
                                       child: Text(
@@ -587,7 +587,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   children: [
                     CircleAvatar(
                       radius: 28,
-                      backgroundColor: isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF009688),
+                      backgroundColor: isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF1B5E20),
                       child: Text(
                         user.name.split(' ').last.substring(0, 1).toUpperCase(),
                         style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
@@ -612,13 +612,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Icon(
                                 isAdmin ? Icons.admin_panel_settings_rounded : Icons.person_outline_rounded,
                                 size: 14,
-                                color: isAdmin ? const Color(0xFFD97706) : const Color(0xFF009688),
+                                color: isAdmin ? const Color(0xFFD97706) : const Color(0xFF1B5E20),
                               ),
                               const SizedBox(width: 4),
                               Text(
                                 isAdmin ? I18n.t('roleAdminSystem') : I18n.t('roleCashierOrder'),
                                 style: TextStyle(
-                                  color: isAdmin ? const Color(0xFFD97706) : const Color(0xFF009688),
+                                  color: isAdmin ? const Color(0xFFD97706) : const Color(0xFF1B5E20),
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -672,8 +672,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       style: OutlinedButton.styleFrom(
-                        foregroundColor: const Color(0xFF009688),
-                        side: const BorderSide(color: Color(0xFF009688), width: 1.2),
+                        foregroundColor: const Color(0xFF1B5E20),
+                        side: const BorderSide(color: Color(0xFF1B5E20), width: 1.2),
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                       ),
@@ -1349,11 +1349,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
         actions: [
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF009688), foregroundColor: Colors.white),
+            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1B5E20), foregroundColor: Colors.white),
             onPressed: () {
               Navigator.pop(ctx);
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Mật khẩu đã được cập nhật thành công!'), backgroundColor: Color(0xFF009688)),
+                const SnackBar(content: Text('Mật khẩu đã được cập nhật thành công!'), backgroundColor: Color(0xFF1B5E20)),
               );
             },
             child: const Text('Lưu'),
@@ -1482,7 +1482,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             width: 22,
             height: 22,
             decoration: const BoxDecoration(
-              color: Color(0xFF009688),
+              color: Color(0xFF1B5E20),
               shape: BoxShape.circle,
             ),
             alignment: Alignment.center,

@@ -207,8 +207,8 @@ export function SplitOrderModal({
                       style={{
                         padding: '10px 6px',
                         borderRadius: '8px',
-                        border: isSelected ? '2px solid #009688' : '1px solid #cbd5e1',
-                        backgroundColor: isSelected ? '#e6f7f5' : '#ffffff',
+                        border: isSelected ? '2px solid #1B5E20' : '1px solid #cbd5e1',
+                        backgroundColor: isSelected ? '#E8F5E9' : '#ffffff',
                         textAlign: 'center',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
@@ -217,7 +217,7 @@ export function SplitOrderModal({
                       <div style={{
                         fontSize: '12.5px',
                         fontWeight: 800,
-                        color: isSelected ? '#00796b' : '#334155'
+                        color: isSelected ? '#2E7D32' : '#334155'
                       }}>
                         {formatTableName(tbl.name)}
                       </div>
@@ -243,7 +243,7 @@ export function SplitOrderModal({
               alignItems: 'center'
             }}>
               <span>2. Chọn số lượng món muốn chuyển:</span>
-              <span style={{ fontSize: '11px', color: '#009688', fontWeight: 600 }}>
+              <span style={{ fontSize: '11px', color: '#1B5E20', fontWeight: 600 }}>
                 Đã chọn: {totalSplitItemsCount} phần
               </span>
             </div>
@@ -326,7 +326,7 @@ export function SplitOrderModal({
                           textAlign: 'center',
                           fontSize: '13px',
                           fontWeight: 800,
-                          color: isSelected ? '#00796b' : '#64748b'
+                          color: isSelected ? '#2E7D32' : '#64748b'
                         }}>
                           {splitQty}
                         </span>
@@ -393,10 +393,10 @@ export function SplitOrderModal({
                 <strong style={{ color: '#0f172a' }}>{formatNumber(remainingSubtotal)} đ</strong>
               </div>
               <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: '#00796b', fontWeight: 600 }}>
+                <span style={{ color: '#2E7D32', fontWeight: 600 }}>
                   Đơn tách mới ({targetTableId ? formatTableName(tables.find(t => t.id === targetTableId)?.name) : 'Bàn mới'}):
                 </span>
-                <strong style={{ color: '#00796b' }}>+{formatNumber(splitSubtotal)} đ</strong>
+                <strong style={{ color: '#2E7D32' }}>+{formatNumber(splitSubtotal)} đ</strong>
               </div>
             </div>
           )}
@@ -434,7 +434,7 @@ export function SplitOrderModal({
             style={{
               padding: '9px 20px',
               borderRadius: '6px',
-              backgroundColor: (totalSplitItemsCount > 0 && targetTableId) ? '#009688' : '#cbd5e1',
+              backgroundColor: (totalSplitItemsCount > 0 && targetTableId) ? '#1B5E20' : '#cbd5e1',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
@@ -443,7 +443,7 @@ export function SplitOrderModal({
               gap: '6px',
               border: 'none',
               cursor: (totalSplitItemsCount > 0 && targetTableId) ? 'pointer' : 'not-allowed',
-              boxShadow: (totalSplitItemsCount > 0 && targetTableId) ? '0 3px 10px rgba(0, 150, 136, 0.3)' : 'none'
+              boxShadow: (totalSplitItemsCount > 0 && targetTableId) ? '0 3px 10px rgba(27, 94, 32, 0.3)' : 'none'
             }}
           >
             <Scissors size={15} />

@@ -74,7 +74,7 @@ export function TransferTableModal({
             borderRadius: '8px',
             border: '1px solid #e2e8f0'
           }}>
-            {t('transfer.from')}: <strong style={{ color: '#009688' }}>{formatTableName(currentTable?.name)}</strong>
+            {t('transfer.from')}: <strong style={{ color: '#1B5E20' }}>{formatTableName(currentTable?.name)}</strong>
             {' → '}{t('transfer.selectTarget')}
           </div>
 
@@ -93,8 +93,8 @@ export function TransferTableModal({
                   style={{
                     padding: '12px 10px',
                     borderRadius: '8px',
-                    border: isPicked ? '2px solid #009688' : '1px solid #cbd5e1',
-                    backgroundColor: isPicked ? '#e6f7f5' : '#ffffff',
+                    border: isPicked ? '2px solid #1B5E20' : '1px solid #cbd5e1',
+                    backgroundColor: isPicked ? '#E8F5E9' : '#ffffff',
                     cursor: 'pointer',
                     textAlign: 'center',
                     transition: 'all 0.15s ease'
@@ -147,7 +147,7 @@ export function TransferTableModal({
             style={{
               padding: '8px 20px',
               borderRadius: '6px',
-              backgroundColor: selectedTargetId ? '#009688' : '#94a3b8',
+              backgroundColor: selectedTargetId ? '#1B5E20' : '#94a3b8',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,

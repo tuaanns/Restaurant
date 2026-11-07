@@ -394,7 +394,7 @@ export function ImportUserModal({
                 padding: '7px 14px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: activeTab === 'upload' ? '#009688' : '#f1f5f9',
+                backgroundColor: activeTab === 'upload' ? '#1B5E20' : '#f1f5f9',
                 color: activeTab === 'upload' ? '#ffffff' : '#475569',
                 fontSize: '12.5px',
                 fontWeight: 700,
@@ -413,7 +413,7 @@ export function ImportUserModal({
                 padding: '7px 14px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: activeTab === 'paste' ? '#009688' : '#f1f5f9',
+                backgroundColor: activeTab === 'paste' ? '#1B5E20' : '#f1f5f9',
                 color: activeTab === 'paste' ? '#ffffff' : '#475569',
                 fontSize: '12.5px',
                 fontWeight: 700,
@@ -494,7 +494,7 @@ export function ImportUserModal({
                 }}
                 onClick={() => fileInputRef.current?.click()}
                 style={{
-                  border: `2px dashed ${isDragging ? '#009688' : '#cbd5e1'}`,
+                  border: `2px dashed ${isDragging ? '#1B5E20' : '#cbd5e1'}`,
                   borderRadius: '12px',
                   backgroundColor: isDragging ? '#f0fdf4' : '#f8fafc',
                   padding: '30px 20px',
@@ -765,7 +765,7 @@ export function ImportUserModal({
               padding: '9px 22px',
               borderRadius: '8px',
               border: 'none',
-              backgroundColor: validCount > 0 ? '#009688' : '#94a3b8',
+              backgroundColor: validCount > 0 ? '#1B5E20' : '#94a3b8',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
@@ -773,7 +773,7 @@ export function ImportUserModal({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: validCount > 0 ? '0 4px 12px rgba(0, 150, 136, 0.3)' : 'none'
+              boxShadow: validCount > 0 ? '0 4px 12px rgba(27, 94, 32, 0.3)' : 'none'
             }}
           >
             {isLoading ? (

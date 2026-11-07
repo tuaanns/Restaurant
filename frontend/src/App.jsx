@@ -915,7 +915,7 @@ export function App() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div style={{
-                      backgroundColor: '#009688',
+                      backgroundColor: '#1B5E20',
                       color: '#ffffff',
                       padding: '4px 8px',
                       borderRadius: '6px',
@@ -954,7 +954,7 @@ export function App() {
                     <button
                       onClick={() => setMobileTab('order')}
                       style={{
-                        backgroundColor: '#009688',
+                        backgroundColor: '#1B5E20',
                         color: '#ffffff',
                         padding: '6px 12px',
                         borderRadius: '6px',
@@ -1218,7 +1218,7 @@ export function App() {
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 9999,
-          backgroundColor: toast.type === 'warning' ? '#ea580c' : '#009688',
+          backgroundColor: toast.type === 'warning' ? '#ea580c' : '#1B5E20',
           color: '#ffffff',
           padding: '10px 22px',
           borderRadius: '10px',

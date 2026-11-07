@@ -148,13 +148,13 @@ export function PromotionModal({
                   key={promo.id}
                   style={{
                     border: isApplied
-                      ? '2px solid #009688'
+                      ? '2px solid #1B5E20'
                       : isEligible
                       ? '1px solid #cbd5e1'
                       : '1px dashed #cbd5e1',
                     borderRadius: '8px',
                     padding: '12px 14px',
-                    backgroundColor: isApplied ? '#e6f7f5' : isEligible ? '#ffffff' : '#f8fafc',
+                    backgroundColor: isApplied ? '#E8F5E9' : isEligible ? '#ffffff' : '#f8fafc',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -168,8 +168,8 @@ export function PromotionModal({
                         fontFamily: 'monospace',
                         fontWeight: 800,
                         fontSize: '12px',
-                        color: isApplied ? '#00796b' : '#009688',
-                        backgroundColor: isApplied ? '#b2dfdb' : '#e6f7f5',
+                        color: isApplied ? '#2E7D32' : '#1B5E20',
+                        backgroundColor: isApplied ? '#A5D6A7' : '#E8F5E9',
                         padding: '2px 6px',
                         borderRadius: '4px'
                       }}>
@@ -180,7 +180,7 @@ export function PromotionModal({
                       </span>
                     </div>
 
-                    <div style={{ fontSize: '12.5px', color: '#00897b', fontWeight: 600, marginBottom: '4px' }}>
+                    <div style={{ fontSize: '12.5px', color: '#1B5E20', fontWeight: 600, marginBottom: '4px' }}>
                       {promo.type === 'order_discount' || promo.type === 'percent'
                         ? t('promotion.discountTotalOrder', { val: promo.discount_value })
                         : t('promotion.discountFixed', { val: formatMoney(promo.discount_value) })}
@@ -222,7 +222,7 @@ export function PromotionModal({
                         style={{
                           padding: '6px 14px',
                           borderRadius: '6px',
-                          backgroundColor: '#009688',
+                          backgroundColor: '#1B5E20',
                           color: '#ffffff',
                           fontSize: '12.5px',
                           fontWeight: 700,

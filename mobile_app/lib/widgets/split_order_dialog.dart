@@ -185,7 +185,7 @@ class _SplitOrderDialogState extends State<SplitOrderDialog> {
                         children: [
                           Checkbox(
                             value: isChecked,
-                            activeColor: const Color(0xFF009688),
+                            activeColor: const Color(0xFF1B5E20),
                             onChanged: (val) {
                               setState(() {
                                 _splitQuantities[it.id] = (val == true) ? 1 : 0;
@@ -234,7 +234,7 @@ class _SplitOrderDialogState extends State<SplitOrderDialog> {
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,
                                       fontSize: 13,
-                                      color: isChecked ? const Color(0xFF009688) : const Color(0xFF94A3B8),
+                                      color: isChecked ? const Color(0xFF1B5E20) : const Color(0xFF94A3B8),
                                     ),
                                   ),
                                 ),
@@ -244,7 +244,7 @@ class _SplitOrderDialogState extends State<SplitOrderDialog> {
                                       : null,
                                   child: const Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                    child: Icon(Icons.add, size: 14, color: Color(0xFF009688)),
+                                    child: Icon(Icons.add, size: 14, color: Color(0xFF1B5E20)),
                                   ),
                                 ),
                               ],
@@ -319,7 +319,7 @@ class _SplitOrderDialogState extends State<SplitOrderDialog> {
                     flex: 2,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF009688),
+                        backgroundColor: const Color(0xFF1B5E20),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 11),
                         elevation: 1,
@@ -352,7 +352,7 @@ class _SplitOrderDialogState extends State<SplitOrderDialog> {
                                       ),
                                     ],
                                   ),
-                                  backgroundColor: const Color(0xFF009688),
+                                  backgroundColor: const Color(0xFF1B5E20),
                                   behavior: SnackBarBehavior.floating,
                                 ),
                               );

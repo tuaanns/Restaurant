@@ -49,7 +49,7 @@ class KitchenTicketDialog extends StatelessWidget {
                       color: const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.notifications_active, color: Color(0xFF00C292), size: 18),
+                    child: const Icon(Icons.notifications_active, color: Color(0xFF66BB6A), size: 18),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -154,7 +154,7 @@ class KitchenTicketDialog extends StatelessWidget {
                                   ),
                                   TextSpan(
                                     text: I18n.formatTableName(table.name),
-                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF009688)),
+                                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Color(0xFF1B5E20)),
                                   ),
                                 ],
                               ),
@@ -351,7 +351,7 @@ class KitchenTicketDialog extends StatelessWidget {
                     flex: 2,
                     child: ElevatedButton.icon(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF009688),
+                        backgroundColor: const Color(0xFF1B5E20),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         elevation: 2,
@@ -386,7 +386,7 @@ class KitchenTicketDialog extends StatelessWidget {
                                         ),
                                       ],
                                     ),
-                                    backgroundColor: const Color(0xFF009688),
+                                    backgroundColor: const Color(0xFF1B5E20),
                                     behavior: SnackBarBehavior.floating,
                                   ),
                                 );

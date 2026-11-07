@@ -87,7 +87,7 @@ export function AreaFilterBar({
           style={{ cursor: 'pointer' }}
         >
           <Badge variant={statusFilter === 'occupied' ? 'default' : 'outline'} style={{ cursor: 'pointer', padding: '4px 10px' }}>
-            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#009688' }}></span>
+            <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#1B5E20' }}></span>
             <span>{t('table.occupied')}: <strong style={{ color: '#0f172a' }}>{summary.occupied}</strong></span>
           </Badge>
         </div>

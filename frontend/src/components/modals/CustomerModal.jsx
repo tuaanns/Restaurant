@@ -112,8 +112,8 @@ export function CustomerModal({
                 style={{
                   padding: '10px 14px',
                   borderRadius: '8px',
-                  border: isSelected ? '1.5px solid #009688' : '1px solid #e2e8f0',
-                  backgroundColor: isSelected ? '#e6f7f5' : '#ffffff',
+                  border: isSelected ? '1.5px solid #1B5E20' : '1px solid #e2e8f0',
+                  backgroundColor: isSelected ? '#E8F5E9' : '#ffffff',
                   marginBottom: '8px',
                   cursor: 'pointer',
                   display: 'flex',
@@ -128,7 +128,7 @@ export function CustomerModal({
                   <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>{c.phone}</span>
                     <span>•</span>
-                    <span style={{ color: '#009688', fontWeight: 600 }}>{getTierLabel(c.membership_tier)}</span>
+                    <span style={{ color: '#1B5E20', fontWeight: 600 }}>{getTierLabel(c.membership_tier)}</span>
                   </div>
                 </div>
 

@@ -104,7 +104,7 @@ export function ItemNoteModal({
                   fontSize: '11px',
                   padding: '4px 8px',
                   borderRadius: '12px',
-                  backgroundColor: noteText === tag ? '#009688' : '#f1f5f9',
+                  backgroundColor: noteText === tag ? '#1B5E20' : '#f1f5f9',
                   color: noteText === tag ? '#ffffff' : '#475569',
                   border: '1px solid #e2e8f0'
                 }}
@@ -133,7 +133,7 @@ export function ItemNoteModal({
               style={{
                 padding: '8px 18px',
                 borderRadius: '6px',
-                backgroundColor: '#009688',
+                backgroundColor: '#1B5E20',
                 color: '#ffffff',
                 fontSize: '12.5px',
                 fontWeight: 700

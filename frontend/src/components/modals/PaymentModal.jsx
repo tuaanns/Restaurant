@@ -201,8 +201,8 @@ export function PaymentModal({
               width: '64px',
               height: '64px',
               borderRadius: '50%',
-              backgroundColor: '#e6f7f5',
-              color: '#009688',
+              backgroundColor: '#E8F5E9',
+              color: '#1B5E20',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -244,7 +244,7 @@ export function PaymentModal({
                     </div>
                   )}
                 </div>
-                <div style={{ fontSize: '22px', fontWeight: 900, color: '#009688' }}>
+                <div style={{ fontSize: '22px', fontWeight: 900, color: '#1B5E20' }}>
                   {formatMoney(totalAmount)}
                 </div>
               </div>
@@ -261,9 +261,9 @@ export function PaymentModal({
                       padding: '8px',
                       borderRadius: '8px',
                       border: '1.5px solid',
-                      borderColor: method === 'cash' ? '#009688' : '#e2e8f0',
-                      backgroundColor: method === 'cash' ? '#e6f7f5' : '#ffffff',
-                      color: method === 'cash' ? '#00796b' : '#334155',
+                      borderColor: method === 'cash' ? '#1B5E20' : '#e2e8f0',
+                      backgroundColor: method === 'cash' ? '#E8F5E9' : '#ffffff',
+                      color: method === 'cash' ? '#2E7D32' : '#334155',
                       fontSize: '12px',
                       fontWeight: 700,
                       display: 'flex',
@@ -282,9 +282,9 @@ export function PaymentModal({
                       padding: '8px',
                       borderRadius: '8px',
                       border: '1.5px solid',
-                      borderColor: method === 'qr_banking' ? '#009688' : '#e2e8f0',
-                      backgroundColor: method === 'qr_banking' ? '#e6f7f5' : '#ffffff',
-                      color: method === 'qr_banking' ? '#00796b' : '#334155',
+                      borderColor: method === 'qr_banking' ? '#1B5E20' : '#e2e8f0',
+                      backgroundColor: method === 'qr_banking' ? '#E8F5E9' : '#ffffff',
+                      color: method === 'qr_banking' ? '#2E7D32' : '#334155',
                       fontSize: '12px',
                       fontWeight: 700,
                       display: 'flex',
@@ -303,9 +303,9 @@ export function PaymentModal({
                       padding: '8px',
                       borderRadius: '8px',
                       border: '1.5px solid',
-                      borderColor: method === 'card' ? '#009688' : '#e2e8f0',
-                      backgroundColor: method === 'card' ? '#e6f7f5' : '#ffffff',
-                      color: method === 'card' ? '#00796b' : '#334155',
+                      borderColor: method === 'card' ? '#1B5E20' : '#e2e8f0',
+                      backgroundColor: method === 'card' ? '#E8F5E9' : '#ffffff',
+                      color: method === 'card' ? '#2E7D32' : '#334155',
                       fontSize: '12px',
                       fontWeight: 700,
                       display: 'flex',
@@ -377,7 +377,7 @@ export function PaymentModal({
                     alignItems: 'center'
                   }}>
                     <span style={{ fontSize: '12px', fontWeight: 600, color: '#475569' }}>{t('payment.change')}:</span>
-                    <span style={{ fontSize: '15px', fontWeight: 800, color: changeMoney > 0 ? '#009688' : '#0f172a' }}>
+                    <span style={{ fontSize: '15px', fontWeight: 800, color: changeMoney > 0 ? '#1B5E20' : '#0f172a' }}>
                       {formatMoney(changeMoney)}
                     </span>
                   </div>
@@ -409,7 +409,7 @@ export function PaymentModal({
                     display: 'inline-block',
                     padding: '6px',
                     backgroundColor: '#ffffff',
-                    border: '2px solid #009688',
+                    border: '2px solid #1B5E20',
                     borderRadius: '10px',
                     marginBottom: '6px',
                     boxShadow: '0 4px 10px rgba(0,0,0,0.05)'
@@ -430,7 +430,7 @@ export function PaymentModal({
                       }}
                     />
                     <div style={{ display: 'none', padding: '16px' }}>
-                      <QrCode size={110} color="#009688" />
+                      <QrCode size={110} color="#1B5E20" />
                     </div>
                   </div>
                   <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
@@ -440,9 +440,9 @@ export function PaymentModal({
                     {t('payment.accountNumber')}: <strong style={{ color: '#0f172a' }}>{activeBank.account_number}</strong> • {t('payment.accountOwner')}: <strong style={{ color: '#0f172a' }}>{activeBank.account_name}</strong>
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#64748b' }}>
-                    {t('payment.transferContent')}: <strong style={{ color: '#009688' }}>{qrTransferContent}</strong>
+                    {t('payment.transferContent')}: <strong style={{ color: '#1B5E20' }}>{qrTransferContent}</strong>
                   </div>
-                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#009688', marginTop: '2px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 800, color: '#1B5E20', marginTop: '2px' }}>
                     {t('payment.amount')}: {formatMoney(totalAmount)}
                   </div>
                 </div>
@@ -455,7 +455,7 @@ export function PaymentModal({
                   backgroundColor: '#f8fafc',
                   borderRadius: '8px'
                 }}>
-                  <CreditCard size={36} color="#009688" style={{ marginBottom: '8px' }} />
+                  <CreditCard size={36} color="#1B5E20" style={{ marginBottom: '8px' }} />
                   <div style={{ fontSize: '13.5px', fontWeight: 700 }}>{t('payment.cardInstruction')}</div>
                   <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '4px' }}>
                     {t('payment.cardSupported')}
@@ -496,7 +496,7 @@ export function PaymentModal({
                 style={{
                   padding: '10px 22px',
                   borderRadius: '8px',
-                  backgroundColor: '#009688',
+                  backgroundColor: '#1B5E20',
                   color: '#ffffff',
                   fontSize: '13.5px',
                   fontWeight: 800,
@@ -505,7 +505,7 @@ export function PaymentModal({
                   gap: '8px',
                   border: 'none',
                   cursor: 'pointer',
-                  boxShadow: '0 4px 12px rgba(0, 150, 136, 0.35)'
+                  boxShadow: '0 4px 12px rgba(27, 94, 32, 0.35)'
                 }}
               >
                 <span>{t('payment.confirm')}</span>

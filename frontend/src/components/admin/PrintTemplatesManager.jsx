@@ -598,7 +598,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
               <div style={{ width: '85px', height: '85px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <QrCode size={75} color="#000000" />
               </div>
-              <div style={{ fontSize: '8.5px', fontWeight: 800, marginTop: '3px', color: '#00796b' }}>
+              <div style={{ fontSize: '8.5px', fontWeight: 800, marginTop: '3px', color: '#2E7D32' }}>
                 QUÉT MÃ VIETQR THANH TOÁN
               </div>
             </div>
@@ -752,16 +752,16 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
               gap: '6px',
               padding: '8px 16px',
               borderRadius: '6px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               color: '#ffffff',
               border: 'none',
               fontSize: '13px',
               fontWeight: 700,
               cursor: 'pointer',
-              boxShadow: '0 2px 6px rgba(0, 150, 136, 0.3)'
+              boxShadow: '0 2px 6px rgba(27, 94, 32, 0.3)'
             }}
-            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#00796b'}
-            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#009688'}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2E7D32'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1B5E20'}
           >
             <Plus size={15} />
             <span>{t('admin.settings.createPrintTemplate') || 'Tạo mẫu in'}</span>
@@ -813,8 +813,8 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                         padding: '9px 12px',
                         borderRadius: '7px',
                         border: 'none',
-                        backgroundColor: isSelected ? '#e6f7f5' : 'transparent',
-                        color: isSelected ? '#009688' : '#334155',
+                        backgroundColor: isSelected ? '#E8F5E9' : 'transparent',
+                        color: isSelected ? '#1B5E20' : '#334155',
                         fontWeight: isSelected ? 800 : 600,
                         fontSize: '13px',
                         cursor: 'pointer',
@@ -829,15 +829,15 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <Icon size={15} color={isSelected ? '#009688' : '#64748b'} />
+                        <Icon size={15} color={isSelected ? '#1B5E20' : '#64748b'} />
                         <span>{item.label}</span>
                       </div>
                       <span style={{
                         fontSize: '10.5px',
                         padding: '1px 6px',
                         borderRadius: '9999px',
-                        backgroundColor: isSelected ? '#b2dfdb' : '#f1f5f9',
-                        color: isSelected ? '#004d40' : '#64748b',
+                        backgroundColor: isSelected ? '#A5D6A7' : '#f1f5f9',
+                        color: isSelected ? '#1B5E20' : '#64748b',
                         fontWeight: 700
                       }}>
                         {count}
@@ -882,8 +882,8 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                       padding: '0 14px',
                       background: 'none',
                       border: 'none',
-                      borderBottom: isActive ? '2.5px solid #009688' : '2.5px solid transparent',
-                      color: isActive ? '#009688' : '#64748b',
+                      borderBottom: isActive ? '2.5px solid #1B5E20' : '2.5px solid transparent',
+                      color: isActive ? '#1B5E20' : '#64748b',
                       fontWeight: isActive ? 800 : 600,
                       fontSize: '13px',
                       cursor: 'pointer',
@@ -895,7 +895,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                   >
                     <span>{tpl.name}</span>
                     {tpl.isDefault && (
-                      <span style={{ fontSize: '10px', backgroundColor: '#e6f7f5', color: '#00796b', padding: '1px 5px', borderRadius: '4px' }}>
+                      <span style={{ fontSize: '10px', backgroundColor: '#E8F5E9', color: '#2E7D32', padding: '1px 5px', borderRadius: '4px' }}>
                         Mặc định
                       </span>
                     )}
@@ -925,7 +925,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                 onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
                 onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
               >
-                <Pencil size={13} color="#009688" />
+                <Pencil size={13} color="#1B5E20" />
                 <span>{t('admin.settings.btnEditTemplate') || 'Sửa'}</span>
               </button>
 
@@ -1034,7 +1034,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     width: '260px',
                     outline: 'none'
                   }}
-                  onFocus={(e) => e.target.style.borderColor = '#009688'}
+                  onFocus={(e) => e.target.style.borderColor = '#1B5E20'}
                   onBlur={(e) => e.target.style.borderColor = '#cbd5e1'}
                 />
 
@@ -1116,16 +1116,16 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     gap: '6px',
                     padding: '7px 18px',
                     borderRadius: '6px',
-                    backgroundColor: '#009688',
+                    backgroundColor: '#1B5E20',
                     color: '#ffffff',
                     border: 'none',
                     fontSize: '12.5px',
                     fontWeight: 700,
                     cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(0, 150, 136, 0.3)'
+                    boxShadow: '0 2px 6px rgba(27, 94, 32, 0.3)'
                   }}
-                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#00796b'}
-                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#009688'}
+                  onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2E7D32'}
+                  onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1B5E20'}
                 >
                   <Save size={14} />
                   <span>{t('admin.settings.saveTemplateBtn') || 'Lưu mẫu'}</span>
@@ -1180,15 +1180,15 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                         gap: '4px',
                         padding: '4px 10px',
                         borderRadius: '4px',
-                        border: isSourceMode ? '1px solid #009688' : '1px solid #cbd5e1',
-                        backgroundColor: isSourceMode ? '#e6f7f5' : '#ffffff',
-                        color: isSourceMode ? '#00796b' : '#334155',
+                        border: isSourceMode ? '1px solid #1B5E20' : '1px solid #cbd5e1',
+                        backgroundColor: isSourceMode ? '#E8F5E9' : '#ffffff',
+                        color: isSourceMode ? '#2E7D32' : '#334155',
                         fontSize: '12px',
                         fontWeight: 700,
                         cursor: 'pointer'
                       }}
                     >
-                      <Code size={13} color={isSourceMode ? '#009688' : '#64748b'} />
+                      <Code size={13} color={isSourceMode ? '#1B5E20' : '#64748b'} />
                       <span>Source</span>
                     </button>
 
@@ -1202,7 +1202,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                           gap: '6px',
                           padding: '4px 10px',
                           borderRadius: '4px',
-                          border: showTokenMenu ? '1px solid #009688' : '1px solid #cbd5e1',
+                          border: showTokenMenu ? '1px solid #1B5E20' : '1px solid #cbd5e1',
                           backgroundColor: '#ffffff',
                           color: '#334155',
                           fontSize: '12px',
@@ -1237,7 +1237,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
 
                           {TOKEN_MENU_GROUPS.map((group, gIdx) => (
                             <div key={gIdx} style={{ marginTop: '8px' }}>
-                              <div style={{ fontSize: '11px', fontWeight: 700, color: '#009688', padding: '2px 8px', backgroundColor: '#f0fdfa', borderRadius: '4px', marginBottom: '4px' }}>
+                              <div style={{ fontSize: '11px', fontWeight: 700, color: '#1B5E20', padding: '2px 8px', backgroundColor: '#f0fdfa', borderRadius: '4px', marginBottom: '4px' }}>
                                 {group.groupTitle}
                               </div>
                               <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
@@ -1268,8 +1268,8 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                                         fontSize: '10px',
                                         padding: '1px 6px',
                                         borderRadius: '4px',
-                                        backgroundColor: isActive ? '#e6f7f5' : '#f1f5f9',
-                                        color: isActive ? '#00796b' : '#64748b',
+                                        backgroundColor: isActive ? '#E8F5E9' : '#f1f5f9',
+                                        color: isActive ? '#2E7D32' : '#64748b',
                                         fontWeight: 700
                                       }}>
                                         {isActive ? '✓ Đã có' : '+ Thêm'}
@@ -1312,9 +1312,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                       style={{
                         padding: '4px 6px',
                         borderRadius: '4px',
-                        border: editingTemplate.showLogo ? '1px solid #009688' : '1px solid #cbd5e1',
-                        backgroundColor: editingTemplate.showLogo ? '#e6f7f5' : '#ffffff',
-                        color: editingTemplate.showLogo ? '#00796b' : '#64748b',
+                        border: editingTemplate.showLogo ? '1px solid #1B5E20' : '1px solid #cbd5e1',
+                        backgroundColor: editingTemplate.showLogo ? '#E8F5E9' : '#ffffff',
+                        color: editingTemplate.showLogo ? '#2E7D32' : '#64748b',
                         cursor: 'pointer',
                         display: 'flex',
                         alignItems: 'center'
@@ -1363,7 +1363,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     Gõ / để{' '}
                     <span
                       onClick={() => setShowTokenMenu(true)}
-                      style={{ color: '#009688', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
+                      style={{ color: '#1B5E20', fontWeight: 700, cursor: 'pointer', textDecoration: 'underline' }}
                     >
                       chèn thông tin
                     </span>
@@ -1410,9 +1410,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     style={{
                       padding: '3px 6px',
                       borderRadius: '3px',
-                      border: editingTemplate.isBold ? '1px solid #009688' : '1px solid transparent',
-                      backgroundColor: editingTemplate.isBold ? '#e6f7f5' : 'transparent',
-                      color: editingTemplate.isBold ? '#00796b' : '#334155',
+                      border: editingTemplate.isBold ? '1px solid #1B5E20' : '1px solid transparent',
+                      backgroundColor: editingTemplate.isBold ? '#E8F5E9' : 'transparent',
+                      color: editingTemplate.isBold ? '#2E7D32' : '#334155',
                       fontWeight: 900,
                       cursor: 'pointer'
                     }}
@@ -1426,9 +1426,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     style={{
                       padding: '3px 6px',
                       borderRadius: '3px',
-                      border: editingTemplate.isItalic ? '1px solid #009688' : '1px solid transparent',
-                      backgroundColor: editingTemplate.isItalic ? '#e6f7f5' : 'transparent',
-                      color: editingTemplate.isItalic ? '#00796b' : '#334155',
+                      border: editingTemplate.isItalic ? '1px solid #1B5E20' : '1px solid transparent',
+                      backgroundColor: editingTemplate.isItalic ? '#E8F5E9' : 'transparent',
+                      color: editingTemplate.isItalic ? '#2E7D32' : '#334155',
                       cursor: 'pointer'
                     }}
                   >
@@ -1441,9 +1441,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     style={{
                       padding: '3px 6px',
                       borderRadius: '3px',
-                      border: editingTemplate.isUnderline ? '1px solid #009688' : '1px solid transparent',
-                      backgroundColor: editingTemplate.isUnderline ? '#e6f7f5' : 'transparent',
-                      color: editingTemplate.isUnderline ? '#00796b' : '#334155',
+                      border: editingTemplate.isUnderline ? '1px solid #1B5E20' : '1px solid transparent',
+                      backgroundColor: editingTemplate.isUnderline ? '#E8F5E9' : 'transparent',
+                      color: editingTemplate.isUnderline ? '#2E7D32' : '#334155',
                       cursor: 'pointer'
                     }}
                   >
@@ -1463,7 +1463,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                   {/* Colors: Text color, Fill color */}
                   <div title="Màu chữ" style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', padding: '2px 4px', cursor: 'pointer' }}>
                     <span style={{ fontSize: '12px', fontWeight: 900, lineHeight: 1, color: '#0f172a' }}>A</span>
-                    <div style={{ width: '11px', height: '2.5px', backgroundColor: '#009688', marginTop: '1px' }} />
+                    <div style={{ width: '11px', height: '2.5px', backgroundColor: '#1B5E20', marginTop: '1px' }} />
                   </div>
 
                   <button title="Màu nền" style={{ padding: '3px 5px', border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}>
@@ -1479,9 +1479,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     style={{
                       padding: '3px 5px',
                       borderRadius: '3px',
-                      border: editingTemplate.textAlign === 'left' ? '1px solid #80cbc4' : '1px solid transparent',
-                      backgroundColor: editingTemplate.textAlign === 'left' ? '#e6f7f5' : 'transparent',
-                      color: editingTemplate.textAlign === 'left' ? '#00796b' : '#64748b',
+                      border: editingTemplate.textAlign === 'left' ? '1px solid #A5D6A7' : '1px solid transparent',
+                      backgroundColor: editingTemplate.textAlign === 'left' ? '#E8F5E9' : 'transparent',
+                      color: editingTemplate.textAlign === 'left' ? '#2E7D32' : '#64748b',
                       cursor: 'pointer'
                     }}
                   >
@@ -1494,9 +1494,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     style={{
                       padding: '3px 5px',
                       borderRadius: '3px',
-                      border: (editingTemplate.textAlign || 'center') === 'center' ? '1px solid #80cbc4' : '1px solid transparent',
-                      backgroundColor: (editingTemplate.textAlign || 'center') === 'center' ? '#e6f7f5' : 'transparent',
-                      color: (editingTemplate.textAlign || 'center') === 'center' ? '#00796b' : '#64748b',
+                      border: (editingTemplate.textAlign || 'center') === 'center' ? '1px solid #A5D6A7' : '1px solid transparent',
+                      backgroundColor: (editingTemplate.textAlign || 'center') === 'center' ? '#E8F5E9' : 'transparent',
+                      color: (editingTemplate.textAlign || 'center') === 'center' ? '#2E7D32' : '#64748b',
                       cursor: 'pointer'
                     }}
                   >
@@ -1509,9 +1509,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                     style={{
                       padding: '3px 5px',
                       borderRadius: '3px',
-                      border: editingTemplate.textAlign === 'right' ? '1px solid #80cbc4' : '1px solid transparent',
-                      backgroundColor: editingTemplate.textAlign === 'right' ? '#e6f7f5' : 'transparent',
-                      color: editingTemplate.textAlign === 'right' ? '#00796b' : '#64748b',
+                      border: editingTemplate.textAlign === 'right' ? '1px solid #A5D6A7' : '1px solid transparent',
+                      backgroundColor: editingTemplate.textAlign === 'right' ? '#E8F5E9' : 'transparent',
+                      color: editingTemplate.textAlign === 'right' ? '#2E7D32' : '#64748b',
                       cursor: 'pointer'
                     }}
                   >
@@ -1530,7 +1530,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
 
                   {/* Grid / Border icons */}
                   <button title="Viền bảng" style={{ padding: '3px 5px', border: 'none', background: 'none', cursor: 'pointer', color: '#64748b' }}>
-                    <Grid size={13} color="#009688" />
+                    <Grid size={13} color="#1B5E20" />
                   </button>
                 </div>
 
@@ -1553,9 +1553,9 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                           style={{
                             padding: '3px 10px',
                             borderRadius: '4px',
-                            border: '1px solid #009688',
-                            backgroundColor: '#e6f7f5',
-                            color: '#00796b',
+                            border: '1px solid #1B5E20',
+                            backgroundColor: '#E8F5E9',
+                            color: '#2E7D32',
                             fontSize: '11px',
                             fontWeight: 700,
                             cursor: 'pointer'
@@ -2220,7 +2220,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                           fontSize: '11.5px',
                           fontWeight: 700,
                           border: 'none',
-                          backgroundColor: editingTemplate.orientation === 'portrait' ? '#009688' : '#ffffff',
+                          backgroundColor: editingTemplate.orientation === 'portrait' ? '#1B5E20' : '#ffffff',
                           color: editingTemplate.orientation === 'portrait' ? '#ffffff' : '#64748b',
                           cursor: 'pointer'
                         }}
@@ -2234,7 +2234,7 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
                           fontSize: '11.5px',
                           fontWeight: 700,
                           border: 'none',
-                          backgroundColor: editingTemplate.orientation === 'landscape' ? '#009688' : '#ffffff',
+                          backgroundColor: editingTemplate.orientation === 'landscape' ? '#1B5E20' : '#ffffff',
                           color: editingTemplate.orientation === 'landscape' ? '#ffffff' : '#64748b',
                           cursor: 'pointer'
                         }}

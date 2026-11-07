@@ -84,7 +84,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     Container(
                       padding: const EdgeInsets.all(6),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF009688),
+                        color: const Color(0xFF1B5E20),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: const Icon(Icons.payment, color: Colors.white, size: 18),
@@ -204,10 +204,10 @@ class _PaymentDialogState extends State<PaymentDialog> {
                             child: Container(
                               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 7),
                               decoration: BoxDecoration(
-                                color: isSelected ? const Color(0xFF009688) : const Color(0xFFF1F5F9),
+                                color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFF1F5F9),
                                 borderRadius: BorderRadius.circular(6),
                                 border: Border.all(
-                                  color: isSelected ? const Color(0xFF009688) : const Color(0xFFCBD5E1),
+                                  color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFCBD5E1),
                                 ),
                               ),
                               child: Text(
@@ -313,7 +313,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     ),
                     child: const Row(
                       children: [
-                        Icon(Icons.credit_card, size: 36, color: Color(0xFF009688)),
+                        Icon(Icons.credit_card, size: 36, color: Color(0xFF1B5E20)),
                         SizedBox(width: 12),
                         Expanded(
                           child: Column(
@@ -361,7 +361,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                       flex: 2,
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF009688),
+                          backgroundColor: const Color(0xFF1B5E20),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           elevation: 0,
@@ -404,7 +404,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                       backgroundColor: const Color(0xFF0B1626),
                                       title: const Row(
                                         children: [
-                                          Icon(Icons.check_circle, color: Color(0xFF00C292), size: 24),
+                                          Icon(Icons.check_circle, color: Color(0xFF66BB6A), size: 24),
                                           SizedBox(width: 8),
                                           Text('Thanh Toán Thành Công!', style: TextStyle(color: Colors.white, fontSize: 15, fontWeight: FontWeight.bold)),
                                         ],
@@ -416,8 +416,8 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                       actions: [
                                         OutlinedButton.icon(
                                           style: OutlinedButton.styleFrom(
-                                            foregroundColor: const Color(0xFF00C292),
-                                            side: const BorderSide(color: Color(0xFF00C292)),
+                                            foregroundColor: const Color(0xFF66BB6A),
+                                            side: const BorderSide(color: Color(0xFF66BB6A)),
                                             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                                           ),
@@ -434,7 +434,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                         ),
                                         ElevatedButton(
                                           style: ElevatedButton.styleFrom(
-                                            backgroundColor: const Color(0xFF009688),
+                                            backgroundColor: const Color(0xFF1B5E20),
                                             foregroundColor: Colors.white,
                                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
                                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -471,10 +471,10 @@ class _PaymentDialogState extends State<PaymentDialog> {
         child: Container(
           padding: const EdgeInsets.symmetric(vertical: 10),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF009688) : const Color(0xFFF8FAFC),
+            color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFF8FAFC),
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? const Color(0xFF009688) : const Color(0xFFCBD5E1),
+              color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFCBD5E1),
               width: 1.2,
             ),
           ),

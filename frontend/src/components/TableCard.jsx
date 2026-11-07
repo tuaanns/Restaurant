@@ -36,7 +36,7 @@ export function TableCard({
     priceColor = '#ffffff';
   } else if (isEmpty) {
     cardBg = '#ffffff';
-    cardBorder = isSelected ? '#009688' : '#e2e8f0';
+    cardBorder = isSelected ? '#1B5E20' : '#e2e8f0';
     textColor = '#0f172a';
     subtextColor = '#64748b';
     priceColor = '#0f172a';
@@ -47,9 +47,9 @@ export function TableCard({
     subtextColor = '#a16207';
     priceColor = '#713f12';
   } else if (isSelected) {
-    cardBorder = '#009688';
+    cardBorder = '#1B5E20';
   } else if (isOccupied) {
-    cardBorder = '#bbf7d0';
+    cardBorder = '#A5D6A7';
   }
 
   return (
@@ -59,7 +59,7 @@ export function TableCard({
       style={{
         position: 'relative',
         backgroundColor: cardBg,
-        border: isSelected ? '2px solid #009688' : `1.5px solid ${cardBorder}`,
+        border: isSelected ? '2px solid #1B5E20' : `1.5px solid ${cardBorder}`,
         borderRadius: '12px',
         padding: '12px 14px',
         cursor: 'pointer',
@@ -68,7 +68,7 @@ export function TableCard({
         justifyContent: 'space-between',
         height: '142px',
         boxShadow: isSelected
-          ? '0 4px 14px rgba(0, 150, 136, 0.25)'
+          ? '0 4px 14px rgba(27, 94, 32, 0.25)'
           : '0 1px 3px rgba(0, 0, 0, 0.04)',
         transition: 'transform 0.15s ease, box-shadow 0.15s ease',
       }}
@@ -88,7 +88,7 @@ export function TableCard({
           width: '20px',
           height: '20px',
           borderRadius: '50%',
-          backgroundColor: '#009688',
+          backgroundColor: '#1B5E20',
           color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
@@ -138,8 +138,8 @@ export function TableCard({
               fontWeight: 700,
               padding: '2px 6px',
               borderRadius: '4px',
-              backgroundColor: isBilling ? '#fef3c7' : '#e6f7f5',
-              color: isBilling ? '#b45309' : '#00796b',
+              backgroundColor: isBilling ? '#fef3c7' : '#E8F5E9',
+              color: isBilling ? '#b45309' : '#1B5E20',
             }}>
               {table.duration}
             </span>
@@ -182,7 +182,7 @@ export function TableCard({
           marginBottom: '8px'
         }}>
           {isSelected && (
-            <span style={{ color: '#009688', fontWeight: 700, marginRight: '4px' }}>
+            <span style={{ color: '#1B5E20', fontWeight: 700, marginRight: '4px' }}>
               {t('table.selected')}
             </span>
           )}

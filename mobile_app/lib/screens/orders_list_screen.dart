@@ -121,7 +121,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                   Container(
                     padding: const EdgeInsets.all(6),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF009688),
+                      color: const Color(0xFF1B5E20),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: const Icon(Icons.receipt_long, color: Colors.white, size: 20),
@@ -234,7 +234,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
     Color statusBg;
 
     if (order.status == 'active') {
-      statusColor = const Color(0xFF009688);
+      statusColor = const Color(0xFF1B5E20);
       statusBg = const Color(0xFFECFDF5);
       statusText = I18n.t('oDining');
     } else if (order.status == 'billing') {
@@ -326,7 +326,7 @@ class _OrdersListScreenState extends State<OrdersListScreen> {
                 ),
                 Text(
                   currencyFormat.format(order.totalAmount),
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Color(0xFF009688)),
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Color(0xFF1B5E20)),
                 ),
               ],
             ),

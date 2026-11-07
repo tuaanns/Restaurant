@@ -484,14 +484,14 @@ class PreBillDialog extends StatelessWidget {
                                 Expanded(
                                   child: Text(
                                     '${promotion!.name.isNotEmpty ? promotion!.name : promotion!.code}:',
-                                    style: const TextStyle(fontFamily: 'serif', fontSize: 12, color: Color(0xFF009688), fontWeight: FontWeight.w600),
+                                    style: const TextStyle(fontFamily: 'serif', fontSize: 12, color: Color(0xFF1B5E20), fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 Text(
                                   '-${numFormat.format(promoDiscount)}',
-                                  style: const TextStyle(fontFamily: 'serif', fontSize: 12, color: Color(0xFF009688), fontWeight: FontWeight.w600),
+                                  style: const TextStyle(fontFamily: 'serif', fontSize: 12, color: Color(0xFF1B5E20), fontWeight: FontWeight.w600),
                                 ),
                               ],
                             ),

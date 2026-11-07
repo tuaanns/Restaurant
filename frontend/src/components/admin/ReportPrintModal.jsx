@@ -666,14 +666,14 @@ export function ReportPrintModal({
             style={{
               padding: '9px 22px',
               borderRadius: '6px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               color: '#ffffff',
               fontSize: '13.5px',
               fontWeight: 700,
               display: 'flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: '0 3px 10px rgba(0, 150, 136, 0.35)',
+              boxShadow: '0 3px 10px rgba(27, 94, 32, 0.35)',
               border: 'none',
               cursor: 'pointer'
             }}

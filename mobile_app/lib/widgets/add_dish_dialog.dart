@@ -84,7 +84,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
                         color: const Color(0xFF1E293B),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.add_shopping_cart, color: Color(0xFF00C292), size: 18),
+                      child: const Icon(Icons.add_shopping_cart, color: Color(0xFF66BB6A), size: 18),
                     ),
                     const SizedBox(width: 10),
                     const Expanded(
@@ -130,7 +130,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
                           const SizedBox(height: 4),
                           Text(
                             '${currencyFormat.format(widget.product.price)} / ${I18n.formatDishUnit(widget.product.unit)}',
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF009688)),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1B5E20)),
                           ),
                         ],
                       ),
@@ -211,7 +211,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.add, size: 18, color: Color(0xFF009688)),
+                                icon: const Icon(Icons.add, size: 18, color: Color(0xFF1B5E20)),
                                 onPressed: () => setState(() => _quantity++),
                                 constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
                                 padding: EdgeInsets.zero,
@@ -288,7 +288,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
                       children: [
                         Row(
                           children: [
-                            const Icon(Icons.table_restaurant, size: 16, color: Color(0xFF009688)),
+                            const Icon(Icons.table_restaurant, size: 16, color: Color(0xFF1B5E20)),
                             const SizedBox(width: 6),
                             Text(
                               '${I18n.t('orderForTableTitle')}: ${I18n.formatTableName(targetTable.name)}',
@@ -302,7 +302,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
                             Text(I18n.t('totalPrice'), style: const TextStyle(fontSize: 10.5, color: Color(0xFF64748B))),
                             Text(
                               currencyFormat.format(subtotal),
-                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF009688)),
+                              style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF1B5E20)),
                             ),
                           ],
                         ),
@@ -336,7 +336,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
                           flex: 3,
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF009688),
+                              backgroundColor: const Color(0xFF1B5E20),
                               foregroundColor: Colors.white,
                               elevation: 2,
                               padding: const EdgeInsets.symmetric(vertical: 12),
@@ -390,7 +390,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
             ),
           ],
         ),
-        backgroundColor: const Color(0xFF009688),
+        backgroundColor: const Color(0xFF1B5E20),
         behavior: SnackBarBehavior.floating,
         duration: const Duration(seconds: 2),
       ),

@@ -100,7 +100,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF009688),
+          backgroundColor: const Color(0xFF1B5E20),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
         ),
@@ -225,7 +225,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF009688),
+                    color: const Color(0xFF1B5E20),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(
@@ -300,7 +300,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                         if (widget.onOpenMenu != null)
                           ElevatedButton(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF009688),
+                              backgroundColor: const Color(0xFF1B5E20),
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                             ),
@@ -356,7 +356,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                                   },
                                   child: const Padding(
                                     padding: EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                                    child: Icon(Icons.add, size: 14, color: Color(0xFF009688)),
+                                    child: Icon(Icons.add, size: 14, color: Color(0xFF1B5E20)),
                                   ),
                                 ),
                               ],
@@ -464,7 +464,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                     color: _selectedPromotion != null ? const Color(0xFFE6F7F5) : Colors.white,
                     borderRadius: BorderRadius.circular(7),
                     border: Border.all(
-                      color: _selectedPromotion != null ? const Color(0xFF80CBC4) : const Color(0xFFCBD5E1),
+                      color: _selectedPromotion != null ? const Color(0xFFA5D6A7) : const Color(0xFFCBD5E1),
                       width: 1,
                     ),
                   ),
@@ -473,7 +473,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                       Icon(
                         Icons.card_giftcard_rounded,
                         size: 16,
-                        color: _selectedPromotion != null ? const Color(0xFF009688) : const Color(0xFF64748B),
+                        color: _selectedPromotion != null ? const Color(0xFF1B5E20) : const Color(0xFF64748B),
                       ),
                       const SizedBox(width: 8),
                       Expanded(
@@ -486,7 +486,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                             style: TextStyle(
                               fontSize: 12,
                               fontWeight: _selectedPromotion != null ? FontWeight.bold : FontWeight.w600,
-                              color: _selectedPromotion != null ? const Color(0xFF00796B) : const Color(0xFF475569),
+                              color: _selectedPromotion != null ? const Color(0xFF2E7D32) : const Color(0xFF475569),
                             ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
@@ -499,7 +499,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                           style: const TextStyle(
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
-                            color: Color(0xFF009688),
+                            color: Color(0xFF1B5E20),
                           ),
                         ),
                         const SizedBox(width: 6),
@@ -550,8 +550,8 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(I18n.t('promoDiscount'), style: const TextStyle(fontSize: 11.5, color: Color(0xFF009688), fontWeight: FontWeight.w600)),
-                      Text('-${currencyFormat.format(promoDiscount)}', style: const TextStyle(fontSize: 11.5, color: Color(0xFF009688), fontWeight: FontWeight.w700)),
+                      Text(I18n.t('promoDiscount'), style: const TextStyle(fontSize: 11.5, color: Color(0xFF1B5E20), fontWeight: FontWeight.w600)),
+                      Text('-${currencyFormat.format(promoDiscount)}', style: const TextStyle(fontSize: 11.5, color: Color(0xFF1B5E20), fontWeight: FontWeight.w700)),
                     ],
                   ),
                 ],
@@ -561,8 +561,8 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text('${I18n.t('memberDiscount')} (5%):', style: const TextStyle(fontSize: 11.5, color: Color(0xFF009688))),
-                    Text('-${currencyFormat.format(memberDiscount)}', style: const TextStyle(fontSize: 11.5, color: Color(0xFF009688))),
+                    Text('${I18n.t('memberDiscount')} (5%):', style: const TextStyle(fontSize: 11.5, color: Color(0xFF1B5E20))),
+                    Text('-${currencyFormat.format(memberDiscount)}', style: const TextStyle(fontSize: 11.5, color: Color(0xFF1B5E20))),
                   ],
                 ),
 
@@ -581,7 +581,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(I18n.t('totalPayment').trim(), style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Color(0xFF0F172A))),
-                    Text(currencyFormat.format(total), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF009688))),
+                    Text(currencyFormat.format(total), style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Color(0xFF1B5E20))),
                   ],
                 ),
               ],
@@ -605,10 +605,10 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          foregroundColor: hasNewItems ? const Color(0xFF00796B) : const Color(0xFF475569),
+                          foregroundColor: hasNewItems ? const Color(0xFF2E7D32) : const Color(0xFF475569),
                           backgroundColor: hasNewItems ? const Color(0xFFE6F7F5) : Colors.white,
                           side: BorderSide(
-                            color: hasNewItems ? const Color(0xFF009688) : const Color(0xFFCBD5E1),
+                            color: hasNewItems ? const Color(0xFF1B5E20) : const Color(0xFFCBD5E1),
                             width: hasNewItems ? 1.5 : 1,
                           ),
                           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 4),
@@ -685,7 +685,7 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
                   width: double.infinity,
                   child: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF009688),
+                      backgroundColor: const Color(0xFF1B5E20),
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
                       elevation: 1,

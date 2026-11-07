@@ -212,7 +212,7 @@ export function KitchenTicketModal({
             style={{
               padding: '9px 20px',
               borderRadius: '6px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               color: '#ffffff',
               fontSize: '13.5px',
               fontWeight: 700,
@@ -221,7 +221,7 @@ export function KitchenTicketModal({
               gap: '7px',
               border: 'none',
               cursor: 'pointer',
-              boxShadow: '0 3px 10px rgba(0, 150, 136, 0.3)'
+              boxShadow: '0 3px 10px rgba(27, 94, 32, 0.3)'
             }}
           >
             <Printer size={16} />

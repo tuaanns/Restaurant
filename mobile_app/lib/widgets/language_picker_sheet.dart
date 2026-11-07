@@ -95,7 +95,7 @@ void showLanguagePickerSheet(BuildContext context, {VoidCallback? onLanguageChan
                                 Text('${lang.name} (${lang.localName})'),
                               ],
                             ),
-                            backgroundColor: const Color(0xFF009688),
+                            backgroundColor: const Color(0xFF1B5E20),
                             duration: const Duration(seconds: 2),
                           ),
                         );

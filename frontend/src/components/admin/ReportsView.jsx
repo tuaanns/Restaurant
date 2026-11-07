@@ -351,9 +351,9 @@ export function ReportsView({
           justifyContent: 'space-between',
           margin: '18px 0 8px 0',
           paddingBottom: '4px',
-          borderBottom: '1.5px solid #009688'
+          borderBottom: '1.5px solid #1B5E20'
         }}>
-          <div style={{ fontWeight: 800, fontSize: '13px', color: '#00796b', textTransform: 'uppercase' }}>
+          <div style={{ fontWeight: 800, fontSize: '13px', color: '#2E7D32', textTransform: 'uppercase' }}>
             {t('admin.reports.sectionOrders')} ({orders.length} {t('admin.reports.ordersCount')})
           </div>
           <div style={{ fontSize: '11px', color: '#64748b' }}>
@@ -364,7 +364,7 @@ export function ReportsView({
 
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
         <thead>
-          <tr style={{ backgroundColor: '#a7f3d0', color: '#00796b' }}>
+          <tr style={{ backgroundColor: '#a7f3d0', color: '#2E7D32' }}>
             <th style={{ padding: '8px 6px', textAlign: 'left', fontWeight: 700, width: '120px' }}>{t('admin.reports.orderCode')}</th>
             <th style={{ padding: '8px 6px', textAlign: 'center', fontWeight: 700, width: '85px' }}>{t('admin.reports.timeCol')}</th>
             <th style={{ padding: '8px 6px', textAlign: 'left', fontWeight: 700, width: '110px' }}>{t('admin.reports.tableCol')}</th>
@@ -432,7 +432,7 @@ export function ReportsView({
                     }}>
                       {expandedOrders[ord.id] ? '−' : '+'}
                     </span>
-                    <span style={{ fontWeight: 700, color: '#009688' }}>{ord.order_code}</span>
+                    <span style={{ fontWeight: 700, color: '#1B5E20' }}>{ord.order_code}</span>
                   </td>
                   <td style={{ padding: '7px 6px', textAlign: 'center', color: '#475569' }}>
                     {ord.created_time || ord.created_at?.split(' ')[1] || '---'}
@@ -489,7 +489,7 @@ export function ReportsView({
                               ord.items.map((it, itIdx) => (
                                 <tr key={it.id || itIdx} style={{ borderTop: '1px solid #f1f5f9' }}>
                                   <td style={{ padding: '5px 8px', textAlign: 'center', color: '#64748b' }}>{itIdx + 1}</td>
-                                  <td style={{ padding: '5px 8px', color: '#009688', fontWeight: 600 }}>{it.product_code || '---'}</td>
+                                  <td style={{ padding: '5px 8px', color: '#1B5E20', fontWeight: 600 }}>{it.product_code || '---'}</td>
                                   <td style={{ padding: '5px 8px', fontWeight: 600 }}>{formatDishName(it.product_name, it.product_code)}</td>
                                   <td style={{ padding: '5px 8px', textAlign: 'center', color: '#64748b' }}>{formatDishUnit(it.unit || 'phần')}</td>
                                   <td style={{ padding: '5px 8px', textAlign: 'right' }}>{formatNumber(it.price)}</td>
@@ -526,9 +526,9 @@ export function ReportsView({
           justifyContent: 'space-between',
           margin: '20px 0 8px 0',
           paddingBottom: '4px',
-          borderBottom: '1.5px solid #009688'
+          borderBottom: '1.5px solid #1B5E20'
         }}>
-          <div style={{ fontWeight: 800, fontSize: '13px', color: '#00796b', textTransform: 'uppercase' }}>
+          <div style={{ fontWeight: 800, fontSize: '13px', color: '#2E7D32', textTransform: 'uppercase' }}>
             {t('admin.reports.sectionGoods')} ({goods.length} {t('admin.reports.itemsCount')})
           </div>
         </div>
@@ -536,7 +536,7 @@ export function ReportsView({
 
       <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
         <thead>
-          <tr style={{ backgroundColor: '#a7f3d0', color: '#00796b' }}>
+          <tr style={{ backgroundColor: '#a7f3d0', color: '#2E7D32' }}>
             <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 700, width: '110px' }}>{t('admin.reports.goodsCode')}</th>
             <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 700 }}>{t('admin.reports.goodsName')}</th>
             <th style={{ padding: '8px 10px', textAlign: 'left', fontWeight: 700, width: '140px' }}>{t('admin.reports.menuGroup')}</th>
@@ -581,7 +581,7 @@ export function ReportsView({
                   backgroundColor: index % 2 === 0 ? '#ffffff' : '#f8fafc'
                 }}
               >
-                <td style={{ padding: '7px 10px', fontWeight: 600, color: '#009688' }}>{item.product_code}</td>
+                <td style={{ padding: '7px 10px', fontWeight: 600, color: '#1B5E20' }}>{item.product_code}</td>
                 <td style={{ padding: '7px 10px', fontWeight: 600 }}>{formatDishName(item.product_name, item.product_code)}</td>
                 <td style={{ padding: '7px 10px', color: '#64748b' }}>{formatCategoryName(item.category_name)}</td>
                 <td style={{ padding: '7px 10px', textAlign: 'center' }}>{formatDishUnit(item.unit)}</td>
@@ -612,8 +612,8 @@ export function ReportsView({
             width: '32px',
             height: '32px',
             borderRadius: '8px',
-            backgroundColor: '#e6f7f5',
-            color: '#009688',
+            backgroundColor: '#E8F5E9',
+            color: '#1B5E20',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -654,7 +654,7 @@ export function ReportsView({
                 borderRadius: '6px',
                 fontSize: '12.5px',
                 fontWeight: reportType === tab.key ? 700 : 500,
-                backgroundColor: reportType === tab.key ? '#009688' : 'transparent',
+                backgroundColor: reportType === tab.key ? '#1B5E20' : 'transparent',
                 color: reportType === tab.key ? '#ffffff' : '#475569',
                 border: 'none',
                 cursor: 'pointer',
@@ -693,7 +693,7 @@ export function ReportsView({
                   name="orientation"
                   checked={orientation === 'vertical'}
                   onChange={() => setOrientation('vertical')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: orientation === 'vertical' ? 600 : 400 }}>{t('admin.reports.portrait')}</span>
               </label>
@@ -703,7 +703,7 @@ export function ReportsView({
                   name="orientation"
                   checked={orientation === 'horizontal'}
                   onChange={() => setOrientation('horizontal')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: orientation === 'horizontal' ? 600 : 400 }}>{t('admin.reports.landscape')}</span>
               </label>
@@ -751,8 +751,8 @@ export function ReportsView({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              backgroundColor: '#e6f7f5',
-              color: '#009688',
+              backgroundColor: '#E8F5E9',
+              color: '#1B5E20',
               padding: '6px 10px',
               borderRadius: '6px',
               fontSize: '12px',
@@ -780,7 +780,7 @@ export function ReportsView({
                   name="dateMode"
                   checked={dateFilterMode === 'custom'}
                   onChange={() => setDateFilterMode('custom')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: dateFilterMode === 'custom' ? 600 : 400 }}>{t('admin.reports.selectDate')}</span>
               </label>
@@ -842,7 +842,7 @@ export function ReportsView({
                   name="dateMode"
                   checked={dateFilterMode === 'preset'}
                   onChange={() => setDateFilterMode('preset')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: dateFilterMode === 'preset' ? 600 : 400 }}>{t('admin.reports.otherOptions')}</span>
               </label>
@@ -937,7 +937,7 @@ export function ReportsView({
                 flex: 1,
                 padding: '8px 12px',
                 borderRadius: '6px',
-                backgroundColor: '#009688',
+                backgroundColor: '#1B5E20',
                 color: '#ffffff',
                 fontWeight: 700,
                 fontSize: '12.5px',
@@ -1174,7 +1174,7 @@ export function ReportsView({
                   gap: '6px',
                   padding: '6px 12px',
                   borderRadius: '6px',
-                  backgroundColor: '#009688',
+                  backgroundColor: '#1B5E20',
                   color: '#ffffff',
                   fontSize: '12.5px',
                   fontWeight: 700,
@@ -1289,7 +1289,7 @@ export function ReportsView({
                 <div style={{ fontSize: '12px', color: '#475569', fontWeight: 500 }}>
                   {t('admin.reports.salesDate')} <strong>{formatDisplayDate(selectedDate)}</strong>
                 </div>
-                <div style={{ fontSize: '12px', color: '#009688', fontWeight: 700, marginTop: '2px' }}>
+                <div style={{ fontSize: '12px', color: '#1B5E20', fontWeight: 700, marginTop: '2px' }}>
                   {t('admin.reports.branchTitle')}
                 </div>
               </div>
@@ -1335,7 +1335,7 @@ export function ReportsView({
                     <span>{t('admin.reports.cardLabel')}</span>
                     <strong>{formatCurrency(summary.payment_breakdown?.card || 0)}</strong>
                   </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontWeight: 800, color: '#00796b', fontSize: '13px', borderBottom: '1px solid #cbd5e1' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', padding: '5px 0', fontWeight: 800, color: '#2E7D32', fontSize: '13px', borderBottom: '1px solid #cbd5e1' }}>
                     <span>{t('admin.reports.totalNetRevenue')}</span>
                     <span>{formatCurrency(summary.total_revenue || 0)}</span>
                   </div>

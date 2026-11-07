@@ -406,7 +406,7 @@ export function CashTransactionModal({
                   fontWeight: 700,
                   border: 'none',
                   cursor: 'pointer',
-                  backgroundColor: type === 'receipt' ? '#009688' : 'transparent',
+                  backgroundColor: type === 'receipt' ? '#1B5E20' : 'transparent',
                   color: type === 'receipt' ? '#ffffff' : '#64748b'
                 }}
               >
@@ -669,7 +669,7 @@ export function CashTransactionModal({
                   width: '100%',
                   padding: '10px 14px',
                   borderRadius: '6px',
-                  border: '1.5px solid #009688',
+                  border: '1.5px solid #1B5E20',
                   fontSize: '17px',
                   fontWeight: 800,
                   color: isPayment ? '#dc2626' : '#047857',
@@ -808,7 +808,7 @@ export function CashTransactionModal({
               padding: '9px 24px',
               borderRadius: '6px',
               border: 'none',
-              backgroundColor: isPayment ? '#ef4444' : '#009688',
+              backgroundColor: isPayment ? '#ef4444' : '#1B5E20',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,

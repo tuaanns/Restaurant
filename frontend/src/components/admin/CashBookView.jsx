@@ -272,8 +272,8 @@ export function CashBookView({ currentUser = null }) {
             width: '32px',
             height: '32px',
             borderRadius: '8px',
-            backgroundColor: '#e6f7f5',
-            color: '#009688',
+            backgroundColor: '#E8F5E9',
+            color: '#1B5E20',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center'
@@ -311,7 +311,7 @@ export function CashBookView({ currentUser = null }) {
                 borderRadius: '6px',
                 fontSize: '12.5px',
                 fontWeight: fundType === tab.key ? 700 : 500,
-                backgroundColor: fundType === tab.key ? '#009688' : 'transparent',
+                backgroundColor: fundType === tab.key ? '#1B5E20' : 'transparent',
                 color: fundType === tab.key ? '#ffffff' : '#475569',
                 border: 'none',
                 cursor: 'pointer',
@@ -350,7 +350,7 @@ export function CashBookView({ currentUser = null }) {
                   name="fundTypeRadio"
                   checked={fundType === 'all'}
                   onChange={() => setFundType('all')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: fundType === 'all' ? 700 : 400 }}>{t('admin.cashbook.fundTotal')}</span>
               </label>
@@ -360,7 +360,7 @@ export function CashBookView({ currentUser = null }) {
                   name="fundTypeRadio"
                   checked={fundType === 'cash'}
                   onChange={() => setFundType('cash')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: fundType === 'cash' ? 700 : 400 }}>{t('admin.cashbook.fundCash')}</span>
               </label>
@@ -370,7 +370,7 @@ export function CashBookView({ currentUser = null }) {
                   name="fundTypeRadio"
                   checked={fundType === 'bank'}
                   onChange={() => setFundType('bank')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: fundType === 'bank' ? 700 : 400 }}>{t('admin.cashbook.fundBank')}</span>
               </label>
@@ -388,8 +388,8 @@ export function CashBookView({ currentUser = null }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              backgroundColor: '#e6f7f5',
-              color: '#009688',
+              backgroundColor: '#E8F5E9',
+              color: '#1B5E20',
               padding: '6px 10px',
               borderRadius: '6px',
               fontSize: '12px',
@@ -417,7 +417,7 @@ export function CashBookView({ currentUser = null }) {
                   name="dateMode"
                   checked={dateFilterMode === 'preset'}
                   onChange={() => setDateFilterMode('preset')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: dateFilterMode === 'preset' ? 600 : 400 }}>{t('admin.cashbook.timeRange')}</span>
               </label>
@@ -455,7 +455,7 @@ export function CashBookView({ currentUser = null }) {
                   name="dateMode"
                   checked={dateFilterMode === 'custom'}
                   onChange={() => setDateFilterMode('custom')}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span style={{ fontWeight: dateFilterMode === 'custom' ? 600 : 400 }}>{t('admin.cashbook.otherOptions')}</span>
               </label>
@@ -514,7 +514,7 @@ export function CashBookView({ currentUser = null }) {
                   type="checkbox"
                   checked={includeReceipt}
                   onChange={(e) => setIncludeReceipt(e.target.checked)}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span>{t('admin.cashbook.receipt')}</span>
               </label>
@@ -523,7 +523,7 @@ export function CashBookView({ currentUser = null }) {
                   type="checkbox"
                   checked={includePayment}
                   onChange={(e) => setIncludePayment(e.target.checked)}
-                  style={{ accentColor: '#009688', width: '15px', height: '15px' }}
+                  style={{ accentColor: '#1B5E20', width: '15px', height: '15px' }}
                 />
                 <span>{t('admin.cashbook.payment')}</span>
               </label>
@@ -662,8 +662,8 @@ export function CashBookView({ currentUser = null }) {
 
             {/* Tồn quỹ */}
             <div style={{ backgroundColor: '#f0fdfa', border: '1px solid #ccfbf1', borderRadius: '8px', padding: '10px 14px' }}>
-              <div style={{ fontSize: '11.5px', color: '#00796b', fontWeight: 700 }}>{t('admin.cashbook.closingBalance')}</div>
-              <div style={{ fontSize: '18px', fontWeight: 900, color: '#009688', marginTop: '3px', letterSpacing: '-0.3px' }}>
+              <div style={{ fontSize: '11.5px', color: '#2E7D32', fontWeight: 700 }}>{t('admin.cashbook.closingBalance')}</div>
+              <div style={{ fontSize: '18px', fontWeight: 900, color: '#1B5E20', marginTop: '3px', letterSpacing: '-0.3px' }}>
                 {formatMoney(summary.closing_balance)}
               </div>
             </div>
@@ -721,13 +721,13 @@ export function CashBookView({ currentUser = null }) {
                     gap: '6px',
                     padding: '7px 14px',
                     borderRadius: '6px',
-                    backgroundColor: '#009688',
+                    backgroundColor: '#1B5E20',
                     color: '#ffffff',
                     fontSize: '12.5px',
                     fontWeight: 700,
                     border: 'none',
                     cursor: 'pointer',
-                    boxShadow: '0 2px 6px rgba(0, 150, 136, 0.3)'
+                    boxShadow: '0 2px 6px rgba(27, 94, 32, 0.3)'
                   }}
                 >
                   <Plus size={15} />
@@ -769,7 +769,7 @@ export function CashBookView({ currentUser = null }) {
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                     >
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#009688' }} />
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#1B5E20' }} />
                       <span>{t('admin.cashbook.receiptCash')}</span>
                     </button>
                     <button
@@ -792,7 +792,7 @@ export function CashBookView({ currentUser = null }) {
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                     >
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#009688' }} />
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#1B5E20' }} />
                       <span>{t('admin.cashbook.receiptBank')}</span>
                     </button>
                   </div>
@@ -814,7 +814,7 @@ export function CashBookView({ currentUser = null }) {
                     gap: '6px',
                     padding: '7px 14px',
                     borderRadius: '6px',
-                    backgroundColor: '#009688',
+                    backgroundColor: '#1B5E20',
                     color: '#ffffff',
                     fontSize: '12.5px',
                     fontWeight: 700,
@@ -885,7 +885,7 @@ export function CashBookView({ currentUser = null }) {
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f8fafc'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
                     >
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#009688' }} />
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#1B5E20' }} />
                       <span>{t('admin.cashbook.paymentBank')}</span>
                     </button>
                   </div>
@@ -1154,8 +1154,8 @@ export function CashBookView({ currentUser = null }) {
                             width: '48px',
                             height: '48px',
                             borderRadius: '50%',
-                            backgroundColor: '#e6f7f5',
-                            color: '#009688',
+                            backgroundColor: '#E8F5E9',
+                            color: '#1B5E20',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center'
@@ -1178,7 +1178,7 @@ export function CashBookView({ currentUser = null }) {
                               marginTop: '8px',
                               padding: '8px 16px',
                               borderRadius: '6px',
-                              backgroundColor: '#009688',
+                              backgroundColor: '#1B5E20',
                               color: '#ffffff',
                               border: 'none',
                               fontSize: '12.5px',
@@ -1204,7 +1204,7 @@ export function CashBookView({ currentUser = null }) {
                         >
                           {/* Mã phiếu */}
                           {visibleColumns.code && (
-                            <td style={{ padding: '9px 12px', fontWeight: 700, color: '#009688' }}>
+                            <td style={{ padding: '9px 12px', fontWeight: 700, color: '#1B5E20' }}>
                               {item.code}
                             </td>
                           )}
@@ -1246,8 +1246,8 @@ export function CashBookView({ currentUser = null }) {
                                 borderRadius: '4px',
                                 fontSize: '11px',
                                 fontWeight: 700,
-                                backgroundColor: item.payment_method === 'cash' ? '#f1f5f9' : '#e6f7f5',
-                                color: item.payment_method === 'cash' ? '#475569' : '#00796b',
+                                backgroundColor: item.payment_method === 'cash' ? '#f1f5f9' : '#E8F5E9',
+                                color: item.payment_method === 'cash' ? '#475569' : '#2E7D32',
                                 border: `1px solid ${item.payment_method === 'cash' ? '#cbd5e1' : '#bae6fd'}`
                               }}>
                                 {item.payment_method === 'cash' ? t('admin.cashbook.fundCash') : t('admin.cashbook.fundBank')}
@@ -1330,7 +1330,7 @@ export function CashBookView({ currentUser = null }) {
                                 style={{
                                   background: 'none',
                                   border: 'none',
-                                  color: '#009688',
+                                  color: '#1B5E20',
                                   cursor: 'pointer',
                                   padding: '4px'
                                 }}

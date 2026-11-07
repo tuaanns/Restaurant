@@ -183,7 +183,7 @@ class _FlagPainter extends CustomPainter {
     }
 
     // Default fallback: Globe blue
-    canvas.drawCircle(Offset(w / 2, h / 2), w / 2, Paint()..color = const Color(0xFF009688));
+    canvas.drawCircle(Offset(w / 2, h / 2), w / 2, Paint()..color = const Color(0xFF1B5E20));
   }
 
   Path _createStarPath({

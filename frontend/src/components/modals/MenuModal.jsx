@@ -89,7 +89,7 @@ export function MenuModal({
               width: '32px',
               height: '32px',
               borderRadius: '8px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center'
@@ -185,7 +185,7 @@ export function MenuModal({
                   fontSize: '11px',
                   padding: '3px 8px',
                   borderRadius: '12px',
-                  backgroundColor: activeNote === note.label ? '#009688' : '#e2e8f0',
+                  backgroundColor: activeNote === note.label ? '#1B5E20' : '#e2e8f0',
                   color: activeNote === note.label ? '#ffffff' : '#475569',
                   fontWeight: 500,
                   flexShrink: 0
@@ -217,7 +217,7 @@ export function MenuModal({
                 borderRadius: '20px',
                 fontSize: '12px',
                 fontWeight: 600,
-                backgroundColor: selectedCatId === 'all' ? '#009688' : '#ffffff',
+                backgroundColor: selectedCatId === 'all' ? '#1B5E20' : '#ffffff',
                 color: selectedCatId === 'all' ? '#ffffff' : '#334155',
                 border: '1px solid #e2e8f0',
                 flexShrink: 0
@@ -234,7 +234,7 @@ export function MenuModal({
                   borderRadius: '20px',
                   fontSize: '12px',
                   fontWeight: 600,
-                  backgroundColor: selectedCatId === cat.id ? '#009688' : '#ffffff',
+                  backgroundColor: selectedCatId === cat.id ? '#1B5E20' : '#ffffff',
                   color: selectedCatId === cat.id ? '#ffffff' : '#334155',
                   border: '1px solid #e2e8f0',
                   flexShrink: 0
@@ -267,7 +267,7 @@ export function MenuModal({
                   fontSize: '12.5px',
                   fontWeight: 600,
                   marginBottom: '4px',
-                  backgroundColor: selectedCatId === 'all' ? '#009688' : 'transparent',
+                  backgroundColor: selectedCatId === 'all' ? '#1B5E20' : 'transparent',
                   color: selectedCatId === 'all' ? '#ffffff' : '#334155'
                 }}
               >
@@ -286,7 +286,7 @@ export function MenuModal({
                     fontSize: '12.5px',
                     fontWeight: 600,
                     marginBottom: '4px',
-                    backgroundColor: selectedCatId === cat.id ? '#009688' : 'transparent',
+                    backgroundColor: selectedCatId === cat.id ? '#1B5E20' : 'transparent',
                     color: selectedCatId === cat.id ? '#ffffff' : '#334155'
                   }}
                 >
@@ -317,8 +317,8 @@ export function MenuModal({
                     style={{
                       padding: '12px',
                       borderRadius: '10px',
-                      border: isJustAdded ? '2px solid #009688' : '1px solid #e2e8f0',
-                      backgroundColor: isJustAdded ? '#e6f7f5' : '#ffffff',
+                      border: isJustAdded ? '2px solid #1B5E20' : '1px solid #e2e8f0',
+                      backgroundColor: isJustAdded ? '#E8F5E9' : '#ffffff',
                       cursor: 'pointer',
                       display: 'flex',
                       flexDirection: 'column',
@@ -328,7 +328,7 @@ export function MenuModal({
                       transition: 'all 0.15s ease'
                     }}
                     onMouseEnter={(e) => {
-                      if (!isJustAdded) e.currentTarget.style.borderColor = '#009688';
+                      if (!isJustAdded) e.currentTarget.style.borderColor = '#1B5E20';
                     }}
                     onMouseLeave={(e) => {
                       if (!isJustAdded) e.currentTarget.style.borderColor = '#e2e8f0';
@@ -345,11 +345,11 @@ export function MenuModal({
                           {formatDishName(p.name, p.code)}
                         </span>
                         {isJustAdded ? (
-                          <span style={{ color: '#009688' }}><Check size={16} /></span>
+                          <span style={{ color: '#1B5E20' }}><Check size={16} /></span>
                         ) : (
                           <span style={{
                             backgroundColor: '#f1f5f9',
-                            color: '#009688',
+                            color: '#1B5E20',
                             borderRadius: '50%',
                             padding: '3px'
                           }}>
@@ -368,7 +368,7 @@ export function MenuModal({
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
-                      <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#009688' }}>
+                      <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#1B5E20' }}>
                         {formatMoney(p.price)}
                       </span>
                       <span style={{
@@ -409,7 +409,7 @@ export function MenuModal({
             style={{
               padding: '8px 20px',
               borderRadius: '6px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700

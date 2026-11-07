@@ -67,7 +67,7 @@ class _PromotionDialogState extends State<PromotionDialog> {
                       color: const Color(0xFF1E293B),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(Icons.card_giftcard, color: Color(0xFF00C292), size: 18),
+                    child: const Icon(Icons.card_giftcard, color: Color(0xFF66BB6A), size: 18),
                   ),
                   const SizedBox(width: 10),
                   Expanded(
@@ -144,7 +144,7 @@ class _PromotionDialogState extends State<PromotionDialog> {
               child: Container(
                 constraints: const BoxConstraints(maxHeight: 340),
                 child: _isLoading
-                    ? const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: Color(0xFF009688))))
+                    ? const Center(child: Padding(padding: EdgeInsets.all(24), child: CircularProgressIndicator(color: Color(0xFF1B5E20))))
                     : _promotions.isEmpty
                         ? Padding(
                             padding: const EdgeInsets.all(24),
@@ -181,7 +181,7 @@ class _PromotionDialogState extends State<PromotionDialog> {
                                     borderRadius: BorderRadius.circular(10),
                                     border: Border.all(
                                       color: isSelected
-                                          ? const Color(0xFF009688)
+                                          ? const Color(0xFF1B5E20)
                                           : isEligible
                                               ? const Color(0xFFCBD5E1)
                                               : const Color(0xFFE2E8F0),
@@ -194,7 +194,7 @@ class _PromotionDialogState extends State<PromotionDialog> {
                                         padding: const EdgeInsets.all(8),
                                         decoration: BoxDecoration(
                                           color: isSelected
-                                              ? const Color(0xFF009688)
+                                              ? const Color(0xFF1B5E20)
                                               : isEligible
                                                   ? const Color(0xFFE0F2FE)
                                                   : const Color(0xFFF1F5F9),
@@ -253,7 +253,7 @@ class _PromotionDialogState extends State<PromotionDialog> {
                                                   style: const TextStyle(
                                                     fontSize: 11.5,
                                                     fontWeight: FontWeight.w700,
-                                                    color: Color(0xFF009688),
+                                                    color: Color(0xFF1B5E20),
                                                   ),
                                                 ),
                                                 if (p.minOrder > 0) ...[
@@ -272,7 +272,7 @@ class _PromotionDialogState extends State<PromotionDialog> {
                                         ),
                                       ),
                                       if (isSelected)
-                                        const Icon(Icons.check_circle, color: Color(0xFF009688), size: 20)
+                                        const Icon(Icons.check_circle, color: Color(0xFF1B5E20), size: 20)
                                       else if (isEligible)
                                         Container(
                                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),

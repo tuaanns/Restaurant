@@ -209,7 +209,7 @@ export function LoginPage({ onLoginSuccess }) {
                     padding: 0,
                     fontSize: '12px',
                     fontWeight: 500,
-                    color: '#009688',
+                    color: '#1B5E20',
                     cursor: 'pointer'
                   }}
                 >
@@ -278,7 +278,7 @@ export function LoginPage({ onLoginSuccess }) {
                 style={{
                   width: '15px',
                   height: '15px',
-                  accentColor: '#009688',
+                  accentColor: '#1B5E20',
                   cursor: 'pointer'
                 }}
               />
@@ -294,7 +294,7 @@ export function LoginPage({ onLoginSuccess }) {
                 marginTop: '6px',
                 borderRadius: '6px',
                 border: 'none',
-                backgroundColor: '#009688',
+                backgroundColor: '#1B5E20',
                 color: '#ffffff',
                 fontSize: '13.5px',
                 fontWeight: 700,
@@ -308,10 +308,10 @@ export function LoginPage({ onLoginSuccess }) {
                 transition: 'background-color 0.15s ease'
               }}
               onMouseEnter={(e) => {
-                if (!loading) e.currentTarget.style.backgroundColor = '#00796b';
+                if (!loading) e.currentTarget.style.backgroundColor = '#2E7D32';
               }}
               onMouseLeave={(e) => {
-                if (!loading) e.currentTarget.style.backgroundColor = '#009688';
+                if (!loading) e.currentTarget.style.backgroundColor = '#1B5E20';
               }}
             >
               <LogIn size={16} />
@@ -329,7 +329,7 @@ export function LoginPage({ onLoginSuccess }) {
           lineHeight: 1.6
         }}>
           <div>
-            Hỗ trợ kỹ thuật: <strong style={{ color: '#0f766e', fontWeight: 700 }}>0348974111</strong>
+            Hỗ trợ kỹ thuật: <strong style={{ color: '#1B5E20', fontWeight: 700 }}>0348974111</strong>
           </div>
           <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '4px' }}>
             103 Trần Hưng Đạo, Phú Quốc • v4.2.0
@@ -390,7 +390,7 @@ export function LoginPage({ onLoginSuccess }) {
               <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
                 Hotline hỗ trợ kỹ thuật POS:
               </div>
-              <div style={{ fontSize: '16px', fontWeight: 800, color: '#00796b' }}>
+              <div style={{ fontSize: '16px', fontWeight: 800, color: '#1B5E20' }}>
                 0348974111
               </div>
             </div>
@@ -401,7 +401,7 @@ export function LoginPage({ onLoginSuccess }) {
                 height: '36px',
                 borderRadius: '6px',
                 border: 'none',
-                backgroundColor: '#009688',
+                backgroundColor: '#1B5E20',
                 color: '#ffffff',
                 fontWeight: 600,
                 fontSize: '13px',

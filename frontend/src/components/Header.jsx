@@ -128,9 +128,9 @@ export function Header({
                 borderRadius: '6px',
                 fontSize: '13px',
                 fontWeight: 600,
-                backgroundColor: activeTab === 'tables' ? '#009688' : 'rgba(255, 255, 255, 0.06)',
+                backgroundColor: activeTab === 'tables' ? '#1B5E20' : 'rgba(255, 255, 255, 0.06)',
                 color: '#ffffff',
-                boxShadow: activeTab === 'tables' ? '0 2px 8px rgba(0, 150, 136, 0.35)' : 'none',
+                boxShadow: activeTab === 'tables' ? '0 2px 8px rgba(27, 94, 32, 0.35)' : 'none',
                 border: 'none',
                 transition: 'background-color 0.15s ease'
               }}
@@ -150,7 +150,7 @@ export function Header({
                 borderRadius: '6px',
                 fontSize: '13px',
                 fontWeight: 600,
-                backgroundColor: activeTab === 'menu' ? '#009688' : 'rgba(255, 255, 255, 0.06)',
+                backgroundColor: activeTab === 'menu' ? '#1B5E20' : 'rgba(255, 255, 255, 0.06)',
                 color: '#ffffff',
                 border: 'none',
                 transition: 'background-color 0.15s ease'
@@ -199,7 +199,7 @@ export function Header({
               borderRadius: '6px',
               fontSize: '12px',
               fontWeight: 700,
-              backgroundColor: mobileTab === 'tables' ? '#009688' : 'transparent',
+              backgroundColor: mobileTab === 'tables' ? '#1B5E20' : 'transparent',
               color: '#ffffff',
               border: 'none'
             }}
@@ -213,7 +213,7 @@ export function Header({
               borderRadius: '6px',
               fontSize: '12px',
               fontWeight: 700,
-              backgroundColor: mobileTab === 'order' ? '#009688' : 'transparent',
+              backgroundColor: mobileTab === 'order' ? '#1B5E20' : 'transparent',
               color: '#ffffff',
               border: 'none',
               display: 'flex',
@@ -334,14 +334,14 @@ export function Header({
               width: isMobile ? '30px' : '34px',
               height: isMobile ? '30px' : '34px',
               borderRadius: '50%',
-              backgroundColor: isAdmin ? '#0284c7' : '#009688',
+              backgroundColor: isAdmin ? '#0284c7' : '#1B5E20',
               color: '#ffffff',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               fontWeight: 700,
               fontSize: isMobile ? '11px' : '13px',
-              boxShadow: isAdmin ? '0 2px 6px rgba(2, 132, 199, 0.4)' : '0 2px 6px rgba(0, 150, 136, 0.4)',
+              boxShadow: isAdmin ? '0 2px 6px rgba(2, 132, 199, 0.4)' : '0 2px 6px rgba(27, 94, 32, 0.4)',
               border: '2px solid rgba(255,255,255,0.2)'
             }}>
               {initials}
@@ -373,7 +373,7 @@ export function Header({
                     width: '38px',
                     height: '38px',
                     borderRadius: '50%',
-                    backgroundColor: isAdmin ? '#0284c7' : '#009688',
+                    backgroundColor: isAdmin ? '#0284c7' : '#1B5E20',
                     color: '#ffffff',
                     display: 'flex',
                     alignItems: 'center',
@@ -393,7 +393,7 @@ export function Header({
                       gap: '4px',
                       fontSize: '10.5px',
                       fontWeight: 700,
-                      backgroundColor: isAdmin ? 'rgba(56, 189, 248, 0.2)' : 'rgba(0, 150, 136, 0.2)',
+                      backgroundColor: isAdmin ? 'rgba(56, 189, 248, 0.2)' : 'rgba(27, 94, 32, 0.2)',
                       color: isAdmin ? '#38bdf8' : '#00c292',
                       padding: '1px 6px',
                       borderRadius: '4px',

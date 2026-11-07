@@ -122,11 +122,11 @@ export function OrderPanel({
               marginTop: '18px',
               padding: '10px 20px',
               borderRadius: '8px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               color: '#ffffff',
               fontWeight: 700,
               fontSize: '13px',
-              boxShadow: '0 2px 8px rgba(0, 150, 136, 0.3)'
+              boxShadow: '0 2px 8px rgba(27, 94, 32, 0.3)'
             }}
           >
             ← Chọn bàn trên sơ đồ
@@ -291,7 +291,7 @@ export function OrderPanel({
                 marginTop: '12px',
                 padding: '8px 16px',
                 borderRadius: '6px',
-                backgroundColor: '#009688',
+                backgroundColor: '#1B5E20',
                 color: '#ffffff',
                 fontSize: '13px',
                 fontWeight: 600
@@ -395,9 +395,9 @@ export function OrderPanel({
                           gap: '4px',
                           fontSize: '11.5px',
                           fontWeight: 600,
-                          color: '#009688'
+                          color: '#1B5E20'
                         }}>
-                          <CheckCircle2 size={12} color="#009688" />
+                          <CheckCircle2 size={12} color="#1B5E20" />
                           <span>{t('order.sentKitchen')}</span>
                         </span>
                       ) : isPending ? (
@@ -508,8 +508,8 @@ export function OrderPanel({
           marginBottom: '6px',
           padding: '6px 8px',
           borderRadius: '6px',
-          backgroundColor: order?.promotion_id ? '#e6f7f5' : '#f8fafc',
-          border: order?.promotion_id ? '1px solid #80cbc4' : '1px dashed #cbd5e1'
+          backgroundColor: order?.promotion_id ? '#E8F5E9' : '#f8fafc',
+          border: order?.promotion_id ? '1px solid #A5D6A7' : '1px dashed #cbd5e1'
         }}>
           <div
             onClick={onOpenPromotionModal}
@@ -519,11 +519,11 @@ export function OrderPanel({
               gap: '6px',
               cursor: 'pointer',
               flex: 1,
-              color: order?.promotion_id ? '#00796b' : '#475569',
+              color: order?.promotion_id ? '#1B5E20' : '#475569',
               fontWeight: order?.promotion_id ? 700 : 500
             }}
           >
-            <Gift size={14} color={order?.promotion_id ? '#009688' : '#64748b'} />
+            <Gift size={14} color={order?.promotion_id ? '#1B5E20' : '#64748b'} />
             <span>
               {order?.promotion_id
                 ? formatPromoName(order.promotion_name || order.promotion_code)
@@ -533,7 +533,7 @@ export function OrderPanel({
 
           {order?.promotion_id ? (
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontWeight: 700, color: '#009688' }}>
+              <span style={{ fontWeight: 700, color: '#1B5E20' }}>
                 -{formatMoney(order?.promotion_discount_amount || 0)}
               </span>
               <button
@@ -580,7 +580,7 @@ export function OrderPanel({
             display: 'flex',
             justifyContent: 'space-between',
             fontSize: '12.5px',
-            color: '#009688',
+            color: '#1B5E20',
             marginBottom: '5px'
           }}>
             <span>{t('payment.memberDiscount')} ({order?.discount_percent || 0}%):</span>
@@ -630,9 +630,9 @@ export function OrderPanel({
             style={{
               padding: '9px 6px',
               borderRadius: '7px',
-              border: hasNewItems ? '2px solid #009688' : '1px solid #80cbc4',
-              backgroundColor: hasNewItems ? '#e6f7f5' : '#ffffff',
-              color: '#00897b',
+              border: hasNewItems ? '2px solid #1B5E20' : '1px solid #A5D6A7',
+              backgroundColor: hasNewItems ? '#E8F5E9' : '#ffffff',
+              color: '#1B5E20',
               fontSize: '12.5px',
               fontWeight: 700,
               display: 'flex',
@@ -641,7 +641,7 @@ export function OrderPanel({
               gap: '6px'
             }}
           >
-            <Bell size={14} color="#00897b" />
+            <Bell size={14} color="#1B5E20" />
             <span>{t('order.sendKitchen')}</span>
           </button>
 
@@ -720,18 +720,18 @@ export function OrderPanel({
             width: '100%',
             padding: '13px 18px',
             borderRadius: '8px',
-            backgroundColor: '#009688',
+            backgroundColor: '#1B5E20',
             color: '#ffffff',
             fontSize: '15px',
             fontWeight: 800,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            boxShadow: '0 4px 12px rgba(0, 150, 136, 0.35)',
+            boxShadow: '0 4px 12px rgba(27, 94, 32, 0.35)',
             transition: 'background-color 0.15s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#00796b'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#009688'}
+          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#2E7D32'}
+          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#1B5E20'}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <CreditCard size={18} />

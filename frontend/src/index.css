@@ -9,11 +9,11 @@
   --border-dark: #1e293b;
   --bg-app: #eef2f6;
   
-  --teal-main: #009688;
-  --teal-hover: #00796b;
-  --teal-light: #e6f6f4;
-  --teal-border: #80cbc4;
-  --teal-badge-text: #004d40;
+  --teal-main: #1B5E20;
+  --teal-hover: #2E7D32;
+  --teal-light: #E8F5E9;
+  --teal-border: #A5D6A7;
+  --teal-badge-text: #1B5E20;
   
   --amber-main: #f59e0b;
   --amber-bg: #fffbeb;
@@ -44,20 +44,20 @@
   --card-foreground: #0f172a;
   --popover: #ffffff;
   --popover-foreground: #0f172a;
-  --primary: #009688;
-  --primary-hover: #00796b;
+  --primary: #1B5E20;
+  --primary-hover: #2E7D32;
   --primary-foreground: #ffffff;
   --secondary: #f1f5f9;
   --secondary-foreground: #0f172a;
   --muted: #f8fafc;
   --muted-foreground: #64748b;
-  --accent: #f1f5f9;
-  --accent-foreground: #0f172a;
+  --accent: #E8F5E9;
+  --accent-foreground: #1B5E20;
   --destructive: #ef4444;
   --destructive-foreground: #ffffff;
   --border: #e2e8f0;
   --input: #cbd5e1;
-  --ring: #009688;
+  --ring: #1B5E20;
   --radius: 8px;
 }
 
@@ -226,9 +226,9 @@ input, select, textarea {
   gap: 4px;
 }
 .shadcn-badge-default {
-  background-color: #e6f6f4;
-  color: #00796b;
-  border-color: #b2dfdb;
+  background-color: #E8F5E9;
+  color: #1B5E20;
+  border-color: #A5D6A7;
 }
 .shadcn-badge-secondary {
   background-color: #f1f5f9;

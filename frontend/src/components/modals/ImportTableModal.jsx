@@ -350,7 +350,7 @@ export function ImportTableModal({
                 padding: '7px 14px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: activeTab === 'upload' ? '#009688' : '#f1f5f9',
+                backgroundColor: activeTab === 'upload' ? '#1B5E20' : '#f1f5f9',
                 color: activeTab === 'upload' ? '#ffffff' : '#475569',
                 fontSize: '12.5px',
                 fontWeight: 700,
@@ -369,7 +369,7 @@ export function ImportTableModal({
                 padding: '7px 14px',
                 borderRadius: '8px',
                 border: 'none',
-                backgroundColor: activeTab === 'paste' ? '#009688' : '#f1f5f9',
+                backgroundColor: activeTab === 'paste' ? '#1B5E20' : '#f1f5f9',
                 color: activeTab === 'paste' ? '#ffffff' : '#475569',
                 fontSize: '12.5px',
                 fontWeight: 700,
@@ -450,7 +450,7 @@ export function ImportTableModal({
                 }}
                 onClick={() => fileInputRef.current?.click()}
                 style={{
-                  border: `2px dashed ${isDragging ? '#009688' : '#cbd5e1'}`,
+                  border: `2px dashed ${isDragging ? '#1B5E20' : '#cbd5e1'}`,
                   borderRadius: '12px',
                   backgroundColor: isDragging ? '#f0fdf4' : '#f8fafc',
                   padding: '30px 20px',
@@ -601,7 +601,7 @@ export function ImportTableModal({
                             {r.area_name}
                           </span>
                         </td>
-                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#009688' }}>
+                        <td style={{ padding: '8px 10px', textAlign: 'center', fontWeight: 700, color: '#1B5E20' }}>
                           {r.capacity} {t('table.people') || 'người'}
                         </td>
                         <td style={{ padding: '8px 10px', color: '#64748b', fontSize: '11.5px', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -667,7 +667,7 @@ export function ImportTableModal({
               padding: '9px 22px',
               borderRadius: '8px',
               border: 'none',
-              backgroundColor: validCount > 0 ? '#009688' : '#94a3b8',
+              backgroundColor: validCount > 0 ? '#1B5E20' : '#94a3b8',
               color: '#ffffff',
               fontSize: '13px',
               fontWeight: 700,
@@ -675,7 +675,7 @@ export function ImportTableModal({
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              boxShadow: validCount > 0 ? '0 4px 12px rgba(0, 150, 136, 0.3)' : 'none'
+              boxShadow: validCount > 0 ? '0 4px 12px rgba(27, 94, 32, 0.3)' : 'none'
             }}
           >
             {isLoading ? (

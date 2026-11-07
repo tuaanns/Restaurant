@@ -124,7 +124,7 @@ class _MenuScreenState extends State<MenuScreen> {
               ),
             ],
           ),
-          backgroundColor: const Color(0xFF009688),
+          backgroundColor: const Color(0xFF1B5E20),
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 3),
         ),
@@ -221,11 +221,11 @@ class _MenuScreenState extends State<MenuScreen> {
                               decoration: BoxDecoration(
                                 color: const Color(0xFF1E293B),
                                 borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: const Color(0xFF009688), width: 1),
+                                border: Border.all(color: const Color(0xFF1B5E20), width: 1),
                               ),
                               child: Row(
                                 children: [
-                                  const Icon(Icons.table_restaurant, color: Color(0xFF00C292), size: 14),
+                                  const Icon(Icons.table_restaurant, color: Color(0xFF66BB6A), size: 14),
                                   const SizedBox(width: 4),
                                   Text(
                                     I18n.formatTableName(currentTable.name),
@@ -294,7 +294,7 @@ class _MenuScreenState extends State<MenuScreen> {
                 // Dishes Grid
                 Expanded(
                   child: _isLoading
-                      ? const Center(child: CircularProgressIndicator(color: Color(0xFF009688)))
+                      ? const Center(child: CircularProgressIndicator(color: Color(0xFF1B5E20)))
                       : _filteredProducts.isEmpty
                           ? Center(
                               child: Column(
@@ -387,10 +387,10 @@ class _MenuScreenState extends State<MenuScreen> {
                       // Button 1: In Báo Bếp trực tiếp
                       OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(
-                          backgroundColor: pendingItemsCount > 0 ? const Color(0xFF00796B) : const Color(0xFF1E293B),
+                          backgroundColor: pendingItemsCount > 0 ? const Color(0xFF2E7D32) : const Color(0xFF1E293B),
                           foregroundColor: Colors.white,
                           side: BorderSide(
-                            color: pendingItemsCount > 0 ? const Color(0xFF26A69A) : const Color(0xFF334155),
+                            color: pendingItemsCount > 0 ? const Color(0xFF66BB6A) : const Color(0xFF334155),
                             width: pendingItemsCount > 0 ? 1.5 : 1,
                           ),
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
@@ -399,7 +399,7 @@ class _MenuScreenState extends State<MenuScreen> {
                         icon: Icon(
                           Icons.notifications_active,
                           size: 14,
-                          color: pendingItemsCount > 0 ? const Color(0xFF80CBC4) : const Color(0xFF94A3B8),
+                          color: pendingItemsCount > 0 ? const Color(0xFFA5D6A7) : const Color(0xFF94A3B8),
                         ),
                         label: Text(
                           pendingItemsCount > 0 ? 'Báo Bếp ($pendingItemsCount)' : I18n.t('btnKitchen'),
@@ -411,7 +411,7 @@ class _MenuScreenState extends State<MenuScreen> {
                       // Button 2: Xem Đơn & Tính Tiền
                       ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color(0xFF009688),
+                          backgroundColor: const Color(0xFF1B5E20),
                           foregroundColor: Colors.white,
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -440,10 +440,10 @@ class _MenuScreenState extends State<MenuScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF009688) : const Color(0xFFF1F5F9),
+            color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? const Color(0xFF009688) : const Color(0xFFE2E8F0),
+              color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFE2E8F0),
             ),
           ),
           alignment: Alignment.center,
@@ -504,7 +504,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     shape: BoxShape.circle,
                   ),
                   child: const Center(
-                    child: Icon(Icons.add, size: 14, color: Color(0xFF009688)),
+                    child: Icon(Icons.add, size: 14, color: Color(0xFF1B5E20)),
                   ),
                 ),
               ],
@@ -535,7 +535,7 @@ class _MenuScreenState extends State<MenuScreen> {
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
                     fontSize: 13.5,
-                    color: Color(0xFF009688),
+                    color: Color(0xFF1B5E20),
                   ),
                 ),
                 Container(
@@ -579,11 +579,11 @@ class _MenuScreenState extends State<MenuScreen> {
                 dense: true,
                 leading: Icon(
                   Icons.table_restaurant,
-                  color: isCur ? const Color(0xFF009688) : const Color(0xFF64748B),
+                  color: isCur ? const Color(0xFF1B5E20) : const Color(0xFF64748B),
                 ),
                 title: Text(I18n.formatTableName(t.name), style: TextStyle(fontWeight: isCur ? FontWeight.bold : FontWeight.normal)),
                 subtitle: Text(t.status == 'occupied' ? '${I18n.t('statusOccupied')} (${t.notes ?? ""})' : I18n.t('tableEmpty')),
-                trailing: isCur ? const Icon(Icons.check, color: Color(0xFF009688)) : null,
+                trailing: isCur ? const Icon(Icons.check, color: Color(0xFF1B5E20)) : null,
                 onTap: () {
                   Navigator.pop(ctx);
                   widget.onTableSelected(t.id);

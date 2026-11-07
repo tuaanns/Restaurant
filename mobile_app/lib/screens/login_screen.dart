@@ -148,7 +148,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
-                              const Icon(Icons.location_on, size: 13, color: Color(0xFF00C292)),
+                              const Icon(Icons.location_on, size: 13, color: Color(0xFF66BB6A)),
                               const SizedBox(width: 4),
                               Flexible(
                                 child: Text(
@@ -245,7 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               controller: _usernameController,
                               style: const TextStyle(color: Colors.white, fontSize: 14),
                               decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF009688), size: 20),
+                                prefixIcon: const Icon(Icons.person_outline, color: Color(0xFF1B5E20), size: 20),
                                 hintText: I18n.t('usernameHint'),
                                 hintStyle: const TextStyle(color: Color(0xFF475569), fontSize: 13),
                                 filled: true,
@@ -261,7 +261,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(color: Color(0xFF009688), width: 1.5),
+                                  borderSide: const BorderSide(color: Color(0xFF1B5E20), width: 1.5),
                                 ),
                               ),
                             ),
@@ -278,7 +278,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               obscureText: _obscurePassword,
                               style: const TextStyle(color: Colors.white, fontSize: 14),
                               decoration: InputDecoration(
-                                prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF009688), size: 20),
+                                prefixIcon: const Icon(Icons.lock_outline, color: Color(0xFF1B5E20), size: 20),
                                 suffixIcon: IconButton(
                                   icon: Icon(
                                     _obscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -302,7 +302,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 ),
                                 focusedBorder: OutlineInputBorder(
                                   borderRadius: BorderRadius.circular(10),
-                                  borderSide: const BorderSide(color: Color(0xFF009688), width: 1.5),
+                                  borderSide: const BorderSide(color: Color(0xFF1B5E20), width: 1.5),
                                 ),
                               ),
                               onSubmitted: (_) => _handleLogin(),
@@ -312,7 +312,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             // Login Button
                             ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: const Color(0xFF009688),
+                                backgroundColor: const Color(0xFF1B5E20),
                                 foregroundColor: Colors.white,
                                 padding: const EdgeInsets.symmetric(vertical: 14),
                                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
@@ -366,7 +366,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           const SizedBox(width: 8),
                           _buildQuickUser(
                             icon: Icons.point_of_sale_rounded,
-                            iconColor: const Color(0xFF009688),
+                            iconColor: const Color(0xFF1B5E20),
                             label: I18n.t('cashierRole'),
                             onTap: () => _quickLogin('thuhang', '123456'),
                           ),

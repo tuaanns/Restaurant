@@ -147,7 +147,7 @@ export function SettingsView({ onBackToDashboard }) {
         width: '46px',
         height: '24px',
         borderRadius: '9999px',
-        backgroundColor: checked ? '#009688' : '#cbd5e1',
+        backgroundColor: checked ? '#1B5E20' : '#cbd5e1',
         position: 'relative',
         cursor: disabled ? 'not-allowed' : 'pointer',
         border: 'none',
@@ -255,7 +255,7 @@ export function SettingsView({ onBackToDashboard }) {
               }}
               onFocus={(e) => {
                 e.target.style.backgroundColor = '#ffffff';
-                e.target.style.borderColor = '#009688';
+                e.target.style.borderColor = '#1B5E20';
               }}
               onBlur={(e) => {
                 e.target.style.backgroundColor = '#f8fafc';
@@ -363,8 +363,8 @@ export function SettingsView({ onBackToDashboard }) {
                         justifyContent: 'space-between',
                         padding: '10px 12px',
                         borderRadius: '8px',
-                        backgroundColor: isActive ? '#e6f7f5' : 'transparent',
-                        color: isActive ? '#009688' : '#334155',
+                        backgroundColor: isActive ? '#E8F5E9' : 'transparent',
+                        color: isActive ? '#1B5E20' : '#334155',
                         cursor: 'pointer',
                         transition: 'all 0.15s ease'
                       }}
@@ -380,7 +380,7 @@ export function SettingsView({ onBackToDashboard }) {
                       }}
                     >
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <Icon size={17} color={isActive ? '#009688' : '#64748b'} />
+                        <Icon size={17} color={isActive ? '#1B5E20' : '#64748b'} />
                         <span style={{ fontSize: '13px', fontWeight: isActive ? 800 : 600 }}>
                           {tab.label}
                         </span>
@@ -424,8 +424,8 @@ export function SettingsView({ onBackToDashboard }) {
                                 textAlign: 'left',
                                 fontSize: '12px',
                                 fontWeight: isSubActive ? 800 : 500,
-                                backgroundColor: isSubActive ? '#e6f7f5' : 'transparent',
-                                color: isSubActive ? '#009688' : '#475569',
+                                backgroundColor: isSubActive ? '#E8F5E9' : 'transparent',
+                                color: isSubActive ? '#1B5E20' : '#475569',
                                 cursor: 'pointer',
                                 transition: 'all 0.1s ease'
                               }}
@@ -459,8 +459,8 @@ export function SettingsView({ onBackToDashboard }) {
                     padding: '10px 12px',
                     borderRadius: '8px',
                     border: 'none',
-                    backgroundColor: isActive ? '#e6f7f5' : 'transparent',
-                    color: isActive ? '#009688' : '#334155',
+                    backgroundColor: isActive ? '#E8F5E9' : 'transparent',
+                    color: isActive ? '#1B5E20' : '#334155',
                     cursor: 'pointer',
                     textAlign: 'left',
                     transition: 'all 0.15s ease',
@@ -473,7 +473,7 @@ export function SettingsView({ onBackToDashboard }) {
                     if (!isActive) e.currentTarget.style.backgroundColor = 'transparent';
                   }}
                 >
-                  <Icon size={17} color={isActive ? '#009688' : '#64748b'} />
+                  <Icon size={17} color={isActive ? '#1B5E20' : '#64748b'} />
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{
                       fontSize: '13px',
@@ -490,7 +490,7 @@ export function SettingsView({ onBackToDashboard }) {
                       width: '4px',
                       height: '18px',
                       borderRadius: '2px',
-                      backgroundColor: '#009688'
+                      backgroundColor: '#1B5E20'
                     }} />
                   )}
                 </button>
@@ -591,7 +591,7 @@ export function SettingsView({ onBackToDashboard }) {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
-                      color: '#009688',
+                      color: '#1B5E20',
                       fontSize: '12.5px',
                       fontWeight: 700,
                       cursor: 'pointer'
@@ -622,7 +622,7 @@ export function SettingsView({ onBackToDashboard }) {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
-                      color: '#009688',
+                      color: '#1B5E20',
                       fontSize: '12.5px',
                       fontWeight: 700,
                       cursor: 'pointer'
@@ -652,7 +652,7 @@ export function SettingsView({ onBackToDashboard }) {
                       display: 'flex',
                       alignItems: 'center',
                       gap: '4px',
-                      color: '#009688',
+                      color: '#1B5E20',
                       fontSize: '12.5px',
                       fontWeight: 700,
                       cursor: 'pointer'
@@ -694,8 +694,8 @@ export function SettingsView({ onBackToDashboard }) {
                         gap: '10px',
                         padding: '12px 14px',
                         borderRadius: '8px',
-                        border: `1.5px solid ${settings.costPriceMethod === 'fixed' ? '#009688' : '#e2e8f0'}`,
-                        backgroundColor: settings.costPriceMethod === 'fixed' ? '#e6f7f5' : '#ffffff',
+                        border: `1.5px solid ${settings.costPriceMethod === 'fixed' ? '#1B5E20' : '#e2e8f0'}`,
+                        backgroundColor: settings.costPriceMethod === 'fixed' ? '#E8F5E9' : '#ffffff',
                         cursor: 'pointer'
                       }}>
                         <input
@@ -703,7 +703,7 @@ export function SettingsView({ onBackToDashboard }) {
                           name="costPriceMethod"
                           checked={settings.costPriceMethod === 'fixed'}
                           onChange={() => updateSetting('costPriceMethod', 'fixed')}
-                          style={{ marginTop: '2px', accentColor: '#009688' }}
+                          style={{ marginTop: '2px', accentColor: '#1B5E20' }}
                         />
                         <div>
                           <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
@@ -721,8 +721,8 @@ export function SettingsView({ onBackToDashboard }) {
                         gap: '10px',
                         padding: '12px 14px',
                         borderRadius: '8px',
-                        border: `1.5px solid ${settings.costPriceMethod === 'average' ? '#009688' : '#e2e8f0'}`,
-                        backgroundColor: settings.costPriceMethod === 'average' ? '#e6f7f5' : '#ffffff',
+                        border: `1.5px solid ${settings.costPriceMethod === 'average' ? '#1B5E20' : '#e2e8f0'}`,
+                        backgroundColor: settings.costPriceMethod === 'average' ? '#E8F5E9' : '#ffffff',
                         cursor: 'pointer'
                       }}>
                         <input
@@ -730,7 +730,7 @@ export function SettingsView({ onBackToDashboard }) {
                           name="costPriceMethod"
                           checked={settings.costPriceMethod === 'average'}
                           onChange={() => updateSetting('costPriceMethod', 'average')}
-                          style={{ marginTop: '2px', accentColor: '#009688' }}
+                          style={{ marginTop: '2px', accentColor: '#1B5E20' }}
                         />
                         <div>
                           <div style={{ fontSize: '13px', fontWeight: 700, color: '#1e293b' }}>
@@ -1262,8 +1262,8 @@ export function SettingsView({ onBackToDashboard }) {
                       <div style={{
                         marginTop: '8px',
                         fontSize: '11.5px',
-                        color: '#00796b',
-                        backgroundColor: '#e6f7f5',
+                        color: '#2E7D32',
+                        backgroundColor: '#E8F5E9',
                         padding: '4px 8px',
                         borderRadius: '6px',
                         display: 'inline-block'
@@ -1502,7 +1502,7 @@ export function SettingsView({ onBackToDashboard }) {
                         gap: '6px',
                         padding: '6px 12px',
                         borderRadius: '6px',
-                        backgroundColor: '#009688',
+                        backgroundColor: '#1B5E20',
                         color: '#ffffff',
                         border: 'none',
                         fontSize: '12px',
@@ -1532,8 +1532,8 @@ export function SettingsView({ onBackToDashboard }) {
                           gap: '8px',
                           padding: '10px 12px',
                           borderRadius: '8px',
-                          border: `1.5px solid ${settings.paperSize === item.id ? '#009688' : '#e2e8f0'}`,
-                          backgroundColor: settings.paperSize === item.id ? '#e6f7f5' : '#ffffff',
+                          border: `1.5px solid ${settings.paperSize === item.id ? '#1B5E20' : '#e2e8f0'}`,
+                          backgroundColor: settings.paperSize === item.id ? '#E8F5E9' : '#ffffff',
                           cursor: 'pointer',
                           fontSize: '12px',
                           fontWeight: settings.paperSize === item.id ? 700 : 500
@@ -1543,7 +1543,7 @@ export function SettingsView({ onBackToDashboard }) {
                             name="paperSize"
                             checked={settings.paperSize === item.id}
                             onChange={() => updateSetting('paperSize', item.id)}
-                            style={{ accentColor: '#009688' }}
+                            style={{ accentColor: '#1B5E20' }}
                           />
                           <span>{item.label}</span>
                         </label>
@@ -1843,14 +1843,14 @@ export function SettingsView({ onBackToDashboard }) {
                       padding: '4px 0',
                       textAlign: 'left',
                       fontSize: '12.5px',
-                      color: idx === 0 ? '#009688' : '#475569',
+                      color: idx === 0 ? '#1B5E20' : '#475569',
                       fontWeight: idx === 0 ? 700 : 500,
                       cursor: 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '6px'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = '#009688'}
+                    onMouseEnter={(e) => e.currentTarget.style.color = '#1B5E20'}
                     onMouseLeave={(e) => {
                       if (idx !== 0) e.currentTarget.style.color = '#475569';
                     }}
@@ -1900,7 +1900,7 @@ export function SettingsView({ onBackToDashboard }) {
               backgroundColor: '#f8fafc'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Printer size={16} color="#009688" />
+                <Printer size={16} color="#1B5E20" />
                 <span style={{ fontSize: '14px', fontWeight: 800, color: '#0f172a' }}>
                   {t('admin.settings.previewBillTitle') || 'Bản xem trước mẫu hóa đơn'} ({settings.paperSize.toUpperCase()})
                 </span>
@@ -2062,7 +2062,7 @@ export function SettingsView({ onBackToDashboard }) {
                       <div style={{ width: '100px', height: '100px', backgroundColor: '#f1f5f9', display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: '4px' }}>
                         <QrCode size={80} color="#0f172a" />
                       </div>
-                      <div style={{ fontSize: '9px', fontWeight: 800, marginTop: '4px', color: '#00796b' }}>
+                      <div style={{ fontSize: '9px', fontWeight: 800, marginTop: '4px', color: '#2E7D32' }}>
                         QUÉT MÃ VIETQR THANH TOÁN
                       </div>
                     </div>
@@ -2103,7 +2103,7 @@ export function SettingsView({ onBackToDashboard }) {
                 style={{
                   padding: '7px 18px',
                   borderRadius: '6px',
-                  backgroundColor: '#009688',
+                  backgroundColor: '#1B5E20',
                   color: '#ffffff',
                   fontWeight: 700,
                   fontSize: '12.5px',

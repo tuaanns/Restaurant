@@ -80,7 +80,7 @@ class _KitchenScreenState extends State<KitchenScreen> {
             ),
           ],
         ),
-        backgroundColor: newStatus == 'cooking' ? const Color(0xFF0284C7) : const Color(0xFF009688),
+        backgroundColor: newStatus == 'cooking' ? const Color(0xFF0284C7) : const Color(0xFF1B5E20),
         duration: const Duration(seconds: 2),
       ),
     );
@@ -155,7 +155,7 @@ class _KitchenScreenState extends State<KitchenScreen> {
                   const SizedBox(width: 6),
                   _buildTab('cooking', '${I18n.t('kFilterCooking')} ($cookingCount)', const Color(0xFF0284C7)),
                   const SizedBox(width: 6),
-                  _buildTab('done', '${I18n.t('kFilterDone')} ($doneCount)', const Color(0xFF009688)),
+                  _buildTab('done', '${I18n.t('kFilterDone')} ($doneCount)', const Color(0xFF1B5E20)),
                 ],
               ),
             ),
@@ -318,7 +318,7 @@ class _KitchenScreenState extends State<KitchenScreen> {
                 alignment: Alignment.center,
                 child: Text(
                   '${item.quantity}x',
-                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Color(0xFF009688)),
+                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 14, color: Color(0xFF1B5E20)),
                 ),
               ),
               const SizedBox(width: 10),
@@ -368,7 +368,7 @@ class _KitchenScreenState extends State<KitchenScreen> {
               if (item.status == 'cooking')
                 ElevatedButton.icon(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF009688),
+                    backgroundColor: const Color(0xFF1B5E20),
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),

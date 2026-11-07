@@ -27,7 +27,7 @@ const inputStyle = {
 };
 const labelStyle = { fontSize: '12px', fontWeight: 600, color: '#475569' };
 const btnPrimary = {
-  padding: '8px 18px', borderRadius: '6px', backgroundColor: '#009688',
+  padding: '8px 18px', borderRadius: '6px', backgroundColor: '#1B5E20',
   color: '#ffffff', fontWeight: 700, fontSize: '13px', cursor: 'pointer', border: 'none',
   display: 'inline-flex', alignItems: 'center', gap: '6px'
 };
@@ -178,8 +178,8 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
                 padding: '0 14px',
                 fontSize: '13.5px',
                 fontWeight: 600,
-                color: isActive ? '#009688' : '#334155',
-                borderBottom: isActive ? '3px solid #009688' : '3px solid transparent',
+                color: isActive ? '#1B5E20' : '#334155',
+                borderBottom: isActive ? '3px solid #1B5E20' : '3px solid transparent',
                 cursor: 'pointer',
                 background: 'none',
                 border: 'none',
@@ -189,8 +189,8 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
                 transition: 'color 0.12s',
                 whiteSpace: 'nowrap'
               }}
-              onMouseEnter={e => e.currentTarget.style.color = '#009688'}
-              onMouseLeave={e => e.currentTarget.style.color = isActive ? '#009688' : '#334155'}
+              onMouseEnter={e => e.currentTarget.style.color = '#1B5E20'}
+              onMouseLeave={e => e.currentTarget.style.color = isActive ? '#1B5E20' : '#334155'}
             >
               {item.label}
             </button>
@@ -220,8 +220,8 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
                 padding: '0 14px',
                 fontSize: '13.5px',
                 fontWeight: 600,
-                color: isActive || isOpen ? '#009688' : '#334155',
-                borderBottom: isActive ? '3px solid #009688' : '3px solid transparent',
+                color: isActive || isOpen ? '#1B5E20' : '#334155',
+                borderBottom: isActive ? '3px solid #1B5E20' : '3px solid transparent',
                 cursor: 'pointer',
                 background: isOpen ? '#f8fafc' : 'none',
                 border: 'none',
@@ -232,8 +232,8 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
                 transition: 'color 0.12s, background-color 0.12s',
                 whiteSpace: 'nowrap'
               }}
-              onMouseEnter={e => { e.currentTarget.style.color = '#009688'; }}
-              onMouseLeave={e => { e.currentTarget.style.color = isActive || isOpen ? '#009688' : '#334155'; }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#1B5E20'; }}
+              onMouseLeave={e => { e.currentTarget.style.color = isActive || isOpen ? '#1B5E20' : '#334155'; }}
             >
               <span>{item.label}</span>
               <ChevronDown
@@ -280,16 +280,16 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
                         textAlign: 'left',
                         fontSize: '13px',
                         fontWeight: activeTab === child.key ? 700 : 500,
-                        color: activeTab === child.key ? '#009688' : '#334155',
-                        backgroundColor: activeTab === child.key ? '#e6f7f5' : 'transparent',
+                        color: activeTab === child.key ? '#1B5E20' : '#334155',
+                        backgroundColor: activeTab === child.key ? '#E8F5E9' : 'transparent',
                         cursor: 'pointer',
                         border: 'none',
                         display: 'block',
-                        borderLeft: activeTab === child.key ? '3px solid #009688' : '3px solid transparent',
+                        borderLeft: activeTab === child.key ? '3px solid #1B5E20' : '3px solid transparent',
                         transition: 'background-color 0.1s'
                       }}
                       onMouseEnter={e => { if (activeTab !== child.key) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
-                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = activeTab === child.key ? '#e6f7f5' : 'transparent'; }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = activeTab === child.key ? '#E8F5E9' : 'transparent'; }}
                     >
                       {child.label}
                     </button>
@@ -1157,18 +1157,18 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
               gap: '6px',
               padding: '6px 12px',
               borderRadius: '6px',
-              backgroundColor: '#009688',
+              backgroundColor: '#1B5E20',
               color: '#ffffff',
               fontSize: '12.5px',
               fontWeight: 700,
               border: 'none',
               cursor: 'pointer',
               whiteSpace: 'nowrap',
-              boxShadow: '0 2px 6px rgba(0, 150, 136, 0.25)',
+              boxShadow: '0 2px 6px rgba(27, 94, 32, 0.25)',
               transition: 'all 0.15s ease'
             }}
-            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#00796b'}
-            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#009688'}
+            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2E7D32'}
+            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#1B5E20'}
           >
             <ArrowLeft size={14} />
             <span>{t('admin.backToPOS') || 'Về POS'}</span>
@@ -1193,8 +1193,8 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
               height: '32px',
               borderRadius: '8px',
               border: '1px solid #e2e8f0',
-              backgroundColor: activeTab === 'settings' ? '#e6f7f5' : '#ffffff',
-              color: activeTab === 'settings' ? '#009688' : '#64748b',
+              backgroundColor: activeTab === 'settings' ? '#E8F5E9' : '#ffffff',
+              color: activeTab === 'settings' ? '#1B5E20' : '#64748b',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -1258,14 +1258,14 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
-                backgroundColor: '#009688',
+                backgroundColor: '#1B5E20',
                 color: '#ffffff',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontWeight: 700,
                 fontSize: '12px',
-                boxShadow: '0 2px 6px rgba(0, 150, 136, 0.35)',
+                boxShadow: '0 2px 6px rgba(27, 94, 32, 0.35)',
                 border: '1.5px solid #ffffff'
               }}>
                 {initials}
@@ -1297,7 +1297,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       width: '36px',
                       height: '36px',
                       borderRadius: '50%',
-                      backgroundColor: '#009688',
+                      backgroundColor: '#1B5E20',
                       color: '#ffffff',
                       display: 'flex',
                       alignItems: 'center',
@@ -1317,8 +1317,8 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                         gap: '4px',
                         fontSize: '10.5px',
                         fontWeight: 700,
-                        backgroundColor: '#e6f7f5',
-                        color: '#00796b',
+                        backgroundColor: '#E8F5E9',
+                        color: '#2E7D32',
                         padding: '1px 6px',
                         borderRadius: '4px',
                         marginTop: '2px'
@@ -1367,18 +1367,18 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       borderRadius: '6px',
                       fontSize: '12.5px',
                       fontWeight: 600,
-                      color: activeTab === 'settings' ? '#009688' : '#334155',
+                      color: activeTab === 'settings' ? '#1B5E20' : '#334155',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
-                      backgroundColor: activeTab === 'settings' ? '#e6f7f5' : 'transparent',
+                      backgroundColor: activeTab === 'settings' ? '#E8F5E9' : 'transparent',
                       border: 'none',
                       cursor: 'pointer'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6f7f5'}
-                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = activeTab === 'settings' ? '#e6f7f5' : 'transparent'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E8F5E9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = activeTab === 'settings' ? '#E8F5E9' : 'transparent'}
                   >
-                    <Settings size={14} color="#009688" />
+                    <Settings size={14} color="#1B5E20" />
                     <span>{t('admin.settings.title') || 'Thiết lập'}</span>
                   </button>
 
@@ -1394,7 +1394,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       borderRadius: '6px',
                       fontSize: '12.5px',
                       fontWeight: 600,
-                      color: '#009688',
+                      color: '#1B5E20',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '8px',
@@ -1402,7 +1402,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       border: 'none',
                       cursor: 'pointer'
                     }}
-                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e6f7f5'}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#E8F5E9'}
                     onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                   >
                     <LayoutDashboard size={14} />
@@ -1483,8 +1483,8 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
           <div>
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
               {[
-                { label: t('admin.totalRevenue'), value: formatMoney(stats?.total_revenue || 3901700), icon: <DollarSign size={18} />, bg: '#e6f7f5', color: '#009688', sub: t('admin.allShiftsCalc'), subColor: '#10b981' },
-                { label: t('admin.totalOrders'), value: (stats?.total_orders_today || 5) + ' ' + t('admin.ordersUnit'), icon: <TrendingUp size={18} />, bg: '#e6f7f5', color: '#009688', sub: `${t('admin.activeOnTables')} 24 ${t('table.tables')}`, subColor: '#64748b' },
+                { label: t('admin.totalRevenue'), value: formatMoney(stats?.total_revenue || 3901700), icon: <DollarSign size={18} />, bg: '#E8F5E9', color: '#1B5E20', sub: t('admin.allShiftsCalc'), subColor: '#10b981' },
+                { label: t('admin.totalOrders'), value: (stats?.total_orders_today || 5) + ' ' + t('admin.ordersUnit'), icon: <TrendingUp size={18} />, bg: '#E8F5E9', color: '#1B5E20', sub: `${t('admin.activeOnTables')} 24 ${t('table.tables')}`, subColor: '#64748b' },
                 { label: t('admin.tablesOccupied'), value: (stats?.occupied_tables || 6) + ' / 24 ' + t('table.tables'), icon: <Utensils size={18} />, bg: '#fef3c7', color: '#d97706', sub: `${stats?.billing_tables || 2} ${t('table.tables')} ${t('admin.waitingPayment')}`, subColor: '#d97706' },
                 { label: t('admin.staffCount'), value: users.length + ' ' + t('admin.accountsUnit'), icon: <Users size={18} />, bg: '#f3e8ff', color: '#9333ea', sub: t('admin.activeInDb'), subColor: '#64748b' },
               ].map((s, i) => (
@@ -1512,11 +1512,11 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 ].map((p, i) => (
                   <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#009688', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
+                      <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#1B5E20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
                       <span style={{ fontSize: '13px', fontWeight: 600 }}>{formatDishName(p.name)}</span>
                     </div>
                     <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#009688' }}>{p.revenue}</div>
+                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#1B5E20' }}>{p.revenue}</div>
                       <div style={{ fontSize: '11px', color: '#64748b' }}>{t('admin.sold')}: {p.qty}</div>
                     </div>
                   </div>
@@ -1527,7 +1527,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 <h3 style={{ fontSize: '15px', fontWeight: 800, marginBottom: '14px' }}>{t('admin.paymentMethods')}</h3>
                 {[
                   { icon: <Banknote size={20} color="#10b981" />, label: t('admin.cash'), sub: t('admin.atCounter'), value: '1.850.000 đ' },
-                  { icon: <QrCode size={20} color="#009688" />, label: t('admin.bankTransfer'), sub: 'MBBank', value: '1.450.000 đ' },
+                  { icon: <QrCode size={20} color="#1B5E20" />, label: t('admin.bankTransfer'), sub: 'MBBank', value: '1.450.000 đ' },
                   { icon: <CreditCard size={20} color="#8b5cf6" />, label: t('admin.cardPayment'), sub: 'ATM/Visa', value: '601.700 đ' },
                 ].map((m, i) => (
                   <div key={i} style={{ padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
@@ -1597,13 +1597,13 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   return (
                     <tr key={u.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
                       <td style={{ padding: '12px', fontWeight: 700 }}>{u.name}</td>
-                      <td style={{ padding: '12px', fontFamily: 'monospace', color: '#009688', fontSize: '12.5px' }}>{u.username}</td>
+                      <td style={{ padding: '12px', fontFamily: 'monospace', color: '#1B5E20', fontSize: '12.5px' }}>{u.username}</td>
                       <td style={{ padding: '12px', color: '#64748b' }}>{u.email}</td>
                       <td style={{ padding: '12px' }}>
                         <span style={{
                           padding: '3px 8px', borderRadius: '4px', fontSize: '11px', fontWeight: 700,
-                          backgroundColor: u.role === 'admin' ? 'rgba(56,189,248,0.15)' : 'rgba(0,150,136,0.15)',
-                          color: u.role === 'admin' ? '#009688' : '#009688'
+                          backgroundColor: u.role === 'admin' ? 'rgba(56,189,248,0.15)' : 'rgba(27, 94, 32,0.15)',
+                          color: u.role === 'admin' ? '#1B5E20' : '#1B5E20'
                         }}>
                           {u.role === 'admin' ? t('admin.roleAdmin') : t('admin.roleCashier')}
                         </span>
@@ -1629,7 +1629,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                             title={t('edit')}
                             style={{
                               padding: '6px 8px', borderRadius: '6px',
-                              color: '#009688', backgroundColor: '#e6f7f5',
+                              color: '#1B5E20', backgroundColor: '#E8F5E9',
                               border: 'none', cursor: 'pointer',
                               display: 'inline-flex', alignItems: 'center', justifyContent: 'center'
                             }}
@@ -1704,13 +1704,13 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#0f172a', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatDishName(p.name, p.code)}</div>
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                      <span style={{ backgroundColor: '#e6f7f5', color: '#009688', padding: '1px 6px', borderRadius: '4px', fontWeight: 700, marginRight: '6px' }}>{p.code}</span>
+                      <span style={{ backgroundColor: '#E8F5E9', color: '#1B5E20', padding: '1px 6px', borderRadius: '4px', fontWeight: 700, marginRight: '6px' }}>{p.code}</span>
                       {t('menu.unit')}: {formatDishUnit(p.unit)}
                     </div>
-                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#009688', marginTop: '4px' }}>{formatMoney(p.price)}</div>
+                    <div style={{ fontSize: '13px', fontWeight: 800, color: '#1B5E20', marginTop: '4px' }}>{formatMoney(p.price)}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '6px', marginLeft: '8px' }}>
-                    <button onClick={() => openEditProduct(p)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}>
+                    <button onClick={() => openEditProduct(p)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}>
                       <Pencil size={13} />
                     </button>
                     <button onClick={() => handleDeleteProduct(p.id)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
@@ -1743,7 +1743,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                     <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>{c.products_count ?? c.products?.length ?? 0} {t('table.items')}</div>
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
-                    <button onClick={() => openEditCat(c)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
+                    <button onClick={() => openEditCat(c)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
                     <button onClick={() => handleDeleteCategory(c.id)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
@@ -1781,7 +1781,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 >
                   <FileSpreadsheet size={15} /> {t('admin.importCustomerExcel') || 'Nhập từ Excel / CSV'}
                 </button>
-                <button onClick={openAddCustomer} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px', backgroundColor: '#009688' }}>
+                <button onClick={openAddCustomer} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px', backgroundColor: '#1B5E20' }}>
                   <Plus size={15} /> {t('admin.addCustomer')}
                 </button>
               </div>
@@ -1794,7 +1794,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700 }}>{t('admin.totalCustomers')}</div>
                   <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>{customers.length} {t('admin.customersCountUnit')}</div>
                 </div>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#e6f7f5', color: '#009688' }}><Users size={18} /></div>
+                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#E8F5E9', color: '#1B5E20' }}><Users size={18} /></div>
               </div>
               <div style={{ backgroundColor: '#fff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
@@ -1866,15 +1866,15 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                     const isDiamond = tier.includes('Kim Cương');
                     const isGold = tier.includes('Vàng');
                     const isSilver = tier.includes('Bạc');
-                    const tierBg = isDiamond ? '#f3e8ff' : isGold ? '#fef3c7' : isSilver ? '#e6f7f5' : '#f1f5f9';
-                    const tierColor = isDiamond ? '#7e22ce' : isGold ? '#b45309' : isSilver ? '#00796b' : '#475569';
+                    const tierBg = isDiamond ? '#f3e8ff' : isGold ? '#fef3c7' : isSilver ? '#E8F5E9' : '#f1f5f9';
+                    const tierColor = isDiamond ? '#7e22ce' : isGold ? '#b45309' : isSilver ? '#2E7D32' : '#475569';
 
                     return (
                       <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}
                         onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
                         onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                       >
-                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#009688', fontWeight: 700, fontSize: '12.5px' }}>{custCode}</td>
+                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#1B5E20', fontWeight: 700, fontSize: '12.5px' }}>{custCode}</td>
                         <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>
@@ -1917,7 +1917,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                         </td>
                         <td style={{ padding: '12px 14px' }}>
                           <div style={{ display: 'flex', gap: '6px' }}>
-                            <button onClick={() => openEditCustomer(c)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}>
+                            <button onClick={() => openEditCustomer(c)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}>
                               <Pencil size={13} />
                             </button>
                             <button onClick={() => handleDeleteCustomer(c.id)} title={t('delete')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
@@ -1943,7 +1943,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{t('admin.promoTitle')}</h2>
                 <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{t('admin.promoSubtitle')}</p>
               </div>
-              <button onClick={openAddPromo} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px', backgroundColor: '#009688' }}>
+              <button onClick={openAddPromo} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px', backgroundColor: '#1B5E20' }}>
                 <Plus size={15} /> {t('admin.addPromo')}
               </button>
             </div>
@@ -1986,7 +1986,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
                       onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                      <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#009688', fontWeight: 700, fontSize: '12.5px' }}>{p.code}</td>
+                      <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#1B5E20', fontWeight: 700, fontSize: '12.5px' }}>{p.code}</td>
                       <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a', maxWidth: '180px' }}>
                         <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{formatPromoName(p.name)}</div>
                       </td>
@@ -2011,13 +2011,13 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                             title={p.is_active ? t('admin.deactivatePromo') : t('admin.activatePromo')}
                             style={{
                               padding: '5px 8px', borderRadius: '6px', border: 'none', cursor: 'pointer',
-                              backgroundColor: p.is_active ? '#fef3c7' : '#e6f7f5',
+                              backgroundColor: p.is_active ? '#fef3c7' : '#E8F5E9',
                               color: p.is_active ? '#b45309' : '#059669'
                             }}
                           >
                             {p.is_active ? <AlertCircle size={13} /> : <CheckCircle size={13} />}
                           </button>
-                          <button onClick={() => openEditPromo(p)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}>
+                          <button onClick={() => openEditPromo(p)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}>
                             <Pencil size={13} />
                           </button>
                           <button onClick={() => handleDeletePromo(p.id)} title={t('delete')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
@@ -2073,10 +2073,10 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
             {/* Summary cards */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '16px' }}>
               {[
-                { label: t('admin.totalTables'), value: tables.length, bg: '#e6f7f5', color: '#009688', icon: <LayoutGrid size={18} /> },
+                { label: t('admin.totalTables'), value: tables.length, bg: '#E8F5E9', color: '#1B5E20', icon: <LayoutGrid size={18} /> },
                 { label: t('admin.emptyTables'), value: tables.filter(t => t.status === 'empty' || !t.status).length, bg: '#ecfdf5', color: '#059669', icon: <CheckCircle size={18} /> },
                 { label: t('admin.occupiedTables'), value: tables.filter(t => t.status === 'occupied').length, bg: '#fef3c7', color: '#d97706', icon: <Users size={18} /> },
-                { label: t('admin.areasCount'), value: areas.length, bg: '#e6f7f5', color: '#009688', icon: <MapPin size={18} /> },
+                { label: t('admin.areasCount'), value: areas.length, bg: '#E8F5E9', color: '#1B5E20', icon: <MapPin size={18} /> },
               ].map((s, i) => (
                 <div key={i} style={{ backgroundColor: '#fff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
@@ -2134,7 +2134,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                         </span>
                       </div>
                       <div style={{ display: 'flex', gap: '6px', marginTop: '12px', justifyContent: 'flex-end' }}>
-                        <button onClick={() => openEditTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
+                        <button onClick={() => openEditTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
                           <Pencil size={12} /> {t('edit')}
                         </button>
                         <button onClick={() => handleDeleteTable(tObj.id)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
@@ -2172,7 +2172,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 <div key={a.id} style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: '#e6f7f5', color: '#009688' }}><MapPin size={18} /></div>
+                      <div style={{ padding: '10px', borderRadius: '10px', backgroundColor: '#E8F5E9', color: '#1B5E20' }}><MapPin size={18} /></div>
                       <div>
                         <div style={{ fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>{formatAreaName(a.name)}</div>
                         <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
@@ -2181,7 +2181,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
-                      <button onClick={() => openEditArea(a)} title={t('edit')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#009688', backgroundColor: '#e6f7f5', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
+                      <button onClick={() => openEditArea(a)} title={t('edit')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
                       <button onClick={() => handleDeleteArea(a.id)} title={t('delete')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                     </div>
                   </div>
@@ -2326,7 +2326,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                     {t('login.password')}: {!editingUser && <span style={{ color: '#ef4444' }}>*</span>}
                   </label>
                   {editingUser && (
-                    <span style={{ fontSize: '11px', color: '#009688', fontStyle: 'italic' }}>
+                    <span style={{ fontSize: '11px', color: '#1B5E20', fontStyle: 'italic' }}>
                       {t('admin.leaveBlankPassword')}
                     </span>
                   )}
@@ -2434,15 +2434,15 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
               <button onClick={() => setShowAddProductModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
             </div>
             {!editingProduct && (
-              <div style={{ backgroundColor: '#e6f7f5', border: '1px solid #99d9d5', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <Tag size={15} color="#009688" />
-                <span style={{ fontSize: '12.5px', color: '#00796b', fontWeight: 600 }}>{t('admin.autoGenCodeHint')}</span>
+              <div style={{ backgroundColor: '#E8F5E9', border: '1px solid #99d9d5', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Tag size={15} color="#1B5E20" />
+                <span style={{ fontSize: '12.5px', color: '#2E7D32', fontWeight: 600 }}>{t('admin.autoGenCodeHint')}</span>
               </div>
             )}
             {editingProduct && (
-              <div style={{ backgroundColor: '#e6f7f5', border: '1px solid #80cbc4', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
-                <span style={{ fontSize: '12px', color: '#009688' }}>{t('admin.productCode')}: </span>
-                <strong style={{ color: '#009688', fontSize: '13px' }}>{editingProduct.code}</strong>
+              <div style={{ backgroundColor: '#E8F5E9', border: '1px solid #A5D6A7', borderRadius: '8px', padding: '10px 14px', marginBottom: '14px' }}>
+                <span style={{ fontSize: '12px', color: '#1B5E20' }}>{t('admin.productCode')}: </span>
+                <strong style={{ color: '#1B5E20', fontSize: '13px' }}>{editingProduct.code}</strong>
               </div>
             )}
             <form onSubmit={handleSaveProduct} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -2552,11 +2552,11 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                       <div key={step} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                         <div style={{
                           width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                          backgroundColor: promoStep >= step ? '#009688' : '#e2e8f0',
+                          backgroundColor: promoStep >= step ? '#1B5E20' : '#e2e8f0',
                           color: promoStep >= step ? '#fff' : '#94a3b8',
                           fontSize: '11px', fontWeight: 700
                         }}>{step}</div>
-                        <span style={{ fontSize: '11.5px', color: promoStep >= step ? '#009688' : '#94a3b8', fontWeight: 600 }}>
+                        <span style={{ fontSize: '11.5px', color: promoStep >= step ? '#1B5E20' : '#94a3b8', fontWeight: 600 }}>
                           {step === 1 ? t('admin.promoStep1') : t('admin.promoStep2')}
                         </span>
                         {step < 2 && <div style={{ width: '24px', height: '1px', backgroundColor: '#e2e8f0', margin: '0 2px' }} />}
@@ -2577,7 +2577,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   onClick={() => setPromoType('order_discount')}
                   style={{
                     padding: '14px 16px', borderRadius: '8px', marginBottom: '8px', cursor: 'pointer',
-                    border: `1.5px solid ${promoType === 'order_discount' ? '#009688' : '#e2e8f0'}`,
+                    border: `1.5px solid ${promoType === 'order_discount' ? '#1B5E20' : '#e2e8f0'}`,
                     backgroundColor: promoType === 'order_discount' ? '#eff6ff' : '#ffffff',
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                   }}
@@ -2589,8 +2589,8 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   </div>
                   <div style={{
                     width: '18px', height: '18px', borderRadius: '50%', border: '2px solid',
-                    borderColor: promoType === 'order_discount' ? '#009688' : '#cbd5e1',
-                    backgroundColor: promoType === 'order_discount' ? '#009688' : 'transparent',
+                    borderColor: promoType === 'order_discount' ? '#1B5E20' : '#cbd5e1',
+                    backgroundColor: promoType === 'order_discount' ? '#1B5E20' : 'transparent',
                     flexShrink: 0, marginLeft: '12px'
                   }} />
                 </div>
@@ -2603,7 +2603,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                     onClick={() => setPromoType(pt.value)}
                     style={{
                       padding: '14px 16px', borderRadius: '8px', marginBottom: '8px', cursor: 'pointer',
-                      border: `1.5px solid ${promoType === pt.value ? '#009688' : '#e2e8f0'}`,
+                      border: `1.5px solid ${promoType === pt.value ? '#1B5E20' : '#e2e8f0'}`,
                       backgroundColor: promoType === pt.value ? '#eff6ff' : '#ffffff',
                       display: 'flex', justifyContent: 'space-between', alignItems: 'center'
                     }}
@@ -2614,8 +2614,8 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                     </div>
                     <div style={{
                       width: '18px', height: '18px', borderRadius: '50%', border: '2px solid',
-                      borderColor: promoType === pt.value ? '#009688' : '#cbd5e1',
-                      backgroundColor: promoType === pt.value ? '#009688' : 'transparent',
+                      borderColor: promoType === pt.value ? '#1B5E20' : '#cbd5e1',
+                      backgroundColor: promoType === pt.value ? '#1B5E20' : 'transparent',
                       flexShrink: 0, marginLeft: '12px'
                     }} />
                   </div>
@@ -2623,7 +2623,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
                 <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', marginTop: '16px', paddingTop: '14px', borderTop: '1px solid #f1f5f9' }}>
                   <button onClick={() => setShowPromoModal(false)} style={btnSecondary}>{t('skip')}</button>
-                  <button onClick={() => setPromoStep(2)} style={{ ...btnPrimary, backgroundColor: '#009688' }}>{t('next')}</button>
+                  <button onClick={() => setPromoStep(2)} style={{ ...btnPrimary, backgroundColor: '#1B5E20' }}>{t('next')}</button>
                 </div>
               </div>
             )}
@@ -2633,7 +2633,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
               <form onSubmit={handleSavePromo} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 {/* Selected type badge */}
                 <div style={{ backgroundColor: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '8px', padding: '10px 14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <Gift size={15} color="#009688" />
+                  <Gift size={15} color="#1B5E20" />
                   <span style={{ fontSize: '13px', fontWeight: 700, color: '#1d40af' }}>{getPromoTypeLabel(promoType)}</span>
                 </div>
 
@@ -2672,7 +2672,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   >
                     {editingPromo ? t('cancel') : t('back')}
                   </button>
-                  <button type="submit" style={{ ...btnPrimary, backgroundColor: '#009688', padding: '9px 24px' }}>
+                  <button type="submit" style={{ ...btnPrimary, backgroundColor: '#1B5E20', padding: '9px 24px' }}>
                     {editingPromo ? t('admin.updatePromo') : t('admin.createPromo')}
                   </button>
                 </div>

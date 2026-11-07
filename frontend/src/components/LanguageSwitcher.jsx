@@ -107,8 +107,8 @@ export function LanguageSwitcher({ variant = 'light' }) {
                   textAlign: 'left',
                   fontSize: '13px',
                   fontWeight: isSelected ? 700 : 500,
-                  color: isSelected ? '#009688' : '#1e293b',
-                  backgroundColor: isSelected ? '#e6f7f5' : 'transparent',
+                  color: isSelected ? '#1B5E20' : '#1e293b',
+                  backgroundColor: isSelected ? '#E8F5E9' : 'transparent',
                   border: 'none',
                   cursor: 'pointer',
                   transition: 'background-color 0.1s ease',
@@ -118,15 +118,15 @@ export function LanguageSwitcher({ variant = 'light' }) {
                   if (!isSelected) e.currentTarget.style.backgroundColor = '#f1f5f9';
                 }}
                 onMouseLeave={e => {
-                  e.currentTarget.style.backgroundColor = isSelected ? '#e6f7f5' : 'transparent';
+                  e.currentTarget.style.backgroundColor = isSelected ? '#E8F5E9' : 'transparent';
                 }}
               >
                 <FlagIcon code={l.code} size={22} />
                 <span style={{ flex: 1 }}>
-                  {l.label} <span style={{ color: isSelected ? '#009688' : '#64748b', fontSize: '12px' }}>({l.countryCode || l.code.toUpperCase()})</span>
+                  {l.label} <span style={{ color: isSelected ? '#1B5E20' : '#64748b', fontSize: '12px' }}>({l.countryCode || l.code.toUpperCase()})</span>
                 </span>
                 {isSelected && (
-                  <span style={{ fontSize: '13px', color: '#009688', fontWeight: 800 }}>✓</span>
+                  <span style={{ fontSize: '13px', color: '#1B5E20', fontWeight: 800 }}>✓</span>
                 )}
               </button>
             );

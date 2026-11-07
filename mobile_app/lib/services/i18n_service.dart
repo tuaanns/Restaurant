@@ -1344,9 +1344,9 @@ class LanguageCountryBadge extends StatelessWidget {
     Color borderColor = const Color(0xFFCBD5E1);
 
     if (isSelected) {
-      bg = const Color(0xFF009688);
+      bg = const Color(0xFF1B5E20);
       textColor = Colors.white;
-      borderColor = const Color(0xFF00796B);
+      borderColor = const Color(0xFF2E7D32);
     } else {
       switch (countryCode) {
         case 'VN':

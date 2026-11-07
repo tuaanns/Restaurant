@@ -137,12 +137,21 @@ export function App() {
 
     // Đồng bộ thông tin user mới nhất từ CSDL
     try {
-      const meRes = await api.getMe();
-      if (meRes && meRes.user) {
-        setCurrentUser(prev => ({ ...prev, ...meRes.user }));
-        try {
-          sessionStorage.setItem('pos_user', JSON.stringify(meRes.user));
-        } catch (e) {}
+      const usersRes = await api.getUsers();
+      if (usersRes && Array.isArray(usersRes.users) && currentUser) {
+        const found = usersRes.users.find(u => 
+          (currentUser.id && Number(u.id) === Number(currentUser.id)) ||
+          (currentUser.username && u.username === currentUser.username)
+        );
+        if (found) {
+          setCurrentUser(prev => {
+            const merged = { ...prev, ...found };
+            try {
+              sessionStorage.setItem('pos_user', JSON.stringify(merged));
+            } catch (e) {}
+            return merged;
+          });
+        }
       }
     } catch (err) {}
   };
@@ -840,6 +849,12 @@ export function App() {
           onOpenMenu={() => setIsMenuOpen(true)}
           searchInputRef={searchInputRef}
           currentUser={currentUser}
+          onUpdateCurrentUser={(updatedUser) => {
+            setCurrentUser(updatedUser);
+            try {
+              sessionStorage.setItem('pos_user', JSON.stringify(updatedUser));
+            } catch (e) {}
+          }}
           onLogout={handleLogout}
           currentView={currentView}
           setCurrentView={setCurrentView}

@@ -25,7 +25,7 @@ CREATE TABLE `users` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `users` (`id`, `name`, `username`, `email`, `password`, `role`, `shift`, `phone`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'Quản lý: Hoàng Nam', 'admin', 'admin@aura.vn', '$2y$12$e68Y2kF5iM1yE6U6183rNu2tL6QWqH3JvV4YVzG.t17J6F7jL.a1C', 'admin', 'Toàn ca (Quản lý nhà hàng)', '0901.888.999', 1, NOW(), NOW()),
+(1, 'Quản trị viên', 'admin', 'admin@aura.vn', '$2y$12$e68Y2kF5iM1yE6U6183rNu2tL6QWqH3JvV4YVzG.t17J6F7jL.a1C', 'admin', 'Toàn ca (Quản lý nhà hàng)', '0901.888.999', 1, NOW(), NOW()),
 (2, 'Thu Hằng', 'thuhang', 'thuhang@aura.vn', '$2y$12$e68Y2kF5iM1yE6U6183rNu2tL6QWqH3JvV4YVzG.t17J6F7jL.a1C', 'cashier', 'Ca sáng (07:00 - 15:00)', '0912.345.678', 1, NOW(), NOW()),
 (3, 'Minh Trí', 'minhtri', 'minhtri@aura.vn', '$2y$12$e68Y2kF5iM1yE6U6183rNu2tL6QWqH3JvV4YVzG.t17J6F7jL.a1C', 'cashier', 'Ca chiều (15:00 - 23:00)', '0987.654.321', 1, NOW(), NOW());
 

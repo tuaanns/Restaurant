@@ -20,7 +20,7 @@ class DatabaseSeeder extends Seeder
     {
         // 0. Tạo Tài Khoản Người Dùng & Phân Quyền (Admin & Thu Ngân)
         User::create([
-            'name' => 'Quản lý: Hoàng Nam',
+            'name' => 'Quản trị viên',
             'username' => 'admin',
             'email' => 'admin@aura.vn',
             'password' => Hash::make('admin123'),

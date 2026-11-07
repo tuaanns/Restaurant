@@ -691,7 +691,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
         setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...updated } : u));
 
         // Nếu sửa chính tài khoản đang đăng nhập, lập tức cập nhật state cha và sessionStorage
-        const isSelf = (currentUser?.id && editingUser.id === currentUser.id) ||
+        const isSelf = (currentUser?.id && Number(editingUser.id) === Number(currentUser.id)) ||
                        (currentUser?.username && editingUser.username === currentUser.username);
         if (isSelf) {
           const merged = { ...currentUser, ...updated };

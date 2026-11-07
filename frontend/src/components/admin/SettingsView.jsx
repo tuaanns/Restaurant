@@ -13,6 +13,7 @@ import {
   SETTINGS_STORAGE_KEY
 } from '../../utils/restaurantSettings';
 import { PrintTemplatesManager } from './PrintTemplatesManager';
+import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
 
 export function SettingsView({ onBackToDashboard }) {
   const { t, lang, formatMoney } = useLanguage();
@@ -26,6 +27,7 @@ export function SettingsView({ onBackToDashboard }) {
 
   const [toastMessage, setToastMessage] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
+  const [resetModalOpen, setResetModalOpen] = useState(false);
   const toastTimeoutRef = useRef(null);
 
   const PRINT_SUB_ITEMS = [
@@ -53,13 +55,16 @@ export function SettingsView({ onBackToDashboard }) {
   };
 
   const handleResetDefaults = () => {
-    if (window.confirm(t('common.confirmAction') || 'Bạn có chắc chắn muốn khôi phục toàn bộ thiết lập về mặc định?')) {
-      setSettings(DEFAULT_RESTAURANT_SETTINGS);
-      saveRestaurantSettings(DEFAULT_RESTAURANT_SETTINGS);
-      setToastMessage(t('admin.settings.resetToDefault') || 'Đã khôi phục thiết lập mặc định!');
-      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-      toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 2200);
-    }
+    setResetModalOpen(true);
+  };
+
+  const confirmResetDefaults = () => {
+    setSettings(DEFAULT_RESTAURANT_SETTINGS);
+    saveRestaurantSettings(DEFAULT_RESTAURANT_SETTINGS);
+    setToastMessage(t('admin.settings.resetToDefault') || 'Đã khôi phục thiết lập mặc định!');
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 2200);
+    setResetModalOpen(false);
   };
 
   const scrollToSection = (id) => {
@@ -1805,6 +1810,18 @@ export function SettingsView({ onBackToDashboard }) {
         </div>
       )}
 
+      {/* MODAL XÁC NHẬN KHÔI PHỤC THIẾT LẬP MẶC ĐỊNH */}
+      <ConfirmDeleteModal
+        isOpen={resetModalOpen}
+        onClose={() => setResetModalOpen(false)}
+        onConfirm={confirmResetDefaults}
+        title={t('admin.settings.confirmResetTitle') || 'Xác nhận khôi phục mặc định'}
+        message={t('admin.settings.confirmResetMsg') || 'Bạn có chắc chắn muốn khôi phục toàn bộ thiết lập nhà hàng về cấu hình mặc định ban đầu không?'}
+        warningText={t('admin.settings.confirmResetWarning') || 'Các tùy chỉnh hiện tại sẽ được đặt lại theo cấu hình chuẩn.'}
+        confirmText={t('admin.settings.resetToDefault') || 'Khôi phục'}
+        cancelText={t('cancel') || 'Hủy'}
+        dangerIcon="warning"
+      />
     </div>
   );
 }

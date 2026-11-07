@@ -24,6 +24,7 @@ import { api } from '../../api';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useCashBook } from '../../hooks';
 import { CashTransactionModal } from './CashTransactionModal';
+import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
 
 export function CashBookView({ currentUser = null }) {
   const { lang, t, formatCashCategory, formatCashTarget, formatCashCreatedBy } = useLanguage();
@@ -115,14 +116,24 @@ export function CashBookView({ currentUser = null }) {
   }, []);
 
   // Xóa phiếu thu / chi
-  const handleDeleteTransaction = async (id, code) => {
-    const msg = `${t('admin.cashbook.confirmDeleteMsg')} "${code}"? ${t('cannotUndo')}`;
-    if (!window.confirm(msg)) {
-      return;
-    }
-    const res = await deleteTransaction(id);
-    if (!res.success && res.message) {
-      alert(res.message);
+  const [txToDelete, setTxToDelete] = useState(null);
+  const [isDeletingTx, setIsDeletingTx] = useState(false);
+
+  const handleDeleteTransaction = (id, code) => {
+    setTxToDelete({ id, code });
+  };
+
+  const handleConfirmDeleteTx = async () => {
+    if (!txToDelete) return;
+    setIsDeletingTx(true);
+    try {
+      const res = await deleteTransaction(txToDelete.id);
+      if (!res.success && res.message) {
+        alert(res.message);
+      }
+    } finally {
+      setIsDeletingTx(false);
+      setTxToDelete(null);
     }
   };
 
@@ -1372,6 +1383,20 @@ export function CashBookView({ currentUser = null }) {
         defaultMethod={modalMethod}
         onSuccess={() => fetchTransactions()}
         currentUser={currentUser}
+      />
+
+      {/* MODAL XÁC NHẬN XÓA PHIẾU THU / PHIẾU CHI */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(txToDelete)}
+        onClose={() => setTxToDelete(null)}
+        onConfirm={handleConfirmDeleteTx}
+        title={t('admin.cashbook.confirmDeleteTxTitle') || 'Xác nhận xóa phiếu'}
+        message={t('admin.cashbook.confirmDeleteMsg') || 'Bạn có chắc chắn muốn xóa phiếu thu/chi này không?'}
+        itemName={txToDelete?.code}
+        warningText={t('cannotUndo') || 'Hành động này không thể hoàn tác.'}
+        confirmText={t('confirmDelete') || 'Xóa phiếu'}
+        cancelText={t('cancel') || 'Hủy'}
+        loading={isDeletingTx}
       />
     </div>
   );

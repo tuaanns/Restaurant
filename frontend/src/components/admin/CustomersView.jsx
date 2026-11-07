@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { api } from '../../api';
+import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
 
 // ── Default Columns Matching User's Image ──
 const DEFAULT_VISIBLE_COLUMNS = [
@@ -512,6 +513,8 @@ export function CustomersView({
 
   // Delete modal state
   const [deleteConfirmTarget, setDeleteConfirmTarget] = useState(null);
+  const [deleteSelectedConfirmOpen, setDeleteSelectedConfirmOpen] = useState(false);
+  const [isDeletingSelected, setIsDeletingSelected] = useState(false);
 
   // Close more menu when clicking outside
   const moreMenuRef = useRef(null);
@@ -754,21 +757,28 @@ export function CustomersView({
   };
 
   // ── Delete Selected Customers ──
-  const handleDeleteSelected = async () => {
+  const handleDeleteSelected = () => {
     if (selectedRows.length === 0) return;
-    const msg = (t('admin.customersView.deleteSelectedConfirm') || 'Bạn có chắc muốn xóa {count} khách hàng đã chọn?')
-      .replace('{count}', selectedRows.length);
-    if (!window.confirm(msg)) return;
+    setDeleteSelectedConfirmOpen(true);
+  };
 
-    for (const id of selectedRows) {
-      try { await api.deleteCustomer(id); } catch (e) {}
+  const confirmDeleteSelectedAction = async () => {
+    if (selectedRows.length === 0) return;
+    setIsDeletingSelected(true);
+    try {
+      for (const id of selectedRows) {
+        try { await api.deleteCustomer(id); } catch (e) {}
+      }
+      setCustomerList(prev => prev.filter(c => !selectedRows.includes(c.id)));
+      if (setExternalCustomers) {
+        setExternalCustomers(prev => prev.filter(c => !selectedRows.includes(c.id)));
+      }
+      setSelectedRows([]);
+      setShowMoreMenu(false);
+    } finally {
+      setIsDeletingSelected(false);
+      setDeleteSelectedConfirmOpen(false);
     }
-    setCustomerList(prev => prev.filter(c => !selectedRows.includes(c.id)));
-    if (setExternalCustomers) {
-      setExternalCustomers(prev => prev.filter(c => !selectedRows.includes(c.id)));
-    }
-    setSelectedRows([]);
-    setShowMoreMenu(false);
   };
 
   // ── Export to Excel ──
@@ -2288,57 +2298,30 @@ export function CustomersView({
       {/* ═══════════════════════════════════════════════════════════
           MODAL: CONFIRM DELETE CUSTOMER
       ═══════════════════════════════════════════════════════════ */}
-      {deleteConfirmTarget && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15,23,42,0.5)',
-          backdropFilter: 'blur(3px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1050,
-          padding: '20px'
-        }}>
-          <div style={{
-            width: '420px',
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)',
-            padding: '22px',
-            border: `1px solid ${THEME.border}`
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444', marginBottom: '12px' }}>
-              <AlertTriangle size={24} />
-              <h4 style={{ fontSize: '16px', fontWeight: 800, margin: 0 }}>
-                {t('admin.customersView.confirmDeleteTitle')}
-              </h4>
-            </div>
-            <p style={{ fontSize: '13.5px', color: THEME.slateBody, margin: '0 0 8px 0' }}>
-              {t('admin.customersView.confirmDeleteMsg')}
-            </p>
-            <div style={{ padding: '8px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px', fontWeight: 700, color: THEME.slateDark, marginBottom: '18px' }}>
-              {deleteConfirmTarget.name} ({deleteConfirmTarget.code})
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              <button
-                type="button"
-                onClick={() => setDeleteConfirmTarget(null)}
-                style={{ padding: '8px 16px', borderRadius: '8px', border: `1px solid ${THEME.border}`, background: '#fff', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}
-              >
-                {t('cancel')}
-              </button>
-              <button
-                type="button"
-                onClick={confirmDeleteAction}
-                style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', background: '#ef4444', color: '#fff', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}
-              >
-                {t('delete')}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteConfirmTarget)}
+        onClose={() => setDeleteConfirmTarget(null)}
+        onConfirm={confirmDeleteAction}
+        title={t('admin.customersView.confirmDeleteTitle') || 'Xác nhận xóa khách hàng'}
+        message={t('admin.customersView.confirmDeleteMsg') || 'Bạn có chắc chắn muốn xóa khách hàng này không?'}
+        itemName={deleteConfirmTarget ? `${deleteConfirmTarget.name} (${deleteConfirmTarget.code})` : ''}
+        warningText={t('cannotUndo') || 'Hành động này không thể hoàn tác.'}
+        confirmText={t('confirmDelete') || 'Xóa khách hàng'}
+        cancelText={t('cancel') || 'Hủy'}
+      />
+
+      {/* MODAL: CONFIRM DELETE MULTIPLE SELECTED CUSTOMERS */}
+      <ConfirmDeleteModal
+        isOpen={deleteSelectedConfirmOpen}
+        onClose={() => setDeleteSelectedConfirmOpen(false)}
+        onConfirm={confirmDeleteSelectedAction}
+        title={t('admin.customersView.confirmDeleteSelectedTitle') || 'Xác nhận xóa khách hàng đã chọn'}
+        message={(t('admin.customersView.deleteSelectedConfirm') || 'Bạn có chắc muốn xóa {count} khách hàng đã chọn?').replace('{count}', selectedRows.length)}
+        warningText={t('cannotUndo') || 'Hành động này không thể hoàn tác.'}
+        confirmText={t('confirmDelete') || 'Xóa'}
+        cancelText={t('cancel') || 'Hủy'}
+        loading={isDeletingSelected}
+      />
 
     </div>
   );

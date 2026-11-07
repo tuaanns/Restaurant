@@ -13,6 +13,7 @@ import {
   saveAllPrintTemplates,
   DEFAULT_PRINT_TEMPLATES
 } from '../../utils/printTemplatesData';
+import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
 
 const DEFAULT_TOKENS_STATE = {
   orderCode: true,
@@ -2302,73 +2303,17 @@ export function PrintTemplatesManager({ onBack, initialDocType = 'invoice' }) {
       {/* ══════════════════════════════════════════════════════════════
           CONFIRM DELETE TEMPLATE MODAL (Yêu cầu thông báo xóa mẫu in)
           ══════════════════════════════════════════════════════════════ */}
-      {deleteModalOpen && templateToDelete && (
-        <div style={{
-          position: 'fixed',
-          inset: 0,
-          backgroundColor: 'rgba(15, 23, 42, 0.65)',
-          backdropFilter: 'blur(3px)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 9999999,
-          padding: '20px'
-        }}>
-          <div style={{
-            backgroundColor: '#ffffff',
-            borderRadius: '12px',
-            maxWidth: '420px',
-            width: '100%',
-            padding: '20px 24px',
-            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.25)'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', color: '#ef4444', marginBottom: '12px' }}>
-              <AlertCircle size={22} />
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 800, color: '#0f172a' }}>
-                {t('admin.settings.confirmDeleteTemplateTitle') || 'Xác nhận xóa mẫu in'}
-              </h3>
-            </div>
-
-            <p style={{ fontSize: '13px', color: '#475569', lineHeight: '1.5', margin: '0 0 20px 0' }}>
-              Bạn có chắc chắn muốn xóa mẫu in <strong>"{templateToDelete.name}"</strong> không? Thao tác này sẽ xóa vĩnh viễn mẫu in khỏi hệ thống.
-            </p>
-
-            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-              <button
-                onClick={() => setDeleteModalOpen(false)}
-                style={{
-                  padding: '8px 16px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  backgroundColor: '#ffffff',
-                  color: '#475569',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer'
-                }}
-              >
-                {t('cancel') || 'Hủy'}
-              </button>
-
-              <button
-                onClick={handleConfirmDelete}
-                style={{
-                  padding: '8px 18px',
-                  borderRadius: '6px',
-                  border: 'none',
-                  backgroundColor: '#ef4444',
-                  color: '#ffffff',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  cursor: 'pointer'
-                }}
-              >
-                {t('confirm') || 'Xác nhận xóa'}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <ConfirmDeleteModal
+        isOpen={Boolean(deleteModalOpen && templateToDelete)}
+        onClose={() => { setDeleteModalOpen(false); setTemplateToDelete(null); }}
+        onConfirm={handleConfirmDelete}
+        title={t('admin.settings.confirmDeleteTemplateTitle') || 'Xác nhận xóa mẫu in'}
+        message={t('admin.settings.confirmDeleteTemplateMsg') || 'Bạn có chắc chắn muốn xóa mẫu in này không? Thao tác này sẽ xóa vĩnh viễn mẫu in khỏi hệ thống.'}
+        itemName={templateToDelete?.name}
+        warningText={t('cannotUndo') || 'Hành động này không thể hoàn tác.'}
+        confirmText={t('confirmDelete') || 'Xóa mẫu in'}
+        cancelText={t('cancel') || 'Hủy'}
+      />
 
       {/* ═══ TOAST NOTIFICATION ═══ */}
       {toastMessage && (

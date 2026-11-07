@@ -24,6 +24,7 @@ import {
 import { api } from '../../api';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { useBankAccounts } from '../../hooks';
+import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
 
 export const VIETNAM_BANKS = [
   { code: 'MB', bin: '970422', shortName: 'MBBank', name: 'Ngân hàng TMCP Quân đội (MBBank)', color: '#103986' },
@@ -252,13 +253,24 @@ export function BankAccountsView() {
     }
   };
 
-  const handleDelete = async (acc) => {
-    const confirmMsg = t('admin.cashbook.deleteConfirmBank') || `Bạn có chắc chắn muốn xóa tài khoản ${acc.bank_code} - ${acc.account_number} không?`;
-    if (!window.confirm(confirmMsg)) return;
+  const [accountToDelete, setAccountToDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
 
-    const res = await deleteAccount(acc.id);
-    if (!res.success && res.message) {
-      alert('Không thể xóa tài khoản: ' + res.message);
+  const handleDelete = (acc) => {
+    setAccountToDelete(acc);
+  };
+
+  const confirmDeleteAccount = async () => {
+    if (!accountToDelete) return;
+    setDeleting(true);
+    try {
+      const res = await deleteAccount(accountToDelete.id);
+      if (!res.success && res.message) {
+        alert('Không thể xóa tài khoản: ' + res.message);
+      }
+    } finally {
+      setDeleting(false);
+      setAccountToDelete(null);
     }
   };
 
@@ -1355,6 +1367,20 @@ export function BankAccountsView() {
           </div>
         </div>
       )}
+
+      {/* Confirm Delete Bank Account Modal */}
+      <ConfirmDeleteModal
+        isOpen={Boolean(accountToDelete)}
+        onClose={() => setAccountToDelete(null)}
+        onConfirm={confirmDeleteAccount}
+        title={t('admin.cashbook.confirmDeleteBankTitle') || 'Xác nhận xóa tài khoản ngân hàng'}
+        message={t('admin.cashbook.deleteConfirmBank') || 'Bạn có chắc chắn muốn xóa tài khoản ngân hàng này không?'}
+        itemName={accountToDelete ? `${accountToDelete.bank_name || accountToDelete.bank_code} (${accountToDelete.account_number})` : ''}
+        warningText={t('cannotUndo') || 'Hành động này không thể hoàn tác.'}
+        confirmText={t('confirmDelete') || 'Xóa tài khoản'}
+        cancelText={t('cancel') || 'Hủy'}
+        loading={deleting}
+      />
     </div>
   );
 }

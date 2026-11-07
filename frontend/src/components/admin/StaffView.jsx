@@ -916,3 +916,5 @@ export function StaffView({
   );
 }
 
+export default StaffView;
+

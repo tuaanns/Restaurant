@@ -19,6 +19,29 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
   </head>
   <body>
+    <script>
+      window.addEventListener('error', function(e) {
+        console.error('Window error:', e.error || e.message);
+        setTimeout(function() {
+          var root = document.getElementById('root');
+          if (root && (!root.firstElementChild || root.innerHTML.trim() === '')) {
+            var el = document.getElementById('critical-fallback-banner');
+            if (!el) {
+              el = document.createElement('div');
+              el.id = 'critical-fallback-banner';
+              el.style.cssText = 'position:fixed;inset:0;background:#f8fafc;display:flex;align-items:center;justify-content:center;padding:20px;font-family:sans-serif;z-index:999999;';
+              el.innerHTML = '<div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:14px;padding:32px 28px;max-width:440px;text-align:center;box-shadow:0 10px 25px rgba(0,0,0,0.08);">' +
+                '<div style="font-size:32px;margin-bottom:12px;">⚠️</div>' +
+                '<h2 style="color:#0f172a;font-size:18px;margin:0 0 8px;font-weight:800;">Đang tải lại dữ liệu hệ thống</h2>' +
+                '<p style="color:#64748b;font-size:13px;margin:0 0 20px;line-height:1.5;">Trình duyệt đang đồng bộ tệp giao diện mới nhất. Vui lòng bấm làm mới bên dưới.</p>' +
+                '<button onclick="location.reload(true)" style="background:#1B5E20;color:#fff;border:none;padding:10px 24px;border-radius:8px;font-weight:700;font-size:13px;cursor:pointer;">Làm mới trang ngay</button>' +
+                '</div>';
+              document.body.appendChild(el);
+            }
+          }
+        }, 800);
+      });
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>

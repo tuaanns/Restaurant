@@ -361,6 +361,9 @@ export function LanguageProvider({ children }) {
 
   // t('login.title') hoặc t('payment.vatAndDiscount', { vat: 8, discount: 5 })
   const t = useCallback((key, params) => {
+    if (!key || typeof key !== 'string') {
+      return typeof params === 'string' ? params : (key || '');
+    }
     const dict = translations[lang] || translations['vi'];
     const parts = key.split('.');
     let val = dict;

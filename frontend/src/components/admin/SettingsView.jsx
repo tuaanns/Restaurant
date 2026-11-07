@@ -3,7 +3,7 @@ import {
   Utensils, ArrowLeftRight, ChefHat, Users, TrendingUp, Printer,
   Search, CheckCircle, RotateCcw, ChevronRight, ChevronDown, Check, X,
   FileText, Shield, Sparkles, Bell, Percent, Store, Eye,
-  Layers, Tag, Info, ArrowLeft, QrCode, Wifi, Coffee
+  Layers, Tag, Info, ArrowLeft, QrCode, Wifi, Coffee, Save
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import {
@@ -20,6 +20,8 @@ export function SettingsView({ onBackToDashboard }) {
   const [activeTab, setActiveTab] = useState('orders');
   const [searchQuery, setSearchQuery] = useState('');
   const [settings, setSettings] = useState(() => getRestaurantSettings());
+  const [hasChanges, setHasChanges] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   // Print templates expansion and sub-item selection
   const [printTemplatesExpanded, setPrintTemplatesExpanded] = useState(true);
@@ -39,19 +41,25 @@ export function SettingsView({ onBackToDashboard }) {
     { id: 'cash_payment', label: t('admin.settings.docCashPayment') || 'Phiếu chi tiền' },
   ];
 
-  // Auto-save to localStorage & broadcast event on change
+  // Cập nhật cài đặt tạm thời (chờ bấm nút Lưu thiết lập, không tự động lưu)
   const updateSetting = (key, value) => {
-    setSettings(prev => {
-      const next = { ...prev, [key]: value };
-      saveRestaurantSettings(next);
-      return next;
-    });
+    setSettings(prev => ({ ...prev, [key]: value }));
+    setHasChanges(true);
+  };
 
-    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
-    setToastMessage(t('admin.settings.savedSuccess') || 'Đã lưu thiết lập thành công!');
-    toastTimeoutRef.current = setTimeout(() => {
-      setToastMessage(null);
-    }, 2200);
+  // Lưu thiết lập chủ động khi người dùng bấm nút Lưu
+  const handleSaveSettings = () => {
+    setIsSaving(true);
+    saveRestaurantSettings(settings);
+    setHasChanges(false);
+    setTimeout(() => {
+      setIsSaving(false);
+      setToastMessage(t('admin.settings.savedSuccess') || 'Đã lưu thiết lập thành công!');
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = setTimeout(() => {
+        setToastMessage(null);
+      }, 2500);
+    }, 200);
   };
 
   const handleResetDefaults = () => {
@@ -61,6 +69,7 @@ export function SettingsView({ onBackToDashboard }) {
   const confirmResetDefaults = () => {
     setSettings(DEFAULT_RESTAURANT_SETTINGS);
     saveRestaurantSettings(DEFAULT_RESTAURANT_SETTINGS);
+    setHasChanges(false);
     setToastMessage(t('admin.settings.resetToDefault') || 'Đã khôi phục thiết lập mặc định!');
     if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
     toastTimeoutRef.current = setTimeout(() => setToastMessage(null), 2200);
@@ -273,23 +282,52 @@ export function SettingsView({ onBackToDashboard }) {
           </div>
         </div>
 
-        {/* Right: Auto-save status & Reset */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '11.5px',
-            fontWeight: 700,
-            color: '#059669',
-            backgroundColor: '#ecfdf5',
-            padding: '4px 10px',
-            borderRadius: '9999px',
-            border: '1px solid #a7f3d0'
-          }}>
-            <CheckCircle size={13} />
-            <span>{t('admin.settings.autoSavedBadge') || 'Đã tự động lưu'}</span>
-          </div>
+        {/* Right: Save Settings & Reset Buttons */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {hasChanges && (
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              fontSize: '11.5px',
+              fontWeight: 600,
+              color: '#d97706',
+              backgroundColor: '#fffbeb',
+              padding: '4px 10px',
+              borderRadius: '9999px',
+              border: '1px solid #fde68a'
+            }}>
+              <span style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#f59e0b' }} />
+              <span>{t('admin.settings.unsavedChanges') || 'Chưa lưu thay đổi'}</span>
+            </div>
+          )}
+
+          <button
+            onClick={handleSaveSettings}
+            disabled={isSaving}
+            title={t('admin.settings.saveSettings') || 'Lưu thiết lập'}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '6px',
+              padding: '7px 16px',
+              borderRadius: '8px',
+              backgroundColor: hasChanges ? '#1B5E20' : '#2e7d32',
+              color: '#ffffff',
+              border: 'none',
+              fontSize: '12.5px',
+              fontWeight: 700,
+              cursor: isSaving ? 'not-allowed' : 'pointer',
+              boxShadow: hasChanges ? '0 2px 8px rgba(27, 94, 32, 0.35)' : 'none',
+              opacity: isSaving ? 0.7 : 1,
+              transition: 'all 0.15s ease'
+            }}
+            onMouseEnter={(e) => { if (!isSaving) e.currentTarget.style.backgroundColor = '#1e8e3e'; }}
+            onMouseLeave={(e) => { if (!isSaving) e.currentTarget.style.backgroundColor = hasChanges ? '#1B5E20' : '#2e7d32'; }}
+          >
+            <Save size={14} />
+            <span>{isSaving ? (t('saving') || 'Đang lưu...') : (t('admin.settings.saveSettings') || 'Lưu thiết lập')}</span>
+          </button>
 
           <button
             onClick={handleResetDefaults}
@@ -298,14 +336,15 @@ export function SettingsView({ onBackToDashboard }) {
               display: 'inline-flex',
               alignItems: 'center',
               gap: '6px',
-              padding: '6px 12px',
-              borderRadius: '6px',
+              padding: '7px 12px',
+              borderRadius: '8px',
               border: '1px solid #e2e8f0',
               backgroundColor: '#ffffff',
               color: '#64748b',
               fontSize: '12px',
               fontWeight: 600,
-              cursor: 'pointer'
+              cursor: 'pointer',
+              transition: 'background-color 0.15s'
             }}
             onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
             onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
@@ -510,13 +549,11 @@ export function SettingsView({ onBackToDashboard }) {
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '24px 32px',
-          display: 'flex',
-          gap: '24px'
+          padding: '24px 32px'
         }}>
           
           {/* Main Setting Cards */}
-          <div style={{ flex: 1, maxWidth: '860px' }}>
+          <div style={{ width: '100%', maxWidth: '980px', margin: '0 auto' }}>
             
             {/* ═════════ TAB: ĐƠN HÀNG ═════════ */}
 
@@ -1485,50 +1522,6 @@ export function SettingsView({ onBackToDashboard }) {
               </div>
             )}
 
-          </div>
-
-          {/* ─── RIGHT STICKY ANCHOR LINKS (KiotViet Right Edge Style) ─── */}
-          <div style={{ width: '220px', flexShrink: 0, position: 'sticky', top: 0, alignSelf: 'flex-start' }}>
-            <div style={{
-              backgroundColor: '#ffffff',
-              borderRadius: '12px',
-              border: '1px solid #e2e8f0',
-              padding: '16px',
-              boxShadow: '0 1px 3px rgba(0,0,0,0.02)'
-            }}>
-              <div style={{ fontSize: '11px', fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '10px' }}>
-                {currentTabObj.label}
-              </div>
-
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {currentTabObj.sections.map((sec, idx) => (
-                  <button
-                    key={sec.id}
-                    onClick={() => scrollToSection(sec.id)}
-                    style={{
-                      background: 'none',
-                      border: 'none',
-                      padding: '4px 0',
-                      textAlign: 'left',
-                      fontSize: '12.5px',
-                      color: idx === 0 ? '#1B5E20' : '#475569',
-                      fontWeight: idx === 0 ? 700 : 500,
-                      cursor: 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '6px'
-                    }}
-                    onMouseEnter={(e) => e.currentTarget.style.color = '#1B5E20'}
-                    onMouseLeave={(e) => {
-                      if (idx !== 0) e.currentTarget.style.color = '#475569';
-                    }}
-                  >
-                    <span style={{ color: '#94a3b8', fontSize: '11px' }}>|</span>
-                    <span>{sec.title}</span>
-                  </button>
-                ))}
-              </div>
-            </div>
           </div>
 
         </div>

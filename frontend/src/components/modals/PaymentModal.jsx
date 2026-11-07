@@ -141,14 +141,6 @@ export function PaymentModal({
       });
       setIsSuccess(false);
       onClose();
-
-      // Tự động in hóa đơn nếu được bật trong Thiết lập Mẫu in / Đơn hàng
-      const settings = getRestaurantSettings();
-      if (settings.autoPrintOnPayment) {
-        setTimeout(() => {
-          window.print();
-        }, 300);
-      }
     }, 1200);
   };
 

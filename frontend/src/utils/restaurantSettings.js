@@ -15,7 +15,7 @@ export const DEFAULT_RESTAURANT_SETTINGS = {
   lowStockThreshold: 5,
 
   // 2. Đơn hàng
-  autoPrintOnPayment: true,
+  autoPrintOnPayment: false,
   allowPrePrintBill: true,
   allowPayBeforeKitchen: true,
   requireCancelReason: true,
@@ -71,6 +71,13 @@ export function getRestaurantSettings() {
       const parsed = JSON.parse(raw);
       if (parsed.billHeaderPhone && (parsed.billHeaderPhone.includes('0901') || parsed.billHeaderPhone.includes('0988'))) {
         parsed.billHeaderPhone = '0348974111';
+        try {
+          localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
+        } catch (_) {}
+      }
+      // Đảm bảo không tự động bật in khi thanh toán làm nhảy ra bản in ngoài ý muốn
+      if (parsed.autoPrintOnPayment === true) {
+        parsed.autoPrintOnPayment = false;
         try {
           localStorage.setItem(SETTINGS_STORAGE_KEY, JSON.stringify(parsed));
         } catch (_) {}

@@ -251,10 +251,10 @@ export function OverviewDashboard({
       }));
     }
     return [
-      { rank: 1, name: 'Mì xào bò thượng hạng', qty: 4, revenue: 440000, unit: 'phần' },
-      { rank: 2, name: 'Cơm chiên hải sản Hoàng Kim', qty: 3, revenue: 375000, unit: 'phần' },
-      { rank: 3, name: 'Nước cam ép tươi', qty: 4, revenue: 180000, unit: 'ly' },
-      { rank: 4, name: 'Khăn lạnh thơm cao cấp', qty: 6, revenue: 30000, unit: 'cái' },
+      { rank: 1, name: 'Cơm pilaf truyền thống', qty: 12, revenue: 2280000, unit: 'phần' },
+      { rank: 2, name: 'Kazan kebab', qty: 8, revenue: 2240000, unit: 'phần' },
+      { rank: 3, name: 'Thịt nướng xiên thập cẩm', qty: 3, revenue: 5400000, unit: 'mẹt' },
+      { rank: 4, name: 'Pizza Pepperoni', qty: 6, revenue: 2040000, unit: 'cái' },
     ];
   }, [stats]);
 

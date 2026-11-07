@@ -459,15 +459,22 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
   const [menuData, setMenuData] = useState(() => {
     try {
-      const c = localStorage.getItem('aura_pos_admin_menu');
-      if (c) {
-        const parsed = JSON.parse(c);
-        if (parsed?.products && Array.isArray(parsed.products) && parsed.products.length > 0) {
-          const cleanProducts = parsed.products.filter(p => p && p.name && p.name.trim().toLowerCase() !== 'test');
-          parsed.products = cleanProducts;
-          try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(parsed)); } catch (e) {}
-          return parsed;
+      const menuVer = localStorage.getItem('aura_pos_menu_version');
+      if (menuVer === 'v2_2026') {
+        const c = localStorage.getItem('aura_pos_admin_menu');
+        if (c) {
+          const parsed = JSON.parse(c);
+          if (parsed?.products && Array.isArray(parsed.products) && parsed.products.length > 0) {
+            const cleanProducts = parsed.products.filter(p => p && p.name && p.name.trim().toLowerCase() !== 'test');
+            parsed.products = cleanProducts;
+            try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(parsed)); } catch (e) {}
+            return parsed;
+          }
         }
+      } else {
+        localStorage.setItem('aura_pos_menu_version', 'v2_2026');
+        localStorage.removeItem('aura_pos_admin_menu');
+        localStorage.removeItem('aura_pos_admin_categories');
       }
     } catch (e) {}
     return { categories: DEFAULT_ADMIN_CATEGORIES, products: DEFAULT_ADMIN_PRODUCTS };
@@ -475,10 +482,13 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
   const [categories, setCategories] = useState(() => {
     try {
-      const c = localStorage.getItem('aura_pos_admin_categories');
-      if (c) {
-        const parsed = JSON.parse(c);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      const menuVer = localStorage.getItem('aura_pos_menu_version');
+      if (menuVer === 'v2_2026') {
+        const c = localStorage.getItem('aura_pos_admin_categories');
+        if (c) {
+          const parsed = JSON.parse(c);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        }
       }
     } catch (e) {}
     return DEFAULT_ADMIN_CATEGORIES;

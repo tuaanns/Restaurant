@@ -446,7 +446,11 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       const c = localStorage.getItem('aura_pos_admin_users');
       if (c) {
         const parsed = JSON.parse(c);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          const cleanUsers = parsed.filter(u => u && u.name && u.name.trim().toLowerCase() !== 'test' && u.username !== 'test');
+          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(cleanUsers)); } catch (e) {}
+          return cleanUsers;
+        }
       }
     } catch (e) {}
     return DEFAULT_ADMIN_USERS;
@@ -457,7 +461,12 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       const c = localStorage.getItem('aura_pos_admin_menu');
       if (c) {
         const parsed = JSON.parse(c);
-        if (parsed?.products && Array.isArray(parsed.products) && parsed.products.length > 0) return parsed;
+        if (parsed?.products && Array.isArray(parsed.products) && parsed.products.length > 0) {
+          const cleanProducts = parsed.products.filter(p => p && p.name && p.name.trim().toLowerCase() !== 'test');
+          parsed.products = cleanProducts;
+          try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(parsed)); } catch (e) {}
+          return parsed;
+        }
       }
     } catch (e) {}
     return { categories: DEFAULT_ADMIN_CATEGORIES, products: DEFAULT_ADMIN_PRODUCTS };
@@ -546,6 +555,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
   const [newUserShift, setNewUserShift] = useState('Ca sáng (07:00 - 15:00)');
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserIsActive, setNewUserIsActive] = useState(true);
+  const [isSubmittingUser, setIsSubmittingUser] = useState(false);
 
   // ── Product modal ──
   const [showAddProductModal, setShowAddProductModal] = useState(false);
@@ -555,6 +565,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
   const [productPrice, setProductPrice] = useState('');
   const [productUnit, setProductUnit] = useState('phần');
   const [productCatId, setProductCatId] = useState('');
+  const [isSubmittingProduct, setIsSubmittingProduct] = useState(false);
 
   // ── Category modal ──
   const [showAddCatModal, setShowAddCatModal] = useState(false);
@@ -605,8 +616,9 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     try {
       const r = await api.getUsers();
       if (r?.users && Array.isArray(r.users) && r.users.length > 0) {
-        setUsers(r.users);
-        try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(r.users)); } catch (e) {}
+        const cleanUsers = r.users.filter(u => u && u.name && u.name.trim().toLowerCase() !== 'test' && u.username !== 'test');
+        setUsers(cleanUsers);
+        try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(cleanUsers)); } catch (e) {}
       }
     } catch (e) {
       offlineDetected = true;
@@ -615,8 +627,10 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     try {
       const r = await api.getMenu();
       if (r && Array.isArray(r.products) && r.products.length > 0) {
-        setMenuData(r);
-        try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(r)); } catch (e) {}
+        const cleanProducts = r.products.filter(p => p && p.name && p.name.trim().toLowerCase() !== 'test');
+        const cleanR = { ...r, products: cleanProducts };
+        setMenuData(cleanR);
+        try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(cleanR)); } catch (e) {}
       }
       if (r?.categories && Array.isArray(r.categories) && r.categories.length > 0) {
         setCategories(r.categories);
@@ -686,13 +700,16 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     setProductName(p.name);
     setProductPrice(p.price);
     setProductUnit(p.unit || 'phần');
-    setProductCatId(p.category_id || '');
+    const catList = (categories && categories.length > 0) ? categories : (menuData.categories || []);
+    const catId = p.category_id || p.category?.id || catList[0]?.id || '1';
+    setProductCatId(String(catId));
     setShowAddProductModal(true);
   };
   const openAddProduct = () => {
     setEditingProduct(null);
     setProductName(''); setProductPrice(''); setProductUnit('phần');
-    setProductCatId(menuData.categories?.[0]?.id || '');
+    const catList = (categories && categories.length > 0) ? categories : (menuData.categories || []);
+    setProductCatId(catList[0]?.id ? String(catList[0].id) : '1');
     setShowAddProductModal(true);
   };
   const openEditCat = (c) => { setEditingCat(c); setCatName(c.name); setShowAddCatModal(true); };
@@ -804,6 +821,9 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
   const handleSaveUser = async (e) => {
     e.preventDefault();
+    if (isSubmittingUser) return;
+    setIsSubmittingUser(true);
+
     const payload = {
       name: newUserName.trim(),
       username: newUserUsername.trim(),
@@ -817,72 +837,84 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       payload.password = newUserPassword.trim();
     }
 
-    try {
-      if (editingUser) {
-        const res = await api.updateUser(editingUser.id, payload);
-        const updated = res?.user || { ...editingUser, ...payload };
-        setUsers(prev => {
-          const next = prev.map(u => u.id === editingUser.id ? { ...u, ...updated } : u);
-          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+    setShowAddUserModal(false);
 
-        // Nếu sửa chính tài khoản đang đăng nhập, lập tức cập nhật state cha và sessionStorage
-        const isSelf = (currentUser?.id && Number(editingUser.id) === Number(currentUser.id)) ||
-                       (currentUser?.username && editingUser.username === currentUser.username);
-        if (isSelf) {
-          const merged = { ...currentUser, ...updated };
-          try {
-            sessionStorage.setItem('pos_user', JSON.stringify(merged));
-          } catch (e) {}
-          if (onUpdateCurrentUser) {
-            onUpdateCurrentUser(merged);
-          }
+    if (editingUser) {
+      const updated = { ...editingUser, ...payload };
+      setUsers(prev => {
+        const next = prev.map(u => String(u.id) === String(editingUser.id) ? { ...u, ...updated } : u);
+        try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+
+      // Nếu sửa chính tài khoản đang đăng nhập, lập tức cập nhật state cha và sessionStorage
+      const isSelf = (currentUser?.id && String(editingUser.id) === String(currentUser.id)) ||
+                     (currentUser?.username && editingUser.username === currentUser.username);
+      if (isSelf) {
+        const merged = { ...currentUser, ...updated };
+        try {
+          sessionStorage.setItem('pos_user', JSON.stringify(merged));
+        } catch (e) {}
+        if (onUpdateCurrentUser) {
+          onUpdateCurrentUser(merged);
         }
-      } else {
-        if (!newUserPassword.trim() || newUserPassword.trim().length < 6) {
-          alert('Vui lòng nhập mật khẩu tối thiểu 6 ký tự!');
-          return;
+      }
+
+      try {
+        const res = await api.updateUser(editingUser.id, payload);
+        if (res?.user) {
+          setUsers(prev => {
+            const next = prev.map(u => String(u.id) === String(editingUser.id) ? { ...u, ...res.user } : u);
+            try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
         }
+      } catch (err) {
+        console.warn('API updateUser warning:', err);
+      } finally {
+        setIsSubmittingUser(false);
+      }
+    } else {
+      if (!newUserPassword.trim() || newUserPassword.trim().length < 6) {
+        alert('Vui lòng nhập mật khẩu tối thiểu 6 ký tự!');
+        setIsSubmittingUser(false);
+        setShowAddUserModal(true);
+        return;
+      }
+      const tempId = Date.now();
+      const created = { id: tempId, ...payload };
+      setUsers(prev => {
+        const next = [...prev, created];
+        try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+
+      try {
         const res = await api.createUser(payload);
-        const created = res?.user || { id: Date.now(), ...payload };
-        setUsers(prev => {
-          const next = [...prev, created];
-          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+        if (res?.user) {
+          setUsers(prev => {
+            const next = prev.map(u => u.id === tempId ? { ...u, ...res.user } : u);
+            try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+        }
+      } catch (err) {
+        console.warn('API createUser warning:', err);
+      } finally {
+        setIsSubmittingUser(false);
       }
-      setShowAddUserModal(false);
-      loadAdminData();
-    } catch (err) {
-      if (editingUser) {
-        const updated = { ...editingUser, ...payload };
-        setUsers(prev => {
-          const next = prev.map(u => u.id === editingUser.id ? { ...u, ...updated } : u);
-          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      } else {
-        const created = { id: Date.now(), ...payload };
-        setUsers(prev => {
-          const next = [...prev, created];
-          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      }
-      setShowAddUserModal(false);
     }
   };
 
   const handleDeleteUser = (u) => {
-    const userObj = typeof u === 'object' ? u : users.find(item => item.id === u);
+    const userObj = typeof u === 'object' ? u : users.find(item => String(item.id) === String(u));
     if (!userObj) return;
 
     if (userObj.id === 1 || userObj.username === 'admin') {
       alert(t('admin.cannotDeleteAdmin'));
       return;
     }
-    if (currentUser && (currentUser.id === userObj.id || currentUser.username === userObj.username)) {
+    if (currentUser && (String(currentUser.id) === String(userObj.id) || currentUser.username === userObj.username)) {
       alert(t('admin.cannotDeleteSelf'));
       return;
     }
@@ -893,121 +925,164 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       message: t('admin.confirmDeleteUser'),
       itemName: `${userObj.name} (@${userObj.username})`,
       warningText: t('admin.confirmDeleteUserWarning'),
-      onConfirm: async () => {
-        try {
-          await api.deleteUser(userObj.id);
-        } catch (err) {}
+      onConfirm: () => {
+        closeDeleteModal();
         setUsers(prev => {
-          const next = prev.filter(item => item.id !== userObj.id);
+          const next = prev.filter(item => String(item.id) !== String(userObj.id));
           try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
           return next;
         });
-        closeDeleteModal();
+        api.deleteUser(userObj.id).catch(err => {
+          console.warn('API deleteUser warning:', err);
+        });
       }
     });
   };
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
-    const data = { category_id: Number(productCatId), name: productName, price: Number(productPrice), unit: productUnit };
-    try {
-      if (editingProduct) { await api.updateProduct(editingProduct.id, data); }
-      else { await api.addProduct(data); }
-      setShowAddProductModal(false);
-      loadAdminData();
-    } catch (err) {
-      const cat = categories.find(c => Number(c.id) === Number(productCatId));
-      if (editingProduct) {
-        const updated = { ...editingProduct, ...data, category: cat || editingProduct.category };
-        setMenuData(prev => {
-          const nextProducts = (prev.products || []).map(p => p.id === editingProduct.id ? updated : p);
-          const next = { ...prev, products: nextProducts };
-          try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      } else {
-        const newProd = { id: Date.now(), ...data, code: `SP${Math.floor(Math.random() * 900) + 100}`, category: cat, is_active: 1 };
-        setMenuData(prev => {
-          const nextProducts = [...(prev.products || []), newProd];
-          const next = { ...prev, products: nextProducts };
-          try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+    if (isSubmittingProduct) return;
+    setIsSubmittingProduct(true);
+
+    const catList = (categories && categories.length > 0) ? categories : (menuData.categories || []);
+    const cat = catList.find(c => String(c.id) === String(productCatId)) || catList[0];
+    const catIdNum = cat ? Number(cat.id) : (Number(productCatId) || 1);
+    const data = { category_id: catIdNum, name: productName.trim(), price: Number(productPrice) || 0, unit: productUnit.trim() || 'phần' };
+
+    setShowAddProductModal(false);
+
+    if (editingProduct) {
+      const updated = { ...editingProduct, ...data, category: cat || editingProduct.category };
+      setMenuData(prev => {
+        const nextProducts = (prev.products || []).map(p => String(p.id) === String(editingProduct.id) ? updated : p);
+        const next = { ...prev, products: nextProducts };
+        try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+
+      try {
+        await api.updateProduct(editingProduct.id, data);
+      } catch (err) {
+        console.warn('API updateProduct warning:', err);
+      } finally {
+        setIsSubmittingProduct(false);
       }
-      setShowAddProductModal(false);
+    } else {
+      const randomCode = `SP${Math.floor(Math.random() * 900) + 100}`;
+      const tempId = Date.now();
+      const newProd = { id: tempId, ...data, code: randomCode, category: cat, is_active: 1 };
+      setMenuData(prev => {
+        const nextProducts = [...(prev.products || []), newProd];
+        const next = { ...prev, products: nextProducts };
+        try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+
+      try {
+        const res = await api.addProduct(data);
+        if (res && res.product) {
+          setMenuData(prev => {
+            const nextProducts = (prev.products || []).map(p => p.id === tempId ? { ...p, id: res.product.id, code: res.product.code || p.code } : p);
+            const next = { ...prev, products: nextProducts };
+            try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+        }
+      } catch (err) {
+        console.warn('API addProduct warning:', err);
+      } finally {
+        setIsSubmittingProduct(false);
+      }
     }
   };
 
   const handleDeleteProduct = (p) => {
-    const prod = typeof p === 'object' ? p : (menuData.products || []).find(item => item.id === p);
-    if (!prod) return;
+    const prod = typeof p === 'object' ? p : (menuData.products || []).find(item => String(item.id) === String(p));
+    const targetId = prod ? prod.id : p;
+    const targetName = prod ? `${formatDishName(prod.name, prod.code)} (${prod.code})` : 'Món ăn';
 
     setDeleteModalState({
       isOpen: true,
       title: t('admin.confirmDeleteProductTitle'),
       message: t('admin.confirmDeleteProduct'),
-      itemName: `${formatDishName(prod.name, prod.code)} (${prod.code})`,
+      itemName: targetName,
       warningText: t('admin.confirmDeleteProductWarning'),
-      onConfirm: async () => {
-        try {
-          await api.deleteProduct(prod.id);
-        } catch (err) {}
+      onConfirm: () => {
+        closeDeleteModal();
         setMenuData(prev => {
-          const nextProducts = (prev.products || []).filter(item => item.id !== prod.id);
+          const nextProducts = (prev.products || []).filter(item => String(item.id) !== String(targetId));
           const next = { ...prev, products: nextProducts };
           try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
           return next;
         });
-        closeDeleteModal();
+        api.deleteProduct(targetId).catch(err => {
+          console.warn('API deleteProduct warning:', err);
+        });
       }
     });
   };
 
   const handleSaveCategory = async (e) => {
     e.preventDefault();
-    try {
-      if (editingCat) { await api.updateCategory(editingCat.id, { name: catName }); }
-      else { await api.addCategory({ name: catName }); }
-      setShowAddCatModal(false);
-      loadAdminData();
-    } catch (err) {
-      if (editingCat) {
-        setCategories(prev => {
-          const next = prev.map(c => c.id === editingCat.id ? { ...c, name: catName } : c);
-          try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      } else {
-        setCategories(prev => {
-          const next = [...prev, { id: Date.now(), name: catName, code: `CAT_${Date.now()}` }];
-          try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+    const name = catName.trim();
+    if (!name) return;
+    setShowAddCatModal(false);
+
+    if (editingCat) {
+      setCategories(prev => {
+        const next = prev.map(c => String(c.id) === String(editingCat.id) ? { ...c, name } : c);
+        try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      try {
+        await api.updateCategory(editingCat.id, { name });
+      } catch (err) {
+        console.warn('API updateCategory warning:', err);
       }
-      setShowAddCatModal(false);
+    } else {
+      const tempId = Date.now();
+      const newCat = { id: tempId, name, code: `CAT_${tempId}` };
+      setCategories(prev => {
+        const next = [...prev, newCat];
+        try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      try {
+        const res = await api.addCategory({ name });
+        if (res && res.category) {
+          setCategories(prev => {
+            const next = prev.map(c => c.id === tempId ? { ...c, id: res.category.id, code: res.category.code || c.code } : c);
+            try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+        }
+      } catch (err) {
+        console.warn('API addCategory warning:', err);
+      }
     }
   };
 
   const handleDeleteCategory = (c) => {
-    const cat = typeof c === 'object' ? c : categories.find(item => item.id === c);
-    if (!cat) return;
+    const cat = typeof c === 'object' ? c : categories.find(item => String(item.id) === String(c));
+    const targetId = cat ? cat.id : c;
+    const targetName = cat ? formatCategoryName(cat.name, cat.code) : 'Nhóm thực đơn';
 
     setDeleteModalState({
       isOpen: true,
       title: t('admin.confirmDeleteCategoryTitle'),
       message: t('admin.confirmDeleteCategory'),
-      itemName: formatCategoryName(cat.name, cat.code),
+      itemName: targetName,
       warningText: t('admin.confirmDeleteCategoryWarning'),
-      onConfirm: async () => {
-        try {
-          await api.deleteCategory(cat.id);
-        } catch (err) {}
+      onConfirm: () => {
+        closeDeleteModal();
         setCategories(prev => {
-          const next = prev.filter(item => item.id !== cat.id);
+          const next = prev.filter(item => String(item.id) !== String(targetId));
           try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
           return next;
         });
-        closeDeleteModal();
+        api.deleteCategory(targetId).catch(err => {
+          console.warn('API deleteCategory warning:', err);
+        });
       }
     });
   };
@@ -1037,60 +1112,62 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       area_name: areaObj?.name || '',
       capacity: Number(tableCapacity) || 4,
     };
-    try {
-      if (editingTable) {
+    setShowTableModal(false);
+
+    if (editingTable) {
+      setTables(prev => {
+        const next = prev.map(t => String(t.id) === String(editingTable.id) ? { ...t, ...payload } : t);
+        try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      try {
         await api.updateAdminTable(editingTable.id, payload);
-        setTables(prev => {
-          const next = prev.map(t => t.id === editingTable.id ? { ...t, ...payload } : t);
-          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      } else {
-        const res = await api.addAdminTable(payload);
-        const newT = res?.table || { id: Date.now(), ...payload, status: 'empty' };
-        setTables(prev => {
-          const next = [...prev, newT];
-          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+      } catch (err) {
+        console.warn('API updateAdminTable warning:', err);
       }
-    } catch {
-      if (editingTable) {
-        setTables(prev => {
-          const next = prev.map(t => t.id === editingTable.id ? { ...t, ...payload } : t);
-          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      } else {
-        setTables(prev => {
-          const next = [...prev, { id: Date.now(), ...payload, status: 'empty' }];
-          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+    } else {
+      const tempId = Date.now();
+      const newT = { id: tempId, ...payload, status: 'empty' };
+      setTables(prev => {
+        const next = [...prev, newT];
+        try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      try {
+        const res = await api.addAdminTable(payload);
+        if (res?.table) {
+          setTables(prev => {
+            const next = prev.map(t => t.id === tempId ? { ...t, ...res.table } : t);
+            try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+        }
+      } catch (err) {
+        console.warn('API addAdminTable warning:', err);
       }
     }
-    setShowTableModal(false);
   };
   const handleDeleteTable = (tItem) => {
-    const tbl = typeof tItem === 'object' ? tItem : tables.find(item => item.id === tItem);
-    if (!tbl) return;
+    const tbl = typeof tItem === 'object' ? tItem : tables.find(item => String(item.id) === String(tItem));
+    const targetId = tbl ? tbl.id : tItem;
+    const targetName = tbl ? formatTableName(tbl.name) : 'Bàn / Phòng';
 
     setDeleteModalState({
       isOpen: true,
       title: t('admin.confirmDeleteTableTitle'),
       message: t('admin.confirmDeleteTable'),
-      itemName: formatTableName(tbl.name),
+      itemName: targetName,
       warningText: t('admin.confirmDeleteTableWarning'),
-      onConfirm: async () => {
-        try {
-          await api.deleteAdminTable(tbl.id);
-        } catch {}
+      onConfirm: () => {
+        closeDeleteModal();
         setTables(prev => {
-          const next = prev.filter(t => t.id !== tbl.id);
+          const next = prev.filter(t => String(t.id) !== String(targetId));
           try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
           return next;
         });
-        closeDeleteModal();
+        api.deleteAdminTable(targetId).catch(err => {
+          console.warn('API deleteAdminTable warning:', err);
+        });
       }
     });
   };
@@ -1102,60 +1179,62 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     e.preventDefault();
     if (!areaName.trim()) return alert('Vui lòng nhập tên khu vực');
     const payload = { name: areaName.trim() };
-    try {
-      if (editingArea) {
+    setShowAreaModal(false);
+
+    if (editingArea) {
+      setAreas(prev => {
+        const next = prev.map(a => String(a.id) === String(editingArea.id) ? { ...a, ...payload } : a);
+        try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      try {
         await api.updateAdminArea(editingArea.id, payload);
-        setAreas(prev => {
-          const next = prev.map(a => a.id === editingArea.id ? { ...a, ...payload } : a);
-          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      } else {
-        const res = await api.addAdminArea(payload);
-        const newA = res?.area || { id: Date.now(), ...payload };
-        setAreas(prev => {
-          const next = [...prev, newA];
-          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+      } catch (err) {
+        console.warn('API updateAdminArea warning:', err);
       }
-    } catch {
-      if (editingArea) {
-        setAreas(prev => {
-          const next = prev.map(a => a.id === editingArea.id ? { ...a, ...payload } : a);
-          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
-      } else {
-        setAreas(prev => {
-          const next = [...prev, { id: Date.now(), ...payload }];
-          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
-          return next;
-        });
+    } else {
+      const tempId = Date.now();
+      const newA = { id: tempId, ...payload };
+      setAreas(prev => {
+        const next = [...prev, newA];
+        try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+        return next;
+      });
+      try {
+        const res = await api.addAdminArea(payload);
+        if (res?.area) {
+          setAreas(prev => {
+            const next = prev.map(a => a.id === tempId ? { ...a, ...res.area } : a);
+            try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+            return next;
+          });
+        }
+      } catch (err) {
+        console.warn('API addAdminArea warning:', err);
       }
     }
-    setShowAreaModal(false);
   };
   const handleDeleteArea = (a) => {
-    const area = typeof a === 'object' ? a : areas.find(item => item.id === a);
-    if (!area) return;
+    const area = typeof a === 'object' ? a : areas.find(item => String(item.id) === String(a));
+    const targetId = area ? area.id : a;
+    const targetName = area ? formatAreaName(area.name, area.code) : 'Khu vực';
 
     setDeleteModalState({
       isOpen: true,
       title: t('admin.confirmDeleteAreaTitle'),
       message: t('admin.confirmDeleteArea'),
-      itemName: formatAreaName(area.name, area.code),
+      itemName: targetName,
       warningText: t('admin.confirmDeleteAreaWarning'),
-      onConfirm: async () => {
-        try {
-          await api.deleteAdminArea(area.id);
-        } catch {}
+      onConfirm: () => {
+        closeDeleteModal();
         setAreas(prev => {
-          const next = prev.filter(item => item.id !== area.id);
+          const next = prev.filter(item => String(item.id) !== String(targetId));
           try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
           return next;
         });
-        closeDeleteModal();
+        api.deleteAdminArea(targetId).catch(err => {
+          console.warn('API deleteAdminArea warning:', err);
+        });
       }
     });
   };
@@ -1970,7 +2049,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                     <button onClick={() => openEditProduct(p)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}>
                       <Pencil size={13} />
                     </button>
-                    <button onClick={() => handleDeleteProduct(p.id)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
+                    <button onClick={() => handleDeleteProduct(p)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
                       <Trash2 size={13} />
                     </button>
                   </div>
@@ -2001,7 +2080,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   </div>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button onClick={() => openEditCat(c)} title={t('edit')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
-                    <button onClick={() => handleDeleteCategory(c.id)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
+                    <button onClick={() => handleDeleteCategory(c)} title={t('delete')} style={{ padding: '6px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                   </div>
                 </div>
               ))}
@@ -2222,7 +2301,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                         <button onClick={() => openEditTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
                           <Pencil size={12} /> {t('edit')}
                         </button>
-                        <button onClick={() => handleDeleteTable(tObj.id)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
+                        <button onClick={() => handleDeleteTable(tObj)} style={{ padding: '5px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px', fontSize: '12px' }}>
                           <Trash2 size={12} /> {t('delete')}
                         </button>
                       </div>
@@ -2267,7 +2346,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                     </div>
                     <div style={{ display: 'flex', gap: '6px' }}>
                       <button onClick={() => openEditArea(a)} title={t('edit')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}><Pencil size={13} /></button>
-                      <button onClick={() => handleDeleteArea(a.id)} title={t('delete')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
+                      <button onClick={() => handleDeleteArea(a)} title={t('delete')} style={{ padding: '7px 10px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}><Trash2 size={13} /></button>
                     </div>
                   </div>
                   {/* Mini table list in this area */}
@@ -2385,8 +2464,8 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
                 <button type="button" onClick={() => setShowAddUserModal(false)} style={btnSecondary}>{t('cancel')}</button>
-                <button type="submit" style={btnPrimary}>
-                  {editingUser ? t('update') : t('admin.saveToDb')}
+                <button type="submit" disabled={isSubmittingUser} style={{ ...btnPrimary, opacity: isSubmittingUser ? 0.7 : 1, cursor: isSubmittingUser ? 'not-allowed' : 'pointer' }}>
+                  {isSubmittingUser ? '...' : (editingUser ? t('update') : t('admin.saveToDb'))}
                 </button>
               </div>
             </form>
@@ -2467,7 +2546,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 <div>
                   <label style={labelStyle}>{t('admin.productGroup')}:</label>
                   <select required value={productCatId} onChange={e => setProductCatId(e.target.value)} style={inputStyle}>
-                    {(menuData.categories || []).map(cat => (
+                    {((categories && categories.length > 0) ? categories : (menuData.categories || [])).map(cat => (
                       <option key={cat.id} value={cat.id}>{formatCategoryName(cat.name)}</option>
                     ))}
                   </select>
@@ -2475,7 +2554,9 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
               </div>
               <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '8px' }}>
                 <button type="button" onClick={() => setShowAddProductModal(false)} style={btnSecondary}>{t('cancel')}</button>
-                <button type="submit" style={btnPrimary}>{editingProduct ? t('update') : t('admin.saveToDb')}</button>
+                <button type="submit" disabled={isSubmittingProduct} style={{ ...btnPrimary, opacity: isSubmittingProduct ? 0.7 : 1, cursor: isSubmittingProduct ? 'not-allowed' : 'pointer' }}>
+                  {isSubmittingProduct ? '...' : (editingProduct ? t('update') : t('admin.saveToDb'))}
+                </button>
               </div>
             </form>
             {!editingProduct && (

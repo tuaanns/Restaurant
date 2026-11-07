@@ -742,18 +742,16 @@ export function CustomersView({
     setDeleteConfirmTarget(c);
   };
 
-  const confirmDeleteAction = async () => {
+  const confirmDeleteAction = () => {
     if (!deleteConfirmTarget) return;
-    try {
-      await api.deleteCustomer(deleteConfirmTarget.id);
-    } catch (e) {}
-
-    setCustomerList(prev => prev.filter(c => c.id !== deleteConfirmTarget.id));
-    if (setExternalCustomers) {
-      setExternalCustomers(prev => prev.filter(c => c.id !== deleteConfirmTarget.id));
-    }
-    setSelectedRows(prev => prev.filter(id => id !== deleteConfirmTarget.id));
+    const targetId = deleteConfirmTarget.id;
     setDeleteConfirmTarget(null);
+    setCustomerList(prev => prev.filter(c => String(c.id) !== String(targetId)));
+    if (setExternalCustomers) {
+      setExternalCustomers(prev => prev.filter(c => String(c.id) !== String(targetId)));
+    }
+    setSelectedRows(prev => prev.filter(id => String(id) !== String(targetId)));
+    api.deleteCustomer(targetId).catch(e => console.warn('API deleteCustomer warning:', e));
   };
 
   // ── Delete Selected Customers ──
@@ -762,22 +760,18 @@ export function CustomersView({
     setDeleteSelectedConfirmOpen(true);
   };
 
-  const confirmDeleteSelectedAction = async () => {
+  const confirmDeleteSelectedAction = () => {
     if (selectedRows.length === 0) return;
-    setIsDeletingSelected(true);
-    try {
-      for (const id of selectedRows) {
-        try { await api.deleteCustomer(id); } catch (e) {}
-      }
-      setCustomerList(prev => prev.filter(c => !selectedRows.includes(c.id)));
-      if (setExternalCustomers) {
-        setExternalCustomers(prev => prev.filter(c => !selectedRows.includes(c.id)));
-      }
-      setSelectedRows([]);
-      setShowMoreMenu(false);
-    } finally {
-      setIsDeletingSelected(false);
-      setDeleteSelectedConfirmOpen(false);
+    const idsToDelete = [...selectedRows];
+    setDeleteSelectedConfirmOpen(false);
+    setSelectedRows([]);
+    setShowMoreMenu(false);
+    setCustomerList(prev => prev.filter(c => !idsToDelete.some(id => String(id) === String(c.id))));
+    if (setExternalCustomers) {
+      setExternalCustomers(prev => prev.filter(c => !idsToDelete.some(id => String(id) === String(c.id))));
+    }
+    for (const id of idsToDelete) {
+      api.deleteCustomer(id).catch(() => {});
     }
   };
 

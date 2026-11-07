@@ -135,7 +135,7 @@ export function App() {
       }
     } catch (err) {}
 
-    // Đồng bộ thông tin user mới nhất từ CSDL
+    // Đồng bộ thông tin user mới nhất từ máy chủ
     try {
       const usersRes = await api.getUsers();
       if (usersRes && Array.isArray(usersRes.users) && currentUser) {

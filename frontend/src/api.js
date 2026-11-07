@@ -5,6 +5,9 @@ const host = typeof window !== 'undefined' && window.location.hostname ? window.
 const API_ROOT = import.meta.env.VITE_API_URL || `http://${host}:8000/api`;
 const API_BASE = `${API_ROOT}/pos`;
 
+// Giới hạn thời gian chờ tối đa 5 giây để tránh đơ giao diện khi máy chủ ngắt kết nối
+axios.defaults.timeout = 5000;
+
 // Tự động gắn token vào header nếu có
 axios.interceptors.request.use((config) => {
   const token = sessionStorage.getItem('pos_token') || localStorage.getItem('pos_token');

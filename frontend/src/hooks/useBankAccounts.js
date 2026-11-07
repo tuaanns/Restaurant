@@ -112,7 +112,7 @@ export function useBankAccounts() {
     }
 
     setBankAccounts(prev => {
-      const updated = prev.filter(acc => acc.id !== id);
+      const updated = prev.filter(acc => String(acc.id) !== String(id));
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(updated)); } catch (e) {}
       return updated;
     });

@@ -19,6 +19,7 @@ import { CashBookView } from './CashBookView';
 import { BankAccountsView } from './BankAccountsView';
 import { SettingsView } from './SettingsView';
 import { CustomersView } from './CustomersView';
+import { OverviewDashboard } from './OverviewDashboard';
 import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
 import { initialMockData } from '../../mockData';
 
@@ -1816,70 +1817,14 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
         {/* ─── TAB: OVERVIEW ─── */}
         {activeTab === 'overview' && (
-          <div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
-              {[
-                { label: t('admin.totalRevenue'), value: formatMoney(stats?.total_revenue || 3901700), icon: <DollarSign size={18} />, bg: '#E8F5E9', color: '#1B5E20', sub: t('admin.allShiftsCalc'), subColor: '#10b981' },
-                { label: t('admin.totalOrders'), value: (stats?.total_orders_today || 5) + ' ' + t('admin.ordersUnit'), icon: <TrendingUp size={18} />, bg: '#E8F5E9', color: '#1B5E20', sub: `${t('admin.activeOnTables')} 24 ${t('table.tables')}`, subColor: '#64748b' },
-                { label: t('admin.tablesOccupied'), value: (stats?.occupied_tables || 6) + ' / 24 ' + t('table.tables'), icon: <Utensils size={18} />, bg: '#fef3c7', color: '#d97706', sub: `${stats?.billing_tables || 2} ${t('table.tables')} ${t('admin.waitingPayment')}`, subColor: '#d97706' },
-                { label: t('admin.staffCount'), value: users.length + ' ' + t('admin.accountsUnit'), icon: <Users size={18} />, bg: '#f3e8ff', color: '#9333ea', sub: t('admin.activeInDb'), subColor: '#64748b' },
-              ].map((s, i) => (
-                <Card key={i}>
-                  <CardHeader style={{ padding: '16px 20px 8px 20px', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 600 }}>{s.label}</span>
-                    <div style={{ padding: '6px', backgroundColor: s.bg, color: s.color, borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{s.icon}</div>
-                  </CardHeader>
-                  <CardContent style={{ padding: '0 20px 16px 20px' }}>
-                    <div style={{ fontSize: '22px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.5px' }}>{s.value}</div>
-                    <div style={{ fontSize: '11.5px', color: s.subColor, marginTop: '4px', fontWeight: 500 }}>{s.sub}</div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-              <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: 800, marginBottom: '14px' }}>{t('admin.topDishes')}</h3>
-                {[
-                  { name: 'Mì xào bò thượng hạng', qty: 4, revenue: '440.000 đ' },
-                  { name: 'Cơm chiên hải sản Hoàng Kim', qty: 3, revenue: '375.000 đ' },
-                  { name: 'Nước cam ép tươi', qty: 4, revenue: '180.000 đ' },
-                  { name: 'Khăn lạnh thơm cao cấp', qty: 6, revenue: '30.000 đ' },
-                ].map((p, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 12px', backgroundColor: '#f8fafc', borderRadius: '8px', marginBottom: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{ width: '24px', height: '24px', borderRadius: '50%', backgroundColor: '#1B5E20', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700, flexShrink: 0 }}>{i + 1}</span>
-                      <span style={{ fontSize: '13px', fontWeight: 600 }}>{formatDishName(p.name)}</span>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 700, color: '#1B5E20' }}>{p.revenue}</div>
-                      <div style={{ fontSize: '11px', color: '#64748b' }}>{t('admin.sold')}: {p.qty}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '20px' }}>
-                <h3 style={{ fontSize: '15px', fontWeight: 800, marginBottom: '14px' }}>{t('admin.paymentMethods')}</h3>
-                {[
-                  { icon: <Banknote size={20} color="#10b981" />, label: t('admin.cash'), sub: t('admin.atCounter'), value: '1.850.000 đ' },
-                  { icon: <QrCode size={20} color="#1B5E20" />, label: t('admin.bankTransfer'), sub: 'MBBank', value: '1.450.000 đ' },
-                  { icon: <CreditCard size={20} color="#8b5cf6" />, label: t('admin.cardPayment'), sub: 'ATM/Visa', value: '601.700 đ' },
-                ].map((m, i) => (
-                  <div key={i} style={{ padding: '14px', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      {m.icon}
-                      <div>
-                        <div style={{ fontSize: '13.5px', fontWeight: 700 }}>{m.label}</div>
-                        <div style={{ fontSize: '11px', color: '#64748b' }}>{m.sub}</div>
-                      </div>
-                    </div>
-                    <span style={{ fontSize: '15px', fontWeight: 800 }}>{m.value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
+          <OverviewDashboard
+            stats={stats}
+            users={users}
+            tables={tables}
+            menuData={menuData}
+            formatMoney={formatMoney}
+            formatDishName={formatDishName}
+          />
         )}
 
         {/* ─── TAB: USERS ─── */}

@@ -378,7 +378,7 @@ export function LanguageProvider({ children }) {
     }
     if (typeof val !== 'string') {
       if (typeof params === 'string') return params;
-      return undefined;
+      return key;
     }
     if (params && typeof params === 'object') {
       return Object.entries(params).reduce((str, [k, v]) => {

@@ -43,6 +43,8 @@ export const translations = {
     optional: 'Tùy chọn',
     total: 'Tổng cộng',
     language: 'Ngôn ngữ',
+    noResultsFound: 'Không tìm thấy dữ liệu phù hợp',
+    rows: 'Hàng',
 
     // === ĐĂNG NHẬP ===
     login: {
@@ -136,6 +138,7 @@ export const translations = {
     // === BÀN ĂN / TABLE GRID ===
     table: {
       tableLabel: 'Bàn',
+      tableName: 'Tên phòng/bàn',
       empty: 'Trống',
       occupied: 'Đang có khách',
       reserved: 'Đã đặt trước',
@@ -220,6 +223,9 @@ export const translations = {
       addToOrder: 'Thêm vào đơn',
       unit: 'ĐVT',
       price: 'Giá',
+      code: 'Mã món',
+      dishName: 'Tên món ăn',
+      items: 'món',
     },
 
     // === MODAL BẾP ===
@@ -876,6 +882,16 @@ export const translations = {
       areaOverview: 'Tổng quan khu vực',
       searchAreaPlaceholder: 'Theo tên khu vực...',
       tableList: 'Danh sách bàn',
+      categories: 'nhóm',
+      tables: 'bàn',
+      roomTable: 'Phòng / Bàn',
+      import: 'Nhập file',
+      exportExcel: 'Xuất file Excel (.xlsx)',
+      printList: 'In danh sách',
+      shiftMorning: 'Ca sáng (07:00 - 15:00)',
+      shiftAfternoon: 'Ca chiều (15:00 - 23:00)',
+      shiftNight: 'Ca tối (17:00 - 23:00)',
+      shiftFull: 'Toàn ca',
 
       // Product tab
       menuTitle: 'Quản Lý Thực Đơn và Món Ăn',
@@ -1359,6 +1375,8 @@ export const translations = {
     optional: 'Optional',
     total: 'Total',
     language: 'Language',
+    noResultsFound: 'No matching data found',
+    rows: 'Rows',
 
     login: {
       title: 'System Login',
@@ -1448,6 +1466,7 @@ export const translations = {
 
     table: {
       tableLabel: 'Table',
+      tableName: 'Table Name',
       empty: 'Empty',
       occupied: 'Occupied',
       reserved: 'Reserved',
@@ -1529,6 +1548,9 @@ export const translations = {
       addToOrder: 'Add to order',
       unit: 'Unit',
       price: 'Price',
+      code: 'Item Code',
+      dishName: 'Item Name',
+      items: 'items',
     },
 
     kitchen: {
@@ -2175,6 +2197,16 @@ export const translations = {
       areaOverview: 'Area Overview',
       searchAreaPlaceholder: 'Search by area name...',
       tableList: 'Table List',
+      categories: 'categories',
+      tables: 'tables',
+      roomTable: 'Room / Table',
+      import: 'Import',
+      exportExcel: 'Export Excel (.xlsx)',
+      printList: 'Print List',
+      shiftMorning: 'Morning Shift (07:00 - 15:00)',
+      shiftAfternoon: 'Afternoon Shift (15:00 - 23:00)',
+      shiftNight: 'Night Shift (17:00 - 23:00)',
+      shiftFull: 'Full Shift',
 
       menuTitle: 'Manage Menu & Food Items',
       addProduct: 'Add New Item',
@@ -2651,6 +2683,8 @@ export const translations = {
     optional: '선택',
     total: '합계',
     language: '언어',
+    noResultsFound: '일치하는 데이터가 없습니다',
+    rows: '행',
 
     login: {
       title: '시스템 로그인',
@@ -2740,6 +2774,7 @@ export const translations = {
 
     table: {
       tableLabel: '테이블',
+      tableName: '테이블명',
       empty: '비어있음',
       occupied: '사용 중',
       reserved: '예약됨',
@@ -2821,6 +2856,9 @@ export const translations = {
       addToOrder: '주문에 추가',
       unit: '단위',
       price: '가격',
+      code: '메뉴 코드',
+      dishName: '메뉴명',
+      items: '개',
     },
 
     kitchen: {
@@ -3467,6 +3505,16 @@ export const translations = {
       areaOverview: '구역 개요',
       searchAreaPlaceholder: '구역명으로 검색...',
       tableList: '테이블 목록',
+      categories: '카테고리',
+      tables: '테이블',
+      roomTable: '룸 / 테이블',
+      import: '가져오기',
+      exportExcel: 'Excel 내보내기 (.xlsx)',
+      printList: '목록 인쇄',
+      shiftMorning: '오전 근무 (07:00 - 15:00)',
+      shiftAfternoon: '오후 근무 (15:00 - 23:00)',
+      shiftNight: '야간 근무 (17:00 - 23:00)',
+      shiftFull: '종일 근무',
 
       menuTitle: '메뉴 및 음식 관리',
       addProduct: '음식 추가',
@@ -3943,6 +3991,8 @@ export const translations = {
     optional: 'Необязательно',
     total: 'Итого',
     language: 'Язык',
+    noResultsFound: 'Подходящие данные не найдены',
+    rows: 'Строк',
 
     login: {
       title: 'Вход в систему',
@@ -4032,6 +4082,7 @@ export const translations = {
 
     table: {
       tableLabel: 'Стол',
+      tableName: 'Название стола',
       empty: 'Свободен',
       occupied: 'Занят',
       reserved: 'Забронирован',
@@ -4113,6 +4164,9 @@ export const translations = {
       addToOrder: 'Добавить в заказ',
       unit: 'Ед.',
       price: 'Цена',
+      code: 'Код блюда',
+      dishName: 'Название блюда',
+      items: 'блюд',
     },
 
     kitchen: {
@@ -4759,6 +4813,16 @@ export const translations = {
       areaOverview: 'Обзор зон',
       searchAreaPlaceholder: 'По названию зоны...',
       tableList: 'Список столов',
+      categories: 'категорий',
+      tables: 'столов',
+      roomTable: 'Комнаты / Столы',
+      import: 'Импорт',
+      exportExcel: 'Экспорт в Excel (.xlsx)',
+      printList: 'Печать списка',
+      shiftMorning: 'Утренняя смена (07:00 - 15:00)',
+      shiftAfternoon: 'Дневная смена (15:00 - 23:00)',
+      shiftNight: 'Вечерняя смена (17:00 - 23:00)',
+      shiftFull: 'Полная смена',
 
       menuTitle: 'Управление меню и блюдами',
       addProduct: 'Добавить блюдо',

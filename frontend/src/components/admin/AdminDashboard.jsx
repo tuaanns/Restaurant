@@ -20,6 +20,45 @@ import { BankAccountsView } from './BankAccountsView';
 import { SettingsView } from './SettingsView';
 import { CustomersView } from './CustomersView';
 import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
+import { initialMockData } from '../../mockData';
+
+const DEFAULT_ADMIN_USERS = [
+  { id: 1, name: 'Quản trị viên', username: 'admin', email: 'admin@aura.vn', role: 'admin', shift: 'Toàn ca (Quản lý nhà hàng)', phone: '0901.888.999', is_active: 1 },
+  { id: 2, name: 'Thu Hằng', username: 'thuhang', email: 'thuhang@aura.vn', role: 'cashier', shift: 'Ca sáng (07:00 - 15:00)', phone: '0912.345.678', is_active: 1 },
+  { id: 3, name: 'Minh Trí', username: 'minhtri', email: 'minhtri@aura.vn', role: 'cashier', shift: 'Ca chiều (15:00 - 23:00)', phone: '0987.654.321', is_active: 1 },
+];
+
+const DEFAULT_ADMIN_CATEGORIES = (initialMockData?.menuList || []).map(c => ({
+  id: c.id,
+  name: c.name,
+  code: c.code || `CAT_${c.id}`,
+  sort_order: c.id,
+  is_active: 1,
+}));
+
+const DEFAULT_ADMIN_PRODUCTS = (initialMockData?.menuList || []).flatMap(c => (c.products || []).map(p => ({
+  ...p,
+  category_id: c.id,
+  category: { id: c.id, name: c.name },
+  is_active: 1,
+})));
+
+const DEFAULT_ADMIN_AREAS = (initialMockData?.areas || []).map(a => ({
+  id: a.id,
+  name: a.name,
+  code: a.code || `area_${a.id}`,
+  sort_order: a.id,
+}));
+
+const DEFAULT_ADMIN_TABLES = (initialMockData?.tables || []).map(t => {
+  const area = DEFAULT_ADMIN_AREAS.find(a => a.id === t.area_id) || { id: t.area_id, name: 'Tầng 1' };
+  return {
+    ...t,
+    area_id: t.area_id,
+    area_name: area.name,
+    area: area,
+  };
+});
 
 const inputStyle = {
   width: '100%', padding: '8px 10px', borderRadius: '6px',
@@ -400,9 +439,41 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
   const [activeTab, setActiveTab] = useState(initialTab || 'overview');
   const [stats, setStats] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [menuData, setMenuData] = useState({ categories: [], products: [] });
-  const [categories, setCategories] = useState([]);
+  const [isDbOffline, setIsDbOffline] = useState(false);
+
+  const [users, setUsers] = useState(() => {
+    try {
+      const c = localStorage.getItem('aura_pos_admin_users');
+      if (c) {
+        const parsed = JSON.parse(c);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_ADMIN_USERS;
+  });
+
+  const [menuData, setMenuData] = useState(() => {
+    try {
+      const c = localStorage.getItem('aura_pos_admin_menu');
+      if (c) {
+        const parsed = JSON.parse(c);
+        if (parsed?.products && Array.isArray(parsed.products) && parsed.products.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return { categories: DEFAULT_ADMIN_CATEGORIES, products: DEFAULT_ADMIN_PRODUCTS };
+  });
+
+  const [categories, setCategories] = useState(() => {
+    try {
+      const c = localStorage.getItem('aura_pos_admin_categories');
+      if (c) {
+        const parsed = JSON.parse(c);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_ADMIN_CATEGORIES;
+  });
+
   const [promotions, setPromotions] = useState([
     { id: 1, code: 'KM000014', name: 'CTKM KHAI TRƯƠNG', type: 'order_discount', discount_value: 10, min_order: 200000, from_date: '24/09/2026', to_date: '27/09/2026', is_active: true, budget_used: 0 },
     { id: 2, code: 'KM000013', name: '10 Ly Tặng 1 Hộp (Combo)', type: 'buy_get', discount_value: 0, min_order: 0, from_date: '07/11/2025', to_date: '07/01/2026', is_active: false, budget_used: 0 },
@@ -411,8 +482,27 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
   const [loading, setLoading] = useState(true);
 
   // ── Tables & Areas state ──
-  const [tables, setTables] = useState([]);
-  const [areas, setAreas] = useState([]);
+  const [tables, setTables] = useState(() => {
+    try {
+      const c = localStorage.getItem('aura_pos_admin_tables');
+      if (c) {
+        const parsed = JSON.parse(c);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_ADMIN_TABLES;
+  });
+
+  const [areas, setAreas] = useState(() => {
+    try {
+      const c = localStorage.getItem('aura_pos_admin_areas');
+      if (c) {
+        const parsed = JSON.parse(c);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+      }
+    } catch (e) {}
+    return DEFAULT_ADMIN_AREAS;
+  });
   const [tableSearch, setTableSearch] = useState('');
   const [tableAreaFilter, setTableAreaFilter] = useState('all');
   const [showTableModal, setShowTableModal] = useState(false);
@@ -503,54 +593,88 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
   // ── Load data ──
   const loadAdminData = async () => {
     setLoading(true);
-    try { const r = await api.getAdminStats(); if (r?.stats) setStats(r.stats); } catch (e) {}
-    try { const r = await api.getUsers(); if (r?.users) setUsers(r.users); } catch (e) {}
+    let offlineDetected = false;
+
+    try {
+      const r = await api.getAdminStats();
+      if (r?.stats) setStats(r.stats);
+    } catch (e) {
+      offlineDetected = true;
+    }
+
+    try {
+      const r = await api.getUsers();
+      if (r?.users && Array.isArray(r.users) && r.users.length > 0) {
+        setUsers(r.users);
+        try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(r.users)); } catch (e) {}
+      }
+    } catch (e) {
+      offlineDetected = true;
+    }
+
     try {
       const r = await api.getMenu();
-      if (r) setMenuData(r);
-      if (r?.categories) setCategories(r.categories);
-    } catch (e) {}
-    try { const r = await api.getCategories(); if (r?.categories) setCategories(r.categories); } catch (e) {}
+      if (r && Array.isArray(r.products) && r.products.length > 0) {
+        setMenuData(r);
+        try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(r)); } catch (e) {}
+      }
+      if (r?.categories && Array.isArray(r.categories) && r.categories.length > 0) {
+        setCategories(r.categories);
+        try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(r.categories)); } catch (e) {}
+      }
+    } catch (e) {
+      offlineDetected = true;
+    }
+
+    try {
+      const r = await api.getCategories();
+      if (r?.categories && Array.isArray(r.categories) && r.categories.length > 0) {
+        setCategories(r.categories);
+        try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(r.categories)); } catch (e) {}
+      }
+    } catch (e) {
+      offlineDetected = true;
+    }
+
     try {
       const r = await api.getAdminCustomers();
-      if (r?.customers && r.customers.length > 0) setCustomers(r.customers);
-    } catch (e) {}
+      if (r?.customers && Array.isArray(r.customers) && r.customers.length > 0) {
+        setCustomers(r.customers);
+      }
+    } catch (e) {
+      offlineDetected = true;
+    }
+
     try {
       const r = await api.getAdminPromotions();
-      if (r?.promotions && r.promotions.length > 0) setPromotions(r.promotions);
-    } catch (e) {}
+      if (r?.promotions && Array.isArray(r.promotions) && r.promotions.length > 0) {
+        setPromotions(r.promotions);
+      }
+    } catch (e) {
+      offlineDetected = true;
+    }
+
     try {
       const r = await api.getAdminAreas();
-      if (r?.areas && r.areas.length > 0) setAreas(r.areas);
-      else setAreas([
-        { id: 1, name: 'Tầng 1' },
-        { id: 2, name: 'Tầng 2' },
-        { id: 3, name: 'Sân thượng' },
-      ]);
+      if (r?.areas && Array.isArray(r.areas) && r.areas.length > 0) {
+        setAreas(r.areas);
+        try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(r.areas)); } catch (e) {}
+      }
     } catch (e) {
-      setAreas([
-        { id: 1, name: 'Tầng 1' },
-        { id: 2, name: 'Tầng 2' },
-        { id: 3, name: 'Sân thượng' },
-      ]);
+      offlineDetected = true;
     }
+
     try {
       const r = await api.getAdminTables();
-      if (r?.tables && r.tables.length > 0) setTables(r.tables);
-      else setTables([
-        { id: 1, name: 'Bàn 01', area_id: 1, area_name: 'Tầng 1', capacity: 4, status: 'empty' },
-        { id: 2, name: 'Bàn 02', area_id: 1, area_name: 'Tầng 1', capacity: 4, status: 'occupied' },
-        { id: 3, name: 'Bàn 03', area_id: 2, area_name: 'Tầng 2', capacity: 6, status: 'empty' },
-        { id: 4, name: 'Phòng VIP 1', area_id: 2, area_name: 'Tầng 2', capacity: 10, status: 'reserved' },
-      ]);
+      if (r?.tables && Array.isArray(r.tables) && r.tables.length > 0) {
+        setTables(r.tables);
+        try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(r.tables)); } catch (e) {}
+      }
     } catch (e) {
-      setTables([
-        { id: 1, name: 'Bàn 01', area_id: 1, area_name: 'Tầng 1', capacity: 4, status: 'empty' },
-        { id: 2, name: 'Bàn 02', area_id: 1, area_name: 'Tầng 1', capacity: 4, status: 'occupied' },
-        { id: 3, name: 'Bàn 03', area_id: 2, area_name: 'Tầng 2', capacity: 6, status: 'empty' },
-        { id: 4, name: 'Phòng VIP 1', area_id: 2, area_name: 'Tầng 2', capacity: 10, status: 'reserved' },
-      ]);
+      offlineDetected = true;
     }
+
+    setIsDbOffline(offlineDetected);
     setLoading(false);
   };
 
@@ -697,7 +821,11 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       if (editingUser) {
         const res = await api.updateUser(editingUser.id, payload);
         const updated = res?.user || { ...editingUser, ...payload };
-        setUsers(prev => prev.map(u => u.id === editingUser.id ? { ...u, ...updated } : u));
+        setUsers(prev => {
+          const next = prev.map(u => u.id === editingUser.id ? { ...u, ...updated } : u);
+          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
 
         // Nếu sửa chính tài khoản đang đăng nhập, lập tức cập nhật state cha và sessionStorage
         const isSelf = (currentUser?.id && Number(editingUser.id) === Number(currentUser.id)) ||
@@ -718,12 +846,31 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
         }
         const res = await api.createUser(payload);
         const created = res?.user || { id: Date.now(), ...payload };
-        setUsers(prev => [...prev, created]);
+        setUsers(prev => {
+          const next = [...prev, created];
+          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       }
       setShowAddUserModal(false);
       loadAdminData();
     } catch (err) {
-      alert('Lỗi: ' + (err.response?.data?.message || err.message));
+      if (editingUser) {
+        const updated = { ...editingUser, ...payload };
+        setUsers(prev => {
+          const next = prev.map(u => u.id === editingUser.id ? { ...u, ...updated } : u);
+          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+      } else {
+        const created = { id: Date.now(), ...payload };
+        setUsers(prev => {
+          const next = [...prev, created];
+          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+      }
+      setShowAddUserModal(false);
     }
   };
 
@@ -749,25 +896,46 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       onConfirm: async () => {
         try {
           await api.deleteUser(userObj.id);
-          setUsers(prev => prev.filter(item => item.id !== userObj.id));
-          loadAdminData();
-          closeDeleteModal();
-        } catch (err) {
-          alert('Lỗi: ' + (err.response?.data?.message || err.message));
-        }
+        } catch (err) {}
+        setUsers(prev => {
+          const next = prev.filter(item => item.id !== userObj.id);
+          try { localStorage.setItem('aura_pos_admin_users', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+        closeDeleteModal();
       }
     });
   };
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
+    const data = { category_id: Number(productCatId), name: productName, price: Number(productPrice), unit: productUnit };
     try {
-      const data = { category_id: Number(productCatId), name: productName, price: Number(productPrice), unit: productUnit };
       if (editingProduct) { await api.updateProduct(editingProduct.id, data); }
       else { await api.addProduct(data); }
       setShowAddProductModal(false);
       loadAdminData();
-    } catch (err) { alert('Loi: ' + (err.response?.data?.message || err.message)); }
+    } catch (err) {
+      const cat = categories.find(c => Number(c.id) === Number(productCatId));
+      if (editingProduct) {
+        const updated = { ...editingProduct, ...data, category: cat || editingProduct.category };
+        setMenuData(prev => {
+          const nextProducts = (prev.products || []).map(p => p.id === editingProduct.id ? updated : p);
+          const next = { ...prev, products: nextProducts };
+          try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+      } else {
+        const newProd = { id: Date.now(), ...data, code: `SP${Math.floor(Math.random() * 900) + 100}`, category: cat, is_active: 1 };
+        setMenuData(prev => {
+          const nextProducts = [...(prev.products || []), newProd];
+          const next = { ...prev, products: nextProducts };
+          try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+      }
+      setShowAddProductModal(false);
+    }
   };
 
   const handleDeleteProduct = (p) => {
@@ -783,11 +951,14 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       onConfirm: async () => {
         try {
           await api.deleteProduct(prod.id);
-          loadAdminData();
-          closeDeleteModal();
-        } catch (err) {
-          alert('Lỗi: ' + (err.response?.data?.message || err.message));
-        }
+        } catch (err) {}
+        setMenuData(prev => {
+          const nextProducts = (prev.products || []).filter(item => item.id !== prod.id);
+          const next = { ...prev, products: nextProducts };
+          try { localStorage.setItem('aura_pos_admin_menu', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+        closeDeleteModal();
       }
     });
   };
@@ -799,7 +970,22 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       else { await api.addCategory({ name: catName }); }
       setShowAddCatModal(false);
       loadAdminData();
-    } catch (err) { alert('Loi: ' + (err.response?.data?.message || err.message)); }
+    } catch (err) {
+      if (editingCat) {
+        setCategories(prev => {
+          const next = prev.map(c => c.id === editingCat.id ? { ...c, name: catName } : c);
+          try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+      } else {
+        setCategories(prev => {
+          const next = [...prev, { id: Date.now(), name: catName, code: `CAT_${Date.now()}` }];
+          try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+      }
+      setShowAddCatModal(false);
+    }
   };
 
   const handleDeleteCategory = (c) => {
@@ -815,11 +1001,13 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       onConfirm: async () => {
         try {
           await api.deleteCategory(cat.id);
-          loadAdminData();
-          closeDeleteModal();
-        } catch (err) {
-          alert('Lỗi: ' + (err.response?.data?.message || err.message));
-        }
+        } catch (err) {}
+        setCategories(prev => {
+          const next = prev.filter(item => item.id !== cat.id);
+          try { localStorage.setItem('aura_pos_admin_categories', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
+        closeDeleteModal();
       }
     });
   };
@@ -852,17 +1040,33 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     try {
       if (editingTable) {
         await api.updateAdminTable(editingTable.id, payload);
-        setTables(prev => prev.map(t => t.id === editingTable.id ? { ...t, ...payload } : t));
+        setTables(prev => {
+          const next = prev.map(t => t.id === editingTable.id ? { ...t, ...payload } : t);
+          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       } else {
         const res = await api.addAdminTable(payload);
         const newT = res?.table || { id: Date.now(), ...payload, status: 'empty' };
-        setTables(prev => [...prev, newT]);
+        setTables(prev => {
+          const next = [...prev, newT];
+          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       }
     } catch {
       if (editingTable) {
-        setTables(prev => prev.map(t => t.id === editingTable.id ? { ...t, ...payload } : t));
+        setTables(prev => {
+          const next = prev.map(t => t.id === editingTable.id ? { ...t, ...payload } : t);
+          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       } else {
-        setTables(prev => [...prev, { id: Date.now(), ...payload, status: 'empty' }]);
+        setTables(prev => {
+          const next = [...prev, { id: Date.now(), ...payload, status: 'empty' }];
+          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       }
     }
     setShowTableModal(false);
@@ -881,7 +1085,11 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
         try {
           await api.deleteAdminTable(tbl.id);
         } catch {}
-        setTables(prev => prev.filter(t => t.id !== tbl.id));
+        setTables(prev => {
+          const next = prev.filter(t => t.id !== tbl.id);
+          try { localStorage.setItem('aura_pos_admin_tables', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
         closeDeleteModal();
       }
     });
@@ -897,17 +1105,33 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     try {
       if (editingArea) {
         await api.updateAdminArea(editingArea.id, payload);
-        setAreas(prev => prev.map(a => a.id === editingArea.id ? { ...a, ...payload } : a));
+        setAreas(prev => {
+          const next = prev.map(a => a.id === editingArea.id ? { ...a, ...payload } : a);
+          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       } else {
         const res = await api.addAdminArea(payload);
         const newA = res?.area || { id: Date.now(), ...payload };
-        setAreas(prev => [...prev, newA]);
+        setAreas(prev => {
+          const next = [...prev, newA];
+          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       }
     } catch {
       if (editingArea) {
-        setAreas(prev => prev.map(a => a.id === editingArea.id ? { ...a, ...payload } : a));
+        setAreas(prev => {
+          const next = prev.map(a => a.id === editingArea.id ? { ...a, ...payload } : a);
+          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       } else {
-        setAreas(prev => [...prev, { id: Date.now(), ...payload }]);
+        setAreas(prev => {
+          const next = [...prev, { id: Date.now(), ...payload }];
+          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
       }
     }
     setShowAreaModal(false);
@@ -926,7 +1150,11 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
         try {
           await api.deleteAdminArea(area.id);
         } catch {}
-        setAreas(prev => prev.filter(item => item.id !== area.id));
+        setAreas(prev => {
+          const next = prev.filter(item => item.id !== area.id);
+          try { localStorage.setItem('aura_pos_admin_areas', JSON.stringify(next)); } catch (e) {}
+          return next;
+        });
         closeDeleteModal();
       }
     });
@@ -1435,6 +1663,53 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
         display: 'flex',
         flexDirection: 'column'
       }}>
+        {/* Banner cảnh báo khi MySQL tạm dừng / chưa bật */}
+        {isDbOffline && (
+          <div style={{
+            margin: ['report_end_of_day', 'report_sales', 'report_goods', 'cashbook', 'bank_accounts', 'settings'].includes(activeTab) ? '12px 24px 0 24px' : '0 0 20px 0',
+            backgroundColor: '#fffbeb',
+            border: '1px solid #fde68a',
+            borderRadius: '10px',
+            padding: '12px 18px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '12px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+            flexShrink: 0
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#fef3c7', color: '#d97706', display: 'flex', flexShrink: 0 }}>
+                <AlertCircle size={20} />
+              </div>
+              <div>
+                <div style={{ fontSize: '13.5px', fontWeight: 800, color: '#92400e' }}>
+                  {t('admin.mysqlOfflineTitle')}
+                </div>
+                <div style={{ fontSize: '12px', color: '#b45309', marginTop: '2px', lineHeight: 1.4 }}>
+                  {t('admin.mysqlOfflineDesc')}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={() => loadAdminData()}
+              style={{
+                padding: '7px 16px',
+                backgroundColor: '#1B5E20',
+                color: '#fff',
+                border: 'none',
+                borderRadius: '6px',
+                fontWeight: 700,
+                fontSize: '12.5px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
+            >
+              {t('admin.retrySync')}
+            </button>
+          </div>
+        )}
 
         {/* ─── TAB: THIẾT LẬP (SETTINGS) ─── */}
         {activeTab === 'settings' && (

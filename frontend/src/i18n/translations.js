@@ -422,6 +422,9 @@ export const translations = {
       tableRooms: 'Phòng/Bàn',
       tableList: 'Danh sách phòng/bàn',
       areas: 'Khu vực',
+      mysqlOfflineTitle: 'Dịch vụ CSDL MySQL đang tạm ngắt kết nối (XAMPP)',
+      mysqlOfflineDesc: 'Hệ thống đang bảo vệ và hiển thị dữ liệu an toàn. Vui lòng mở XAMPP Control Panel và nhấn "Start" tại mục MySQL để đồng bộ cơ sở dữ liệu.',
+      retrySync: 'Thử kết nối lại',
 
       // Báo cáo (Reports)
       reports: {
@@ -1606,6 +1609,9 @@ export const translations = {
       tableRooms: 'Rooms/Tables',
       tableList: 'Room/Table List',
       areas: 'Areas',
+      mysqlOfflineTitle: 'MySQL Database service is temporarily stopped (XAMPP)',
+      mysqlOfflineDesc: 'The system is safely displaying cached data. Please open XAMPP Control Panel and click "Start" on MySQL to sync database.',
+      retrySync: 'Retry connection',
 
       // Reports
       reports: {
@@ -2781,6 +2787,9 @@ export const translations = {
       tableRooms: '룸/테이블',
       tableList: '룸/테이블 목록',
       areas: '구역',
+      mysqlOfflineTitle: 'MySQL 데이터베이스 서비스가 일시 중지되었습니다 (XAMPP)',
+      mysqlOfflineDesc: '시스템이 안전하게 캐시된 데이터를 표시하고 있습니다. XAMPP Control Panel을 열고 MySQL의 "Start"를 클릭하여 동기화하세요.',
+      retrySync: '다시 연결',
 
       // 보고서 (Reports)
       reports: {
@@ -3956,6 +3965,9 @@ export const translations = {
       tableRooms: 'Столы/Комнаты',
       tableList: 'Список столов/комнат',
       areas: 'Зоны',
+      mysqlOfflineTitle: 'Служба базы данных MySQL временно остановлена (XAMPP)',
+      mysqlOfflineDesc: 'Система безопасно отображает кэшированные данные. Откройте XAMPP Control Panel и нажмите «Start» для MySQL.',
+      retrySync: 'Повторить попытку',
 
       // Отчеты (Reports)
       reports: {

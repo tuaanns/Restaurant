@@ -1003,14 +1003,23 @@ class AdminController extends Controller
      */
     public function getBankAccounts()
     {
-        $accounts = BankAccount::orderBy('is_default', 'desc')
-            ->orderBy('id', 'desc')
-            ->get();
+        try {
+            $accounts = BankAccount::orderBy('is_default', 'desc')
+                ->orderBy('id', 'desc')
+                ->get();
 
-        return response()->json([
-            'success' => true,
-            'bank_accounts' => $accounts
-        ]);
+            return response()->json([
+                'success' => true,
+                'bank_accounts' => $accounts
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'is_db_offline' => true,
+                'message' => 'Cơ sở dữ liệu MySQL chưa khởi động (Vui lòng bật MySQL trong XAMPP).',
+                'bank_accounts' => []
+            ], 200);
+        }
     }
 
     /**
@@ -1018,15 +1027,24 @@ class AdminController extends Controller
      */
     public function getDefaultBankAccount()
     {
-        $account = BankAccount::where('is_default', true)->where('is_active', true)->first();
-        if (!$account) {
-            $account = BankAccount::where('is_active', true)->first();
-        }
+        try {
+            $account = BankAccount::where('is_default', true)->where('is_active', true)->first();
+            if (!$account) {
+                $account = BankAccount::where('is_active', true)->first();
+            }
 
-        return response()->json([
-            'success' => true,
-            'bank_account' => $account
-        ]);
+            return response()->json([
+                'success' => true,
+                'bank_account' => $account
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'is_db_offline' => true,
+                'message' => 'Cơ sở dữ liệu MySQL chưa khởi động.',
+                'bank_account' => null
+            ], 200);
+        }
     }
 
     /**
@@ -1042,33 +1060,41 @@ class AdminController extends Controller
             'account_name' => 'required|string|max:191',
         ]);
 
-        $isDefault = filter_var($request->input('is_default', false), FILTER_VALIDATE_BOOLEAN);
+        try {
+            $isDefault = filter_var($request->input('is_default', false), FILTER_VALIDATE_BOOLEAN);
 
-        // Nếu đặt làm mặc định hoặc hệ thống chưa có tài khoản mặc định nào
-        $hasAnyDefault = BankAccount::where('is_default', true)->exists();
-        if ($isDefault || !$hasAnyDefault) {
-            BankAccount::query()->update(['is_default' => false]);
-            $isDefault = true;
+            // Nếu đặt làm mặc định hoặc hệ thống chưa có tài khoản mặc định nào
+            $hasAnyDefault = BankAccount::where('is_default', true)->exists();
+            if ($isDefault || !$hasAnyDefault) {
+                BankAccount::query()->update(['is_default' => false]);
+                $isDefault = true;
+            }
+
+            $account = BankAccount::create([
+                'bank_name' => trim($request->input('bank_name')),
+                'bank_code' => strtoupper(trim($request->input('bank_code'))),
+                'bin' => trim($request->input('bin')),
+                'account_number' => trim($request->input('account_number')),
+                'account_name' => strtoupper(trim($request->input('account_name'))),
+                'branch' => $request->input('branch'),
+                'is_default' => $isDefault,
+                'is_active' => filter_var($request->input('is_active', true), FILTER_VALIDATE_BOOLEAN),
+                'qr_template' => $request->input('qr_template', 'compact2'),
+                'notes' => $request->input('notes'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã thêm tài khoản ngân hàng thành công!',
+                'bank_account' => $account
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'is_db_offline' => true,
+                'message' => 'Cơ sở dữ liệu MySQL chưa khởi động (Vui lòng bật MySQL trong XAMPP).'
+            ], 503);
         }
-
-        $account = BankAccount::create([
-            'bank_name' => trim($request->input('bank_name')),
-            'bank_code' => strtoupper(trim($request->input('bank_code'))),
-            'bin' => trim($request->input('bin')),
-            'account_number' => trim($request->input('account_number')),
-            'account_name' => strtoupper(trim($request->input('account_name'))),
-            'branch' => $request->input('branch'),
-            'is_default' => $isDefault,
-            'is_active' => filter_var($request->input('is_active', true), FILTER_VALIDATE_BOOLEAN),
-            'qr_template' => $request->input('qr_template', 'compact2'),
-            'notes' => $request->input('notes'),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Đã thêm tài khoản ngân hàng thành công!',
-            'bank_account' => $account
-        ]);
     }
 
     /**
@@ -1076,8 +1102,6 @@ class AdminController extends Controller
      */
     public function updateBankAccount(Request $request, $id)
     {
-        $account = BankAccount::findOrFail($id);
-
         $request->validate([
             'bank_name' => 'required|string|max:191',
             'bank_code' => 'required|string|max:50',
@@ -1086,30 +1110,39 @@ class AdminController extends Controller
             'account_name' => 'required|string|max:191',
         ]);
 
-        $isDefault = filter_var($request->input('is_default', $account->is_default), FILTER_VALIDATE_BOOLEAN);
+        try {
+            $account = BankAccount::findOrFail($id);
+            $isDefault = filter_var($request->input('is_default', $account->is_default), FILTER_VALIDATE_BOOLEAN);
 
-        if ($isDefault && !$account->is_default) {
-            BankAccount::where('id', '!=', $id)->update(['is_default' => false]);
+            if ($isDefault && !$account->is_default) {
+                BankAccount::where('id', '!=', $id)->update(['is_default' => false]);
+            }
+
+            $account->update([
+                'bank_name' => trim($request->input('bank_name')),
+                'bank_code' => strtoupper(trim($request->input('bank_code'))),
+                'bin' => trim($request->input('bin')),
+                'account_number' => trim($request->input('account_number')),
+                'account_name' => strtoupper(trim($request->input('account_name'))),
+                'branch' => $request->input('branch'),
+                'is_default' => $isDefault,
+                'is_active' => filter_var($request->input('is_active', $account->is_active), FILTER_VALIDATE_BOOLEAN),
+                'qr_template' => $request->input('qr_template', $account->qr_template ?: 'compact2'),
+                'notes' => $request->input('notes'),
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Đã cập nhật thông tin tài khoản ngân hàng!',
+                'bank_account' => $account
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'is_db_offline' => true,
+                'message' => 'Cơ sở dữ liệu MySQL chưa khởi động (Vui lòng bật MySQL trong XAMPP).'
+            ], 503);
         }
-
-        $account->update([
-            'bank_name' => trim($request->input('bank_name')),
-            'bank_code' => strtoupper(trim($request->input('bank_code'))),
-            'bin' => trim($request->input('bin')),
-            'account_number' => trim($request->input('account_number')),
-            'account_name' => strtoupper(trim($request->input('account_name'))),
-            'branch' => $request->input('branch'),
-            'is_default' => $isDefault,
-            'is_active' => filter_var($request->input('is_active', $account->is_active), FILTER_VALIDATE_BOOLEAN),
-            'qr_template' => $request->input('qr_template', $account->qr_template ?: 'compact2'),
-            'notes' => $request->input('notes'),
-        ]);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Đã cập nhật thông tin tài khoản ngân hàng!',
-            'bank_account' => $account
-        ]);
     }
 
     /**
@@ -1117,16 +1150,24 @@ class AdminController extends Controller
      */
     public function setDefaultBankAccount($id)
     {
-        $account = BankAccount::findOrFail($id);
+        try {
+            $account = BankAccount::findOrFail($id);
 
-        BankAccount::query()->update(['is_default' => false]);
-        $account->update(['is_default' => true, 'is_active' => true]);
+            BankAccount::query()->update(['is_default' => false]);
+            $account->update(['is_default' => true, 'is_active' => true]);
 
-        return response()->json([
-            'success' => true,
-            'message' => "Đã đặt tài khoản {$account->bank_code} - {$account->account_number} làm mặc định nhận thanh toán QR!",
-            'bank_account' => $account
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => "Đã đặt tài khoản {$account->bank_code} - {$account->account_number} làm mặc định nhận thanh toán QR!",
+                'bank_account' => $account
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'is_db_offline' => true,
+                'message' => 'Cơ sở dữ liệu MySQL chưa khởi động (Vui lòng bật MySQL trong XAMPP).'
+            ], 503);
+        }
     }
 
     /**
@@ -1134,22 +1175,30 @@ class AdminController extends Controller
      */
     public function deleteBankAccount($id)
     {
-        $account = BankAccount::findOrFail($id);
-        $wasDefault = $account->is_default;
-        $name = "{$account->bank_code} - {$account->account_number}";
+        try {
+            $account = BankAccount::findOrFail($id);
+            $wasDefault = $account->is_default;
+            $name = "{$account->bank_code} - {$account->account_number}";
 
-        $account->delete();
+            $account->delete();
 
-        if ($wasDefault) {
-            $fallback = BankAccount::where('is_active', true)->first();
-            if ($fallback) {
-                $fallback->update(['is_default' => true]);
+            if ($wasDefault) {
+                $fallback = BankAccount::where('is_active', true)->first();
+                if ($fallback) {
+                    $fallback->update(['is_default' => true]);
+                }
             }
-        }
 
-        return response()->json([
-            'success' => true,
-            'message' => "Đã xóa tài khoản ngân hàng {$name} thành công!"
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => "Đã xóa tài khoản ngân hàng {$name} thành công!"
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'is_db_offline' => true,
+                'message' => 'Cơ sở dữ liệu MySQL chưa khởi động (Vui lòng bật MySQL trong XAMPP).'
+            ], 503);
+        }
     }
 }

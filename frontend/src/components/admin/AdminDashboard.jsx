@@ -1868,8 +1868,6 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
             menuData={menuData}
             formatMoney={formatMoney}
             formatDishName={formatDishName}
-            lastSyncTime={lastSyncTime}
-            onManualRefresh={refreshLiveStats}
           />
         )}
 

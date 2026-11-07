@@ -27,9 +27,7 @@ import {
   BarChart3,
   Calendar,
   Layers,
-  Sparkles,
-  RefreshCw,
-  Activity
+  Sparkles
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -146,9 +144,7 @@ export function OverviewDashboard({
   tables = [],
   menuData,
   formatMoney,
-  formatDishName,
-  lastSyncTime,
-  onManualRefresh
+  formatDishName
 }) {
   const { t } = useLanguage();
 
@@ -265,81 +261,7 @@ export function OverviewDashboard({
   const maxDishQty = Math.max(...topProductsList.map(p => p.qty || 1), 1);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-
-      {/* ── REAL-TIME LIVE STATUS HEADER BAR ── */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexWrap: 'wrap',
-        gap: '12px',
-        padding: '12px 18px',
-        backgroundColor: '#ffffff',
-        borderRadius: '14px',
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.03)'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '8px',
-            backgroundColor: '#ecfdf5',
-            color: '#065f46',
-            border: '1px solid #a7f3d0',
-            padding: '5px 12px',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: 800,
-            letterSpacing: '0.4px'
-          }}>
-            <span style={{
-              width: '8px',
-              height: '8px',
-              borderRadius: '50%',
-              backgroundColor: '#10b981',
-              display: 'inline-block',
-              boxShadow: '0 0 0 3px rgba(16, 185, 129, 0.35)'
-            }} />
-            REAL-TIME LIVE
-          </div>
-          <span style={{ fontSize: '13px', color: '#475569', fontWeight: 500 }}>
-            Hệ thống tự động cập nhật số liệu và biểu đồ mỗi 3 giây hoặc ngay khi có order mới
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <span style={{ fontSize: '12px', color: '#64748b' }}>
-            Vừa đồng bộ: <strong style={{ color: '#0f172a' }}>{lastSyncTime ? new Date(lastSyncTime).toLocaleTimeString('vi-VN') : 'Đang kết nối...'}</strong>
-          </span>
-          {onManualRefresh && (
-            <button
-              onClick={onManualRefresh}
-              title="Làm mới số liệu ngay"
-              style={{
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 14px',
-                borderRadius: '8px',
-                border: '1px solid #cbd5e1',
-                backgroundColor: '#f8fafc',
-                color: '#334155',
-                fontSize: '12px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                transition: 'all 0.15s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
-            >
-              <RefreshCw size={13} />
-              Làm mới
-            </button>
-          )}
-        </div>
-      </div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
 
       {/* ══════════════ ROW 1: 4 BENTO KPI CARDS (WITH SPARKLINE & SPOTLIGHT) ══════════════ */}
       <div style={{

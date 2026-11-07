@@ -18,6 +18,7 @@ import { ReportsView } from './ReportsView';
 import { CashBookView } from './CashBookView';
 import { BankAccountsView } from './BankAccountsView';
 import { SettingsView } from './SettingsView';
+import { CustomersView } from './CustomersView';
 import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
 
 const inputStyle = {
@@ -1735,184 +1736,12 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
         {/* ─── TAB: CUSTOMERS ─── */}
         {activeTab === 'customers' && (
-          <div>
-            {/* Toolbar */}
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <div>
-                <h2 style={{ fontSize: '18px', fontWeight: 800, color: '#0f172a' }}>{t('admin.customerTitle')}</h2>
-                <p style={{ fontSize: '12.5px', color: '#64748b', marginTop: '2px' }}>{t('admin.customerSubtitle')}</p>
-              </div>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => setShowImportCustomerModal(true)}
-                  style={{
-                    padding: '9px 18px',
-                    fontSize: '13.5px',
-                    backgroundColor: '#ecfdf5',
-                    color: '#059669',
-                    border: '1px solid #a7f3d0',
-                    borderRadius: '8px',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '7px',
-                    transition: 'all 0.15s ease'
-                  }}
-                >
-                  <FileSpreadsheet size={15} /> {t('admin.importCustomerExcel') || 'Nhập từ Excel / CSV'}
-                </button>
-                <button onClick={openAddCustomer} style={{ ...btnPrimary, padding: '9px 20px', fontSize: '13.5px', backgroundColor: '#1B5E20' }}>
-                  <Plus size={15} /> {t('admin.addCustomer')}
-                </button>
-              </div>
-            </div>
-
-            {/* Quick summary cards */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '14px', marginBottom: '16px' }}>
-              <div style={{ backgroundColor: '#fff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700 }}>{t('admin.totalCustomers')}</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>{customers.length} {t('admin.customersCountUnit')}</div>
-                </div>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#E8F5E9', color: '#1B5E20' }}><Users size={18} /></div>
-              </div>
-              <div style={{ backgroundColor: '#fff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700 }}>{t('admin.vipMembers')}</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#d97706', marginTop: '4px' }}>
-                    {customers.filter(c => (c.membership_tier || '').includes('Vàng') || (c.membership_tier || '').includes('Kim Cương')).length} {t('admin.membersUnit')}
-                  </div>
-                </div>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#fef3c7', color: '#d97706' }}><Award size={18} /></div>
-              </div>
-              <div style={{ backgroundColor: '#fff', padding: '14px 18px', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700 }}>{t('admin.totalRevenueStat')}</div>
-                  <div style={{ fontSize: '20px', fontWeight: 800, color: '#059669', marginTop: '4px' }}>
-                    {formatMoney(customers.reduce((sum, c) => sum + (Number(c.total_spent) || 0), 0))}
-                  </div>
-                </div>
-                <div style={{ padding: '8px', borderRadius: '8px', backgroundColor: '#ecfdf5', color: '#059669' }}><DollarSign size={18} /></div>
-              </div>
-            </div>
-
-            {/* Search + Filter bar */}
-            <div style={{ backgroundColor: '#fff', borderRadius: '10px', border: '1px solid #e2e8f0', padding: '12px 16px', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '12px' }}>
-              <Search size={16} color="#94a3b8" />
-              <input
-                type="text"
-                placeholder={t('admin.searchCustomerPlaceholder')}
-                value={customerSearch}
-                onChange={e => setCustomerSearch(e.target.value)}
-                style={{ flex: 1, border: 'none', outline: 'none', fontSize: '13.5px', color: '#0f172a', background: 'transparent' }}
-              />
-              <div style={{ width: '1px', height: '20px', backgroundColor: '#e2e8f0' }} />
-              <Filter size={15} color="#64748b" />
-              <select
-                value={customerTierFilter}
-                onChange={e => setCustomerTierFilter(e.target.value)}
-                style={{ border: 'none', outline: 'none', fontSize: '13px', color: '#334155', background: 'transparent', cursor: 'pointer', fontWeight: 600 }}
-              >
-                <option value="all">{t('admin.allTiers')}</option>
-                <option value="Hội viên Kim Cương">{t('admin.tierDiamond')}</option>
-                <option value="Hội viên Vàng">{t('admin.tierGold')}</option>
-                <option value="Hội viên Bạc">{t('admin.tierSilver')}</option>
-                <option value="Hội viên">{t('admin.tierMember')}</option>
-                <option value="Khách mới">{t('admin.tierNew')}</option>
-              </select>
-            </div>
-
-            {/* Customers Table */}
-            <div style={{ backgroundColor: '#fff', borderRadius: '12px', border: '1px solid #e2e8f0', overflow: 'hidden' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
-                <thead>
-                  <tr style={{ backgroundColor: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                    {[t('admin.customerCode'), t('admin.customerName'), t('admin.phone'), t('admin.memberTier'), t('admin.discountPct'), t('admin.ordersCount'), t('admin.totalSpent'), t('admin.joinDate'), t('actions')].map(h => (
-                      <th key={h} style={{ padding: '11px 14px', textAlign: 'left', fontSize: '12px', fontWeight: 700, color: '#475569', whiteSpace: 'nowrap' }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredCustomers.length === 0 ? (
-                    <tr>
-                      <td colSpan={9} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8', fontSize: '14px' }}>
-                        <Users size={32} style={{ display: 'block', margin: '0 auto 8px auto', opacity: 0.4 }} />
-                        {t('admin.noCustomersFound')}
-                      </td>
-                    </tr>
-                  ) : filteredCustomers.map(c => {
-                    const custCode = `KH${String(c.id).padStart(5, '0')}`;
-                    const tier = c.membership_tier || 'Khách mới';
-                    const isDiamond = tier.includes('Kim Cương');
-                    const isGold = tier.includes('Vàng');
-                    const isSilver = tier.includes('Bạc');
-                    const tierBg = isDiamond ? '#f3e8ff' : isGold ? '#fef3c7' : isSilver ? '#E8F5E9' : '#f1f5f9';
-                    const tierColor = isDiamond ? '#7e22ce' : isGold ? '#b45309' : isSilver ? '#2E7D32' : '#475569';
-
-                    return (
-                      <tr key={c.id} style={{ borderBottom: '1px solid #f1f5f9' }}
-                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
-                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                      >
-                        <td style={{ padding: '12px 14px', fontFamily: 'monospace', color: '#1B5E20', fontWeight: 700, fontSize: '12.5px' }}>{custCode}</td>
-                        <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <div style={{ width: '28px', height: '28px', borderRadius: '50%', backgroundColor: '#e2e8f0', color: '#475569', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '12px', fontWeight: 700 }}>
-                              {(c.name || 'K').charAt(0).toUpperCase()}
-                            </div>
-                            <span>{c.name}</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: '12px 14px', color: '#475569', fontSize: '12.5px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                            <Phone size={12} color="#94a3b8" />
-                            <span>{c.phone || t('admin.noPhone')}</span>
-                          </div>
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          <span style={{
-                            padding: '3px 9px', borderRadius: '12px', fontSize: '11px', fontWeight: 700,
-                            backgroundColor: tierBg, color: tierColor
-                          }}>
-                            {getTierLabel(tier)}
-                          </span>
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          {Number(c.discount_percent) > 0 ? (
-                            <span style={{ padding: '2px 8px', borderRadius: '10px', fontSize: '11px', fontWeight: 700, backgroundColor: '#ecfdf5', color: '#059669' }}>
-                              {t('admin.discountShort')} {c.discount_percent}%
-                            </span>
-                          ) : (
-                            <span style={{ color: '#94a3b8', fontSize: '12px' }}>0%</span>
-                          )}
-                        </td>
-                        <td style={{ padding: '12px 14px', color: '#475569', fontSize: '12.5px', fontWeight: 600 }}>
-                          {c.orders_count || 0} {t('admin.ordersUnit')}
-                        </td>
-                        <td style={{ padding: '12px 14px', fontWeight: 700, color: '#0f172a', fontSize: '12.5px' }}>
-                          {formatMoney(c.total_spent || 0)}
-                        </td>
-                        <td style={{ padding: '12px 14px', color: '#64748b', fontSize: '12px', whiteSpace: 'nowrap' }}>
-                          {c.created_at ? new Date(c.created_at).toLocaleDateString('vi-VN') : '—'}
-                        </td>
-                        <td style={{ padding: '12px 14px' }}>
-                          <div style={{ display: 'flex', gap: '6px' }}>
-                            <button onClick={() => openEditCustomer(c)} title={t('edit')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#1B5E20', backgroundColor: '#E8F5E9', border: 'none', cursor: 'pointer' }}>
-                              <Pencil size={13} />
-                            </button>
-                            <button onClick={() => handleDeleteCustomer(c.id)} title={t('delete')} style={{ padding: '5px 8px', borderRadius: '6px', color: '#ef4444', backgroundColor: '#fee2e2', border: 'none', cursor: 'pointer' }}>
-                              <Trash2 size={13} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </div>
+          <CustomersView
+            customers={customers}
+            setCustomers={setCustomers}
+            onRefresh={loadAdminData}
+            setShowImportCustomerModal={setShowImportCustomerModal}
+          />
         )}
 
         {/* ─── TAB: PROMOTIONS ─── */}
@@ -2192,87 +2021,7 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
 
       </div>{/* end content */}
 
-      {/* ══════════════ MODAL: ADD / EDIT CUSTOMER ══════════════ */}
-      {showCustomerModal && (
-        <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(3px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: '20px' }}>
-          <div style={{ width: '440px', maxWidth: '100%', backgroundColor: '#fff', borderRadius: '12px', padding: '24px', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '16px', fontWeight: 800 }}>
-                {editingCustomer ? t('admin.editCustomer') : t('admin.addCustomer')}
-              </h3>
-              <button onClick={() => setShowCustomerModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b' }}><X size={20} /></button>
-            </div>
-            <form onSubmit={handleSaveCustomer} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div>
-                <label style={labelStyle}>{t('admin.customerName')}: <span style={{ color: '#ef4444' }}>*</span></label>
-                <input required type="text" placeholder="VD: Anh Hoàng / Chị Phương Linh" value={customerName} onChange={e => setCustomerName(e.target.value)} style={inputStyle} />
-              </div>
-              <div>
-                <label style={labelStyle}>{t('admin.phone')}:</label>
-                <input type="text" placeholder="VD: 0988.666.888" value={customerPhone} onChange={e => setCustomerPhone(e.target.value)} style={inputStyle} />
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-                <div>
-                  <label style={labelStyle}>{t('admin.memberTier')}:</label>
-                  <select value={customerTier} onChange={e => setCustomerTier(e.target.value)} style={inputStyle}>
-                    <option value="Hội viên Kim Cương">{t('admin.tierDiamond')}</option>
-                    <option value="Hội viên Vàng">{t('admin.tierGold')}</option>
-                    <option value="Hội viên Bạc">{t('admin.tierSilver')}</option>
-                    <option value="Hội viên">{t('admin.tierMember')}</option>
-                    <option value="Khách mới">{t('admin.tierNew')}</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={labelStyle}>{t('admin.discountPct')} (%):</label>
-                  <input type="number" min="0" max="100" placeholder="VD: 5 hoặc 10" value={customerDiscount} onChange={e => setCustomerDiscount(e.target.value)} style={inputStyle} />
-                </div>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '10px' }}>
-                <button type="button" onClick={() => setShowCustomerModal(false)} style={btnSecondary}>{t('cancel')}</button>
-                <button type="submit" style={btnPrimary}>
-                  {editingCustomer ? t('update') : t('save')}
-                </button>
-              </div>
-            </form>
-            {!editingCustomer && (
-              <div style={{
-                marginTop: '14px',
-                padding: '10px 12px',
-                borderRadius: '8px',
-                backgroundColor: '#f8fafc',
-                border: '1px dashed #cbd5e1',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                fontSize: '12px',
-                color: '#475569'
-              }}>
-                <span>{t('admin.orImportCustomersFromExcel') || 'Bạn muốn thêm nhiều khách hàng cùng lúc?'}</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowCustomerModal(false);
-                    setShowImportCustomerModal(true);
-                  }}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#059669',
-                    fontWeight: 700,
-                    cursor: 'pointer',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    textDecoration: 'underline'
-                  }}
-                >
-                  <FileSpreadsheet size={13} /> {t('admin.importCustomerExcel') || 'Nhập từ Excel'}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+
 
       {/* ══════════════ MODAL: ADD / EDIT USER ══════════════ */}
       {showAddUserModal && (

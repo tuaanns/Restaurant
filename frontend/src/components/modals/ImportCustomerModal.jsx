@@ -181,32 +181,32 @@ export function ImportCustomerModal({
       {
         'Tên khách hàng': 'Nguyễn Văn Hùng',
         'Số điện thoại': '0912345678',
-        'Hạng thành viên': 'Hội viên Kim Cương',
-        'Chiết khấu (%)': 15
+        'Nhóm khách hàng': 'VIP',
+        'Địa chỉ': '123 Trần Hưng Đạo, Phú Quốc'
       },
       {
         'Tên khách hàng': 'Trần Thị Thu Trang',
         'Số điện thoại': '0987654321',
-        'Hạng thành viên': 'Hội viên Vàng',
-        'Chiết khấu (%)': 10
+        'Nhóm khách hàng': 'Khách quen',
+        'Địa chỉ': '45 Nguyễn Trung Trực, Phú Quốc'
       },
       {
         'Tên khách hàng': 'Lê Hoàng Nam',
         'Số điện thoại': '0905112233',
-        'Hạng thành viên': 'Hội viên Bạc',
-        'Chiết khấu (%)': 5
+        'Nhóm khách hàng': 'Khách lẻ',
+        'Địa chỉ': ''
       },
       {
         'Tên khách hàng': 'Phạm Minh Đức',
         'Số điện thoại': '0933889900',
-        'Hạng thành viên': 'Hội viên',
-        'Chiết khấu (%)': 0
+        'Nhóm khách hàng': 'Khách lẻ',
+        'Địa chỉ': ''
       },
       {
         'Tên khách hàng': 'Vũ Mai Linh',
         'Số điện thoại': '0977223344',
-        'Hạng thành viên': 'Khách mới',
-        'Chiết khấu (%)': 0
+        'Nhóm khách hàng': 'Khách quen',
+        'Địa chỉ': ''
       }
     ];
 
@@ -214,8 +214,8 @@ export function ImportCustomerModal({
     worksheet['!cols'] = [
       { wch: 28 }, // Tên khách hàng
       { wch: 18 }, // Số điện thoại
-      { wch: 22 }, // Hạng thành viên
-      { wch: 16 }  // Chiết khấu (%)
+      { wch: 20 }, // Nhóm khách hàng
+      { wch: 30 }  // Địa chỉ
     ];
 
     const workbook = XLSX.utils.book_new();

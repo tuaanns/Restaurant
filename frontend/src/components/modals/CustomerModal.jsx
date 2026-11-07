@@ -26,9 +26,9 @@ export function CustomerModal({
   };
 
   const defaultCustomers = customers.length > 0 ? customers : [
-    { id: 1, name: 'Anh Hoàng', phone: '0912.888.xxx', membership_tier: 'Hội viên Kim Cương', discount_percent: 5 },
-    { id: 2, name: 'Chị Phương Linh', phone: '0988.666.888', membership_tier: 'Hội viên Vàng', discount_percent: 10 },
-    { id: 3, name: t('customer.walkin'), phone: '-', membership_tier: t('customer.tier'), discount_percent: 0 },
+    { id: 1, name: 'Anh Hoàng', phone: '0912.888.666', customer_group: 'VIP' },
+    { id: 2, name: 'Chị Phương Linh', phone: '0988.666.888', customer_group: 'VIP' },
+    { id: 3, name: t('customer.walkin') || 'Khách vãng lai', phone: '-', customer_group: 'Khách lẻ' },
   ];
 
   const filtered = defaultCustomers.filter(c =>
@@ -61,14 +61,14 @@ export function CustomerModal({
         {/* Header */}
         <div style={{
           padding: '14px 18px',
-          backgroundColor: '#0b1320',
+          backgroundColor: '#1B5E20',
           color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <User size={18} color="#00a884" />
+            <User size={18} color="#A5D6A7" />
             <span style={{ fontSize: '15px', fontWeight: 800 }}>{t('customer.title')} (F4)</span>
           </div>
           <button onClick={onClose} style={{ color: '#94a3b8' }}>
@@ -126,23 +126,27 @@ export function CustomerModal({
                     {c.name}
                   </div>
                   <div style={{ fontSize: '11.5px', color: '#64748b', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                    <span>{c.phone}</span>
-                    <span>•</span>
-                    <span style={{ color: '#1B5E20', fontWeight: 600 }}>{getTierLabel(c.membership_tier)}</span>
+                    <span>{c.phone || '—'}</span>
+                    {c.customer_group && (
+                      <>
+                        <span>•</span>
+                        <span style={{ color: '#1B5E20', fontWeight: 600 }}>{c.customer_group}</span>
+                      </>
+                    )}
                   </div>
                 </div>
 
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{
+                  <span style={{
                     fontSize: '11.5px',
                     fontWeight: 700,
-                    backgroundColor: c.discount_percent > 0 ? '#fef3c7' : '#f1f5f9',
-                    color: c.discount_percent > 0 ? '#b45309' : '#64748b',
+                    backgroundColor: '#E8F5E9',
+                    color: '#1B5E20',
                     padding: '3px 8px',
                     borderRadius: '4px'
                   }}>
-                    {t('customer.discount')} {c.discount_percent}%
-                  </div>
+                    {c.code || `KH${String(c.id).padStart(5, '0')}`}
+                  </span>
                 </div>
               </div>
             );

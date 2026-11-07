@@ -169,7 +169,6 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
             <button
               key={item.key}
               type="button"
-              onMouseEnter={() => handleItemMouseEnter(item.key, false)}
               onClick={() => {
                 setActiveMenuKey(null);
                 onSelect(item.children[0].key);
@@ -179,18 +178,25 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
                 fontSize: '13.5px',
                 fontWeight: 600,
                 color: isActive ? '#1B5E20' : '#334155',
+                borderTop: 'none',
+                borderLeft: 'none',
+                borderRight: 'none',
                 borderBottom: isActive ? '3px solid #1B5E20' : '3px solid transparent',
                 cursor: 'pointer',
                 background: 'none',
-                border: 'none',
                 height: '56px',
                 display: 'flex',
                 alignItems: 'center',
                 transition: 'color 0.12s',
                 whiteSpace: 'nowrap'
               }}
-              onMouseEnter={e => e.currentTarget.style.color = '#1B5E20'}
-              onMouseLeave={e => e.currentTarget.style.color = isActive ? '#1B5E20' : '#334155'}
+              onMouseEnter={(e) => {
+                handleItemMouseEnter(item.key, false);
+                e.currentTarget.style.color = '#1B5E20';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.color = isActive ? '#1B5E20' : '#334155';
+              }}
             >
               {item.label}
             </button>
@@ -221,10 +227,12 @@ function AdminNavMenu({ navItems, activeTab, onSelect }) {
                 fontSize: '13.5px',
                 fontWeight: 600,
                 color: isActive || isOpen ? '#1B5E20' : '#334155',
+                borderTop: 'none',
+                borderLeft: 'none',
+                borderRight: 'none',
                 borderBottom: isActive ? '3px solid #1B5E20' : '3px solid transparent',
                 cursor: 'pointer',
                 background: isOpen ? '#f8fafc' : 'none',
-                border: 'none',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '5px',

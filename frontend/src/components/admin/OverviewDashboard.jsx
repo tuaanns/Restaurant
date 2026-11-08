@@ -961,56 +961,31 @@ export function OverviewDashboard({
             </div>
           </div>
 
-          {totalPaymentSum === 0 ? (
-            <div style={{ textAlign: 'center', padding: '42px 16px', color: '#94a3b8', fontSize: '13px' }}>
-              <PieIcon size={36} style={{ margin: '0 auto 10px auto', opacity: 0.35 }} />
-              <div style={{ fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
-                {paymentScope === 'today' ? 'Chưa phát sinh giao dịch thanh toán nào hôm nay' : 'Chưa có dữ liệu thanh toán'}
-              </div>
-              {paymentScope === 'today' && (
-                <button
-                  type="button"
-                  onClick={() => setPaymentScope('all')}
-                  style={{
-                    marginTop: '10px',
-                    backgroundColor: '#ffffff',
-                    border: '1px solid #cbd5e1',
-                    padding: '6px 14px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    color: '#1B5E20',
-                    cursor: 'pointer',
-                    fontWeight: 700
-                  }}
-                >
-                  Xem cơ cấu toàn thời gian &gt;
-                </button>
-              )}
-            </div>
-          ) : (
             <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: '16px', alignItems: 'center' }}>
               {/* Donut Chart */}
               <div style={{ width: '170px', height: '170px', position: 'relative' }}>
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={paymentData}
+                      data={totalPaymentSum > 0 ? paymentData.filter(p => p.value > 0) : [{ name: 'Chưa có giao dịch', value: 1, color: '#f1f5f9' }]}
                       cx="50%"
                       cy="50%"
                       innerRadius={50}
                       outerRadius={75}
-                      paddingAngle={4}
+                      paddingAngle={totalPaymentSum > 0 ? 4 : 0}
                       dataKey="value"
                     >
-                      {paymentData.map((entry, index) => (
+                      {(totalPaymentSum > 0 ? paymentData.filter(p => p.value > 0) : [{ color: '#f1f5f9' }]).map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
-                    <Tooltip
-                      content={
-                        <ShadcnCustomTooltip isCurrency={true} />
-                      }
-                    />
+                    {totalPaymentSum > 0 && (
+                      <Tooltip
+                        content={
+                          <ShadcnCustomTooltip isCurrency={true} />
+                        }
+                      />
+                    )}
                   </PieChart>
                 </ResponsiveContainer>
 
@@ -1024,14 +999,15 @@ export function OverviewDashboard({
                   pointerEvents: 'none'
                 }}>
                   <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>TỔNG THU</div>
-                  <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#0f172a' }}>100%</div>
+                  <div style={{ fontSize: '11.5px', fontWeight: 800, color: totalPaymentSum > 0 ? '#0f172a' : '#94a3b8' }}>
+                    {totalPaymentSum > 0 ? '100%' : '0 đ'}
+                  </div>
                 </div>
               </div>
 
               {/* Methods Breakdown List */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
                 {paymentData.map((m, i) => {
-                  const IconComponent = m.icon;
                   return (
                     <div
                       key={i}
@@ -1060,7 +1036,7 @@ export function OverviewDashboard({
                         <span style={{
                           fontSize: '10.5px',
                           fontWeight: 700,
-                          color: m.color,
+                          color: m.value > 0 ? m.color : '#94a3b8',
                           backgroundColor: '#ffffff',
                           padding: '1px 6px',
                           borderRadius: '4px',
@@ -1076,7 +1052,6 @@ export function OverviewDashboard({
                 })}
               </div>
             </div>
-          )}
         </BentoCard>
       </div>
 

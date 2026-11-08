@@ -37,23 +37,17 @@ class AdminController extends Controller
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
-        // Tổng doanh thu từ các đơn hôm nay
+        // Tổng doanh thu từ các đơn hôm nay (chỉ tính đơn đã thanh toán 'paid')
         $todayOrders = Order::whereDate('created_at', $today)->get();
         $totalRevenue = (float)$todayOrders->where('status', 'paid')->sum('total_amount');
-        if ($totalRevenue == 0) {
-            $totalRevenue = (float)$todayOrders->sum('total_amount');
-        }
 
         $paidOrdersCount = $todayOrders->where('status', 'paid')->count();
-        $activeOrdersCount = $todayOrders->where('status', 'active')->count();
+        $activeWithItemsCount = $todayOrders->where('status', 'active')->where('total_amount', '>', 0)->count();
 
-        // So sánh với hôm qua để tính tăng trưởng thực tế
+        // So sánh với hôm qua để tính tăng trưởng thực tế (chỉ tính đơn đã thanh toán 'paid')
         $yesterdayOrders = Order::whereDate('created_at', $yesterday)->get();
         $yesterdayRevenue = (float)$yesterdayOrders->where('status', 'paid')->sum('total_amount');
-        if ($yesterdayRevenue == 0) {
-            $yesterdayRevenue = (float)$yesterdayOrders->sum('total_amount');
-        }
-        $yesterdayOrdersCount = $yesterdayOrders->count();
+        $yesterdayOrdersCount = $yesterdayOrders->where('status', 'paid')->count();
 
         $revenueGrowth = 0.0;
         if ($yesterdayRevenue > 0) {
@@ -64,39 +58,45 @@ class AdminController extends Controller
 
         $ordersGrowth = 0.0;
         if ($yesterdayOrdersCount > 0) {
-            $ordersGrowth = round((($todayOrders->count() - $yesterdayOrdersCount) / $yesterdayOrdersCount) * 100, 1);
-        } elseif ($todayOrders->count() > 0) {
+            $ordersGrowth = round((($paidOrdersCount - $yesterdayOrdersCount) / $yesterdayOrdersCount) * 100, 1);
+        } elseif ($paidOrdersCount > 0) {
             $ordersGrowth = 100.0;
         }
 
-        // Top món bán chạy hôm nay
-        $todayOrderIds = $todayOrders->pluck('id');
-        $topProductsToday = OrderItem::whereIn('order_id', $todayOrderIds)
-            ->select('product_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
-            ->groupBy('product_name')
+        // Top món bán chạy hôm nay (chỉ tính các món thuộc menu đang kích hoạt và từ đơn đã thanh toán)
+        $todayPaidOrderIds = $todayOrders->where('status', 'paid')->pluck('id');
+        $topProductsToday = OrderItem::join('products', 'order_items.product_name', '=', 'products.name')
+            ->where('products.is_active', 1)
+            ->whereIn('order_items.order_id', $todayPaidOrderIds)
+            ->select('order_items.product_name', DB::raw('SUM(order_items.quantity) as total_qty'), DB::raw('SUM(order_items.subtotal) as total_sales'))
+            ->groupBy('order_items.product_name')
             ->orderByDesc('total_qty')
             ->limit(5)
             ->get();
 
-        // Top món bán chạy toàn thời gian
-        $topProductsAllTime = OrderItem::select('product_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
-            ->groupBy('product_name')
+        // Top món bán chạy toàn thời gian (chỉ tính các món thuộc menu đang kích hoạt và từ đơn đã thanh toán)
+        $topProductsAllTime = OrderItem::join('products', 'order_items.product_name', '=', 'products.name')
+            ->join('orders', 'order_items.order_id', '=', 'orders.id')
+            ->where('orders.status', 'paid')
+            ->where('products.is_active', 1)
+            ->select('order_items.product_name', DB::raw('SUM(order_items.quantity) as total_qty'), DB::raw('SUM(order_items.subtotal) as total_sales'))
+            ->groupBy('order_items.product_name')
             ->orderByDesc('total_qty')
             ->limit(5)
             ->get();
 
-        // Thống kê theo phương thức thanh toán hôm nay
+        // Thống kê theo phương thức thanh toán hôm nay (chỉ tính đơn đã thanh toán 'paid')
         $paymentMethodsToday = [
-            'cash' => (float)$todayOrders->where('payment_method', 'cash')->sum('total_amount'),
-            'qr_banking' => (float)$todayOrders->where('payment_method', 'qr_banking')->sum('total_amount'),
-            'card' => (float)$todayOrders->where('payment_method', 'card')->sum('total_amount'),
+            'cash' => (float)$todayOrders->where('status', 'paid')->where('payment_method', 'cash')->sum('total_amount'),
+            'qr_banking' => (float)$todayOrders->where('status', 'paid')->where('payment_method', 'qr_banking')->sum('total_amount'),
+            'card' => (float)$todayOrders->where('status', 'paid')->where('payment_method', 'card')->sum('total_amount'),
         ];
 
-        // Thống kê theo phương thức thanh toán toàn thời gian
+        // Thống kê theo phương thức thanh toán toàn thời gian (chỉ tính đơn đã thanh toán 'paid')
         $paymentMethodsAllTime = [
-            'cash' => (float)Order::where('payment_method', 'cash')->sum('total_amount'),
-            'qr_banking' => (float)Order::where('payment_method', 'qr_banking')->sum('total_amount'),
-            'card' => (float)Order::where('payment_method', 'card')->sum('total_amount'),
+            'cash' => (float)Order::where('status', 'paid')->where('payment_method', 'cash')->sum('total_amount'),
+            'qr_banking' => (float)Order::where('status', 'paid')->where('payment_method', 'qr_banking')->sum('total_amount'),
+            'card' => (float)Order::where('status', 'paid')->where('payment_method', 'card')->sum('total_amount'),
         ];
 
         // Số bàn đang phục vụ
@@ -115,12 +115,12 @@ class AdminController extends Controller
             });
             $hourlyData[] = [
                 'time' => $slot,
-                'revenue' => (float)$slotOrders->sum('total_amount'),
-                'orders' => $slotOrders->count(),
+                'revenue' => (float)$slotOrders->where('status', 'paid')->sum('total_amount'),
+                'orders' => $slotOrders->where('status', 'paid')->count(),
             ];
         }
 
-        // Biểu đồ 7 ngày gần nhất
+        // Biểu đồ 7 ngày gần nhất (chỉ tính đơn đã thanh toán 'paid')
         $sevenDaysData = [];
         $dayNames = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
         for ($i = 6; $i >= 0; $i--) {
@@ -129,12 +129,12 @@ class AdminController extends Controller
             $label = $i === 0 ? 'Hôm nay' : ($dayNames[$d->dayOfWeek] . ' ' . $d->format('d/m'));
             $sevenDaysData[] = [
                 'time' => $label,
-                'revenue' => (float)$dayOrders->sum('total_amount'),
-                'orders' => $dayOrders->count(),
+                'revenue' => (float)$dayOrders->where('status', 'paid')->sum('total_amount'),
+                'orders' => $dayOrders->where('status', 'paid')->count(),
             ];
         }
 
-        // Biểu đồ 30 ngày gần nhất (nhóm theo 4 tuần)
+        // Biểu đồ 30 ngày gần nhất (nhóm theo 4 tuần, chỉ tính đơn đã thanh toán 'paid')
         $thirtyDaysData = [];
         for ($w = 3; $w >= 0; $w--) {
             $startWeek = Carbon::today()->subDays($w * 7 + 6)->startOfDay();
@@ -143,8 +143,8 @@ class AdminController extends Controller
             $label = $w === 0 ? 'Tuần này' : ('Tuần ' . (4 - $w) . ' (' . $startWeek->format('d/m') . ')');
             $thirtyDaysData[] = [
                 'time' => $label,
-                'revenue' => (float)$weekOrders->sum('total_amount'),
-                'orders' => $weekOrders->count(),
+                'revenue' => (float)$weekOrders->where('status', 'paid')->sum('total_amount'),
+                'orders' => $weekOrders->where('status', 'paid')->count(),
             ];
         }
 
@@ -153,8 +153,8 @@ class AdminController extends Controller
             'stats' => [
                 'total_revenue' => (float)$totalRevenue,
                 'paid_orders_count' => $paidOrdersCount,
-                'active_orders_count' => $activeOrdersCount,
-                'total_orders_today' => $todayOrders->count(),
+                'active_orders_count' => $activeWithItemsCount,
+                'total_orders_today' => $paidOrdersCount + $activeWithItemsCount,
                 'occupied_tables' => $occupiedTables,
                 'billing_tables' => $billingTables,
                 'empty_tables' => $emptyTables,

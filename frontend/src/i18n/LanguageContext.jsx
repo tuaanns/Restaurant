@@ -1,5 +1,11 @@
 import React, { createContext, useContext, useState, useCallback, useEffect } from 'react';
 import { translations, LANGUAGES } from './translations';
+import {
+  localizeMenuTag,
+  localizeMenuUnit,
+  localizeMenuAttribute,
+  localizeAttrValue
+} from '../utils/menuSettingsHelper';
 
 // === LOOKUP MAPPINGS ===
 export const DISH_MAP = {
@@ -529,6 +535,32 @@ export function LanguageProvider({ children }) {
     return rawCreator;
   }, [t]);
 
+  // Format menu tag (Bán chạy -> Best Seller)
+  const formatMenuTag = useCallback((tagOrName) => {
+    if (!tagOrName) return { name: '', desc: '' };
+    const tagObj = typeof tagOrName === 'string' ? { name: tagOrName } : tagOrName;
+    return localizeMenuTag(tagObj, lang);
+  }, [lang]);
+
+  // Format menu unit (phần -> portion)
+  const formatMenuUnit = useCallback((unitOrName) => {
+    if (!unitOrName) return { name: '', desc: '' };
+    const unitObj = typeof unitOrName === 'string' ? { name: unitOrName } : unitOrName;
+    return localizeMenuUnit(unitObj, lang);
+  }, [lang]);
+
+  // Format menu attribute (Kích cỡ -> Size)
+  const formatMenuAttribute = useCallback((attrOrName) => {
+    if (!attrOrName) return { name: '', desc: '', values: [] };
+    const attrObj = typeof attrOrName === 'string' ? { name: attrOrName } : attrOrName;
+    return localizeMenuAttribute(attrObj, lang);
+  }, [lang]);
+
+  // Format attribute value (Size S (Nhỏ) -> Size S (Small))
+  const formatAttrValue = useCallback((val) => {
+    return localizeAttrValue(val, lang);
+  }, [lang]);
+
   // Cập nhật document.title và lang attribute khi đổi ngôn ngữ
   useEffect(() => {
     document.documentElement.lang = lang;
@@ -552,7 +584,11 @@ export function LanguageProvider({ children }) {
       formatPromoName,
       formatCashCategory,
       formatCashTarget,
-      formatCashCreatedBy
+      formatCashCreatedBy,
+      formatMenuTag,
+      formatMenuUnit,
+      formatMenuAttribute,
+      formatAttrValue
     }}>
       {children}
     </LanguageContext.Provider>

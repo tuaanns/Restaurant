@@ -5,11 +5,12 @@ import { ConfirmDeleteModal } from '../../modals/ConfirmDeleteModal';
 import {
   getMenuUnits,
   saveMenuUnits,
-  DEFAULT_MENU_UNITS
+  DEFAULT_MENU_UNITS,
+  localizeMenuUnit
 } from '../../../utils/menuSettingsHelper';
 
 export function MenuUnitsModal({ isOpen, onClose, onUnitsChanged }) {
-  const { t, formatDishUnit } = useLanguage();
+  const { t, lang, formatDishUnit } = useLanguage();
   const [units, setUnits] = useState(() => getMenuUnits());
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -40,7 +41,11 @@ export function MenuUnitsModal({ isOpen, onClose, onUnitsChanged }) {
   const filteredUnits = units.filter(unit => {
     const q = searchTerm.toLowerCase().trim();
     if (!q) return true;
-    return unit.name.toLowerCase().includes(q) || (unit.desc && unit.desc.toLowerCase().includes(q));
+    const loc = localizeMenuUnit(unit, lang);
+    return unit.name.toLowerCase().includes(q) ||
+           (unit.desc && unit.desc.toLowerCase().includes(q)) ||
+           loc.name.toLowerCase().includes(q) ||
+           (loc.desc && loc.desc.toLowerCase().includes(q));
   });
 
   const handleStartAdd = () => {
@@ -443,72 +448,75 @@ export function MenuUnitsModal({ isOpen, onClose, onUnitsChanged }) {
                     </td>
                   </tr>
                 ) : (
-                  filteredUnits.map((u) => (
-                    <tr
-                      key={u.id}
-                      style={{ borderBottom: '1px solid #f1f5f9' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <td style={{ padding: '10px 16px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: '3px 10px',
-                          borderRadius: '6px',
-                          backgroundColor: '#E8F5E9',
-                          color: '#1B5E20',
-                          fontSize: '12.5px',
-                          fontWeight: 700,
-                          border: '1px solid #A5D6A7'
-                        }}>
-                          {u.name}
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px 16px', color: '#2E7D32', fontSize: '12px', fontWeight: 600 }}>
-                        {formatDishUnit ? formatDishUnit(u.name) : u.name}
-                      </td>
-                      <td style={{ padding: '10px 16px', color: '#64748b', fontSize: '12.5px' }}>
-                        {u.desc || '—'}
-                      </td>
-                      <td style={{ padding: '10px 16px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <button
-                            onClick={() => handleStartEdit(u)}
-                            title={t('edit') || 'Sửa'}
-                            style={{
-                              padding: '5px',
-                              borderRadius: '4px',
-                              border: '1px solid #e2e8f0',
-                              backgroundColor: '#ffffff',
-                              color: '#0284C7',
-                              cursor: 'pointer'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f9ff'}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                          >
-                            <Edit3 size={13} />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(u)}
-                            title={t('delete') || 'Xóa'}
-                            style={{
-                              padding: '5px',
-                              borderRadius: '4px',
-                              border: '1px solid #e2e8f0',
-                              backgroundColor: '#ffffff',
-                              color: '#ef4444',
-                              cursor: 'pointer'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fef2f2'}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  filteredUnits.map((u) => {
+                    const loc = localizeMenuUnit(u, lang);
+                    return (
+                      <tr
+                        key={u.id}
+                        style={{ borderBottom: '1px solid #f1f5f9' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td style={{ padding: '10px 16px' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            padding: '3px 10px',
+                            borderRadius: '6px',
+                            backgroundColor: '#E8F5E9',
+                            color: '#1B5E20',
+                            fontSize: '12.5px',
+                            fontWeight: 700,
+                            border: '1px solid #A5D6A7'
+                          }}>
+                            {loc.name}
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px 16px', color: '#2E7D32', fontSize: '12px', fontWeight: 600 }}>
+                          {formatDishUnit ? formatDishUnit(u.name) : loc.name}
+                        </td>
+                        <td style={{ padding: '10px 16px', color: '#64748b', fontSize: '12.5px' }}>
+                          {loc.desc || '—'}
+                        </td>
+                        <td style={{ padding: '10px 16px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              onClick={() => handleStartEdit(u)}
+                              title={t('edit') || 'Sửa'}
+                              style={{
+                                padding: '5px',
+                                borderRadius: '4px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: '#ffffff',
+                                color: '#0284C7',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f9ff'}
+                              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteTarget(u)}
+                              title={t('delete') || 'Xóa'}
+                              style={{
+                                padding: '5px',
+                                borderRadius: '4px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: '#ffffff',
+                                color: '#ef4444',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

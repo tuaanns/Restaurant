@@ -5,7 +5,9 @@ import { ConfirmDeleteModal } from '../../modals/ConfirmDeleteModal';
 import {
   getMenuTags,
   saveMenuTags,
-  DEFAULT_MENU_TAGS
+  DEFAULT_MENU_TAGS,
+  localizeMenuTag,
+  localizeColorName
 } from '../../../utils/menuSettingsHelper';
 
 const COLOR_PALETTE = [
@@ -54,7 +56,11 @@ export function MenuTagsModal({ isOpen, onClose, onTagsChanged }) {
   const filteredTags = tags.filter(tag => {
     const q = searchTerm.toLowerCase().trim();
     if (!q) return true;
-    return tag.name.toLowerCase().includes(q) || (tag.desc && tag.desc.toLowerCase().includes(q));
+    const loc = localizeMenuTag(tag, lang);
+    return tag.name.toLowerCase().includes(q) ||
+           (tag.desc && tag.desc.toLowerCase().includes(q)) ||
+           loc.name.toLowerCase().includes(q) ||
+           (loc.desc && loc.desc.toLowerCase().includes(q));
   });
 
   const handleStartAdd = () => {
@@ -428,7 +434,7 @@ export function MenuTagsModal({ isOpen, onClose, onTagsChanged }) {
                           }}
                         >
                           <span style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: pal.color }} />
-                          <span>{formData.name || pal.name}</span>
+                          <span>{formData.name || localizeColorName(pal.color, lang) || pal.name}</span>
                           {isSelected && <Check size={12} />}
                         </button>
                       );
@@ -504,71 +510,74 @@ export function MenuTagsModal({ isOpen, onClose, onTagsChanged }) {
                     </td>
                   </tr>
                 ) : (
-                  filteredTags.map((tag) => (
-                    <tr
-                      key={tag.id}
-                      style={{ borderBottom: '1px solid #f1f5f9' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <td style={{ padding: '10px 16px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          gap: '6px',
-                          padding: '4px 10px',
-                          borderRadius: '9999px',
-                          backgroundColor: tag.bg || '#E8F5E9',
-                          color: tag.color || '#1B5E20',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                          border: `1px solid ${tag.color ? tag.color + '33' : '#A5D6A7'}`
-                        }}>
-                          <Tag size={12} />
-                          <span>{tag.name}</span>
-                        </span>
-                      </td>
-                      <td style={{ padding: '10px 16px', color: '#64748b', fontSize: '12.5px' }}>
-                        {tag.desc || '—'}
-                      </td>
-                      <td style={{ padding: '10px 16px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <button
-                            onClick={() => handleStartEdit(tag)}
-                            title={t('edit') || 'Sửa'}
-                            style={{
-                              padding: '5px',
-                              borderRadius: '4px',
-                              border: '1px solid #e2e8f0',
-                              backgroundColor: '#ffffff',
-                              color: '#0284C7',
-                              cursor: 'pointer'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f9ff'}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                          >
-                            <Edit3 size={13} />
-                          </button>
-                          <button
-                            onClick={() => setDeleteTarget(tag)}
-                            title={t('delete') || 'Xóa'}
-                            style={{
-                              padding: '5px',
-                              borderRadius: '4px',
-                              border: '1px solid #e2e8f0',
-                              backgroundColor: '#ffffff',
-                              color: '#ef4444',
-                              cursor: 'pointer'
-                            }}
-                            onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fef2f2'}
-                            onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
-                          >
-                            <Trash2 size={13} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))
+                  filteredTags.map((tag) => {
+                    const loc = localizeMenuTag(tag, lang);
+                    return (
+                      <tr
+                        key={tag.id}
+                        style={{ borderBottom: '1px solid #f1f5f9' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td style={{ padding: '10px 16px' }}>
+                          <span style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '6px',
+                            padding: '4px 10px',
+                            borderRadius: '9999px',
+                            backgroundColor: tag.bg || '#E8F5E9',
+                            color: tag.color || '#1B5E20',
+                            fontSize: '12px',
+                            fontWeight: 700,
+                            border: `1px solid ${tag.color ? tag.color + '33' : '#A5D6A7'}`
+                          }}>
+                            <Tag size={12} />
+                            <span>{loc.name}</span>
+                          </span>
+                        </td>
+                        <td style={{ padding: '10px 16px', color: '#64748b', fontSize: '12.5px' }}>
+                          {loc.desc || '—'}
+                        </td>
+                        <td style={{ padding: '10px 16px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              onClick={() => handleStartEdit(tag)}
+                              title={t('edit') || 'Sửa'}
+                              style={{
+                                padding: '5px',
+                                borderRadius: '4px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: '#ffffff',
+                                color: '#0284C7',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0f9ff'}
+                              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                            >
+                              <Edit3 size={13} />
+                            </button>
+                            <button
+                              onClick={() => setDeleteTarget(tag)}
+                              title={t('delete') || 'Xóa'}
+                              style={{
+                                padding: '5px',
+                                borderRadius: '4px',
+                                border: '1px solid #e2e8f0',
+                                backgroundColor: '#ffffff',
+                                color: '#ef4444',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fef2f2'}
+                              onMouseLeave={e => e.currentTarget.style.backgroundColor = '#ffffff'}
+                            >
+                              <Trash2 size={13} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

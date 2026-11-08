@@ -5,11 +5,12 @@ import { ConfirmDeleteModal } from '../../modals/ConfirmDeleteModal';
 import {
   getMenuAttributes,
   saveMenuAttributes,
-  DEFAULT_MENU_ATTRIBUTES
+  DEFAULT_MENU_ATTRIBUTES,
+  localizeMenuAttribute
 } from '../../../utils/menuSettingsHelper';
 
 export function MenuAttributesModal({ isOpen, onClose, onAttributesChanged }) {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [attributes, setAttributes] = useState(() => getMenuAttributes());
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -43,9 +44,13 @@ export function MenuAttributesModal({ isOpen, onClose, onAttributesChanged }) {
   const filteredAttributes = attributes.filter(attr => {
     const q = searchTerm.toLowerCase().trim();
     if (!q) return true;
+    const loc = localizeMenuAttribute(attr, lang);
     return attr.name.toLowerCase().includes(q) ||
       (attr.desc && attr.desc.toLowerCase().includes(q)) ||
-      (attr.values && attr.values.some(v => v.toLowerCase().includes(q)));
+      (attr.values && attr.values.some(v => v.toLowerCase().includes(q))) ||
+      loc.name.toLowerCase().includes(q) ||
+      (loc.desc && loc.desc.toLowerCase().includes(q)) ||
+      (loc.values && loc.values.some(v => v.toLowerCase().includes(q)));
   });
 
   const handleStartAdd = () => {
@@ -566,51 +571,53 @@ export function MenuAttributesModal({ isOpen, onClose, onAttributesChanged }) {
                     </td>
                   </tr>
                 ) : (
-                  filteredAttributes.map((attr) => (
-                    <tr
-                      key={attr.id}
-                      style={{ borderBottom: '1px solid #f1f5f9' }}
-                      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
-                      onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
-                    >
-                      <td style={{ padding: '10px 16px' }}>
-                        <div style={{ fontWeight: 700, color: '#0f172a' }}>{attr.name}</div>
-                        {attr.desc && (
-                          <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>{attr.desc}</div>
-                        )}
-                      </td>
-                      <td style={{ padding: '10px 16px' }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
-                          {Array.isArray(attr.values) && attr.values.length > 0 ? (
-                            attr.values.map((v, i) => (
-                              <span
-                                key={i}
-                                style={{
-                                  display: 'inline-block',
-                                  padding: '2px 8px',
-                                  borderRadius: '6px',
-                                  backgroundColor: '#E8F5E9',
-                                  color: '#1B5E20',
-                                  fontSize: '11.5px',
-                                  fontWeight: 600,
-                                  border: '1px solid #C8E6C9'
-                                }}
-                              >
-                                {v}
-                              </span>
-                            ))
-                          ) : (
-                            <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' }}>
-                              {t('admin.settings.noValuesDefined') || '(Chưa gán giá trị biến thể)'}
-                            </span>
+                  filteredAttributes.map((attr) => {
+                    const loc = localizeMenuAttribute(attr, lang);
+                    return (
+                      <tr
+                        key={attr.id}
+                        style={{ borderBottom: '1px solid #f1f5f9' }}
+                        onMouseEnter={e => e.currentTarget.style.backgroundColor = '#fafafa'}
+                        onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
+                      >
+                        <td style={{ padding: '10px 16px' }}>
+                          <div style={{ fontWeight: 700, color: '#0f172a' }}>{loc.name}</div>
+                          {loc.desc && (
+                            <div style={{ fontSize: '11.5px', color: '#64748b', marginTop: '2px' }}>{loc.desc}</div>
                           )}
-                        </div>
-                      </td>
-                      <td style={{ padding: '10px 16px', textAlign: 'center' }}>
-                        <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                          <button
-                            onClick={() => handleStartEdit(attr)}
-                            title={t('edit') || 'Sửa'}
+                        </td>
+                        <td style={{ padding: '10px 16px' }}>
+                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                            {Array.isArray(loc.values) && loc.values.length > 0 ? (
+                              loc.values.map((v, i) => (
+                                <span
+                                  key={i}
+                                  style={{
+                                    display: 'inline-block',
+                                    padding: '2px 8px',
+                                    borderRadius: '6px',
+                                    backgroundColor: '#E8F5E9',
+                                    color: '#1B5E20',
+                                    fontSize: '11.5px',
+                                    fontWeight: 600,
+                                    border: '1px solid #C8E6C9'
+                                  }}
+                                >
+                                  {v}
+                                </span>
+                              ))
+                            ) : (
+                              <span style={{ color: '#94a3b8', fontStyle: 'italic', fontSize: '12px' }}>
+                                {t('admin.settings.noValuesDefined') || '(Chưa gán giá trị biến thể)'}
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td style={{ padding: '10px 16px', textAlign: 'center' }}>
+                          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              onClick={() => handleStartEdit(attr)}
+                              title={t('edit') || 'Sửa'}
                             style={{
                               padding: '5px',
                               borderRadius: '4px',
@@ -643,7 +650,8 @@ export function MenuAttributesModal({ isOpen, onClose, onAttributesChanged }) {
                         </div>
                       </td>
                     </tr>
-                  ))
+                  );
+                })
                 )}
               </tbody>
             </table>

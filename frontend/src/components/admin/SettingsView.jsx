@@ -17,7 +17,13 @@ import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
 
 export function SettingsView({ onBackToDashboard }) {
   const { t, lang, formatMoney } = useLanguage();
-  const [activeTab, setActiveTab] = useState('orders');
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('aura_pos_settings_tab') || localStorage.getItem('aura_pos_settings_tab');
+      if (saved) return saved;
+    } catch (e) {}
+    return 'orders';
+  });
   const [searchQuery, setSearchQuery] = useState('');
   const [settings, setSettings] = useState(() => getRestaurantSettings());
   const [hasChanges, setHasChanges] = useState(false);
@@ -25,7 +31,27 @@ export function SettingsView({ onBackToDashboard }) {
 
   // Print templates expansion and sub-item selection
   const [printTemplatesExpanded, setPrintTemplatesExpanded] = useState(true);
-  const [selectedPrintDocType, setSelectedPrintDocType] = useState('invoice');
+  const [selectedPrintDocType, setSelectedPrintDocType] = useState(() => {
+    try {
+      const saved = sessionStorage.getItem('aura_pos_settings_print_doc') || localStorage.getItem('aura_pos_settings_print_doc');
+      if (saved) return saved;
+    } catch (e) {}
+    return 'invoice';
+  });
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('aura_pos_settings_tab', activeTab);
+      localStorage.setItem('aura_pos_settings_tab', activeTab);
+    } catch (e) {}
+  }, [activeTab]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('aura_pos_settings_print_doc', selectedPrintDocType);
+      localStorage.setItem('aura_pos_settings_print_doc', selectedPrintDocType);
+    } catch (e) {}
+  }, [selectedPrintDocType]);
 
   const [toastMessage, setToastMessage] = useState(null);
   const [showPreviewModal, setShowPreviewModal] = useState(false);

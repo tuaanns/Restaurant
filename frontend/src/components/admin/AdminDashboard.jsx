@@ -370,7 +370,7 @@ function StatusBadge({ active }) {
   );
 }
 
-export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overview', onLogout = () => {}, onUpdateCurrentUser }) {
+export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overview', onLogout = () => {}, onUpdateCurrentUser, onTabChange }) {
   const { t, formatTableName, formatAreaName, formatDishName, formatCategoryName, formatDishUnit, formatPromoName } = useLanguage();
 
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -441,7 +441,42 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
     },
   ];
 
-  const [activeTab, setActiveTab] = useState(initialTab || 'overview');
+  const [activeTab, setActiveTab] = useState(() => {
+    try {
+      const hash = typeof window !== 'undefined' ? window.location.hash || '' : '';
+      if (hash.startsWith('#admin/')) {
+        const tab = hash.replace('#admin/', '').split('?')[0].split('/')[0];
+        if (tab) return tab;
+      }
+      const saved = sessionStorage.getItem('aura_pos_admin_tab') || localStorage.getItem('aura_pos_admin_tab');
+      if (saved) return saved;
+    } catch (e) {}
+    return initialTab || 'overview';
+  });
+
+  // Khi activeTab thay đổi, lưu vào storage và đồng bộ ngược lên App & URL
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('aura_pos_admin_tab', activeTab);
+      localStorage.setItem('aura_pos_admin_tab', activeTab);
+    } catch (e) {}
+    if (typeof onTabChange === 'function') {
+      onTabChange(activeTab);
+    }
+    try {
+      const targetHash = `#admin/${activeTab}`;
+      if (window.location.hash !== targetHash) {
+        window.history.replaceState(null, '', targetHash);
+      }
+    } catch (e) {}
+  }, [activeTab]);
+
+  // Đồng bộ nếu initialTab thay đổi từ bên ngoài (ví dụ popstate / hashchange)
+  useEffect(() => {
+    if (initialTab && initialTab !== activeTab) {
+      setActiveTab(initialTab);
+    }
+  }, [initialTab]);
   const [stats, setStats] = useState(null);
   const [isDbOffline, setIsDbOffline] = useState(false);
 

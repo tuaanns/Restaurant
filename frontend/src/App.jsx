@@ -42,8 +42,87 @@ export function App() {
     }
   });
 
-  const [currentView, setCurrentView] = useState('pos'); // 'pos' hoặc 'admin'
-  const [adminTab, setAdminTab] = useState('overview');
+  const [currentView, setCurrentView] = useState(() => {
+    try {
+      const savedUser = sessionStorage.getItem('pos_user');
+      const user = savedUser ? JSON.parse(savedUser) : null;
+      if (user && user.role === 'admin') {
+        const hash = typeof window !== 'undefined' ? window.location.hash || '' : '';
+        if (hash.startsWith('#admin')) return 'admin';
+        if (hash.startsWith('#pos')) return 'pos';
+
+        const saved = sessionStorage.getItem('aura_pos_current_view') || localStorage.getItem('aura_pos_current_view');
+        if (saved === 'admin') return 'admin';
+      }
+    } catch (e) {}
+    return 'pos';
+  });
+
+  const [adminTab, setAdminTab] = useState(() => {
+    try {
+      const hash = typeof window !== 'undefined' ? window.location.hash || '' : '';
+      if (hash.startsWith('#admin/')) {
+        const tab = hash.replace('#admin/', '').split('?')[0].split('/')[0];
+        if (tab) return tab;
+      }
+      const saved = sessionStorage.getItem('aura_pos_admin_tab') || localStorage.getItem('aura_pos_admin_tab');
+      if (saved) return saved;
+    } catch (e) {}
+    return 'overview';
+  });
+
+  // Đồng bộ view và adminTab với storage & URL hash
+  useEffect(() => {
+    if (!currentUser) return;
+    try {
+      sessionStorage.setItem('aura_pos_current_view', currentView);
+      localStorage.setItem('aura_pos_current_view', currentView);
+    } catch (e) {}
+
+    if (currentView === 'admin' && currentUser.role === 'admin') {
+      try {
+        const targetHash = `#admin/${adminTab || 'overview'}`;
+        if (window.location.hash !== targetHash) {
+          window.history.replaceState(null, '', targetHash);
+        }
+      } catch (e) {}
+    } else {
+      try {
+        if (window.location.hash.startsWith('#admin')) {
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        }
+      } catch (e) {}
+    }
+  }, [currentView, adminTab, currentUser]);
+
+  useEffect(() => {
+    if (!currentUser || currentUser.role !== 'admin') return;
+    try {
+      sessionStorage.setItem('aura_pos_admin_tab', adminTab);
+      localStorage.setItem('aura_pos_admin_tab', adminTab);
+    } catch (e) {}
+  }, [adminTab, currentUser]);
+
+  // Lắng nghe thay đổi hash (Back / Forward browser)
+  useEffect(() => {
+    const handleHashChange = () => {
+      if (!currentUser || currentUser.role !== 'admin') return;
+      const hash = window.location.hash || '';
+      if (hash.startsWith('#admin')) {
+        setCurrentView('admin');
+        const parts = hash.replace('#admin', '').replace(/^\//, '').split('?')[0].split('/');
+        const tab = parts[0];
+        if (tab) {
+          setAdminTab(tab);
+        }
+      } else if (hash === '#pos' || hash === '' || hash === '#') {
+        setCurrentView('pos');
+      }
+    };
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, [currentUser]);
+
   const [activeTab, setActiveTab] = useState('tables');
   const [selectedArea, setSelectedArea] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -171,7 +250,23 @@ export function App() {
     } catch (e) {}
     setCurrentUser(user);
     if (user.role === 'admin') {
-      setCurrentView('pos'); // Mặc định vào POS hoặc có thể chuyển Admin
+      const hash = typeof window !== 'undefined' ? window.location.hash || '' : '';
+      if (hash.startsWith('#admin')) {
+        setCurrentView('admin');
+        const tab = hash.replace('#admin/', '').split('?')[0].split('/')[0];
+        if (tab && tab !== '#admin') {
+          setAdminTab(tab);
+        }
+        return;
+      }
+      const savedView = sessionStorage.getItem('aura_pos_current_view') || localStorage.getItem('aura_pos_current_view');
+      if (savedView === 'admin') {
+        setCurrentView('admin');
+        const savedTab = sessionStorage.getItem('aura_pos_admin_tab') || localStorage.getItem('aura_pos_admin_tab');
+        if (savedTab) setAdminTab(savedTab);
+        return;
+      }
+      setCurrentView('pos');
     } else {
       setCurrentView('pos');
     }
@@ -184,9 +279,19 @@ export function App() {
       sessionStorage.removeItem('pos_token');
       localStorage.removeItem('pos_user');
       localStorage.removeItem('pos_token');
+      sessionStorage.removeItem('aura_pos_current_view');
+      localStorage.removeItem('aura_pos_current_view');
+      sessionStorage.removeItem('aura_pos_admin_tab');
+      localStorage.removeItem('aura_pos_admin_tab');
+      sessionStorage.removeItem('aura_pos_settings_tab');
+      localStorage.removeItem('aura_pos_settings_tab');
+      sessionStorage.removeItem('aura_pos_settings_print_doc');
+      localStorage.removeItem('aura_pos_settings_print_doc');
+      window.history.replaceState(null, '', window.location.pathname);
     } catch (e) {}
     setCurrentUser(null);
     setCurrentView('pos');
+    setAdminTab('overview');
   };
 
   // Chọn bàn
@@ -883,7 +988,15 @@ export function App() {
             } catch (e) {}
           }}
           initialTab={adminTab}
-          onBackToPos={() => setCurrentView('pos')}
+          onTabChange={(tab) => setAdminTab(tab)}
+          onBackToPos={() => {
+            try {
+              sessionStorage.setItem('aura_pos_current_view', 'pos');
+              localStorage.setItem('aura_pos_current_view', 'pos');
+              window.history.replaceState(null, '', window.location.pathname + window.location.search);
+            } catch (e) {}
+            setCurrentView('pos');
+          }}
           onLogout={handleLogout}
         />
       ) : (

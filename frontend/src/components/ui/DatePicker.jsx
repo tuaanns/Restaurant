@@ -188,8 +188,9 @@ export function DatePicker({
             border: '1px solid #e2e8f0',
             boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
             padding: '8px',
-            width: '240px',
-            maxWidth: 'calc(100vw - 24px)',
+            width: '100%',
+            minWidth: '232px',
+            maxWidth: '252px',
             boxSizing: 'border-box',
             animation: 'fadeIn 0.15s ease-out'
           }}

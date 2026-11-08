@@ -263,7 +263,6 @@ export function Calendar({
       className={`shadcn-calendar ${className}`}
       style={{
         width: '100%',
-        maxWidth: '228px',
         backgroundColor: '#ffffff',
         userSelect: 'none',
         fontFamily: 'inherit',
@@ -277,7 +276,9 @@ export function Calendar({
         alignItems: 'center',
         justifyContent: 'space-between',
         padding: '2px 0 8px 0',
-        gap: '2px'
+        gap: '2px',
+        width: '100%',
+        boxSizing: 'border-box'
       }}>
         {/* Prev month button */}
         <button
@@ -285,8 +286,8 @@ export function Calendar({
           onClick={handlePrevMonth}
           title="Previous month"
           style={{
-            width: '26px',
-            height: '26px',
+            width: '24px',
+            height: '24px',
             borderRadius: '5px',
             border: '1px solid #e2e8f0',
             backgroundColor: 'transparent',
@@ -306,7 +307,7 @@ export function Calendar({
         </button>
 
         {/* Center: Month and Year Dropdown buttons (matching shadcn preview in user image) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flex: 1, justifyContent: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '2px', flex: 1, justifyContent: 'center', minWidth: 0 }}>
           {/* Month selector */}
           <div ref={monthDropdownRef} style={{ position: 'relative' }}>
             <button
@@ -318,15 +319,16 @@ export function Calendar({
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '3px',
-                padding: '3px 6px',
+                gap: '2px',
+                padding: '2px 5px',
                 borderRadius: '5px',
                 border: '1px solid transparent',
                 backgroundColor: isMonthSelectOpen ? '#f1f5f9' : 'transparent',
-                fontSize: '12px',
+                fontSize: '11.5px',
                 fontWeight: 700,
                 color: '#0f172a',
-                cursor: 'pointer'
+                cursor: 'pointer',
+                whiteSpace: 'nowrap'
               }}
               onMouseEnter={e => { if (!isMonthSelectOpen) e.currentTarget.style.backgroundColor = '#f8fafc'; }}
               onMouseLeave={e => { if (!isMonthSelectOpen) e.currentTarget.style.backgroundColor = 'transparent'; }}
@@ -460,8 +462,8 @@ export function Calendar({
           onClick={handleNextMonth}
           title="Next month"
           style={{
-            width: '26px',
-            height: '26px',
+            width: '24px',
+            height: '24px',
             borderRadius: '5px',
             border: '1px solid #e2e8f0',
             backgroundColor: 'transparent',

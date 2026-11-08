@@ -3,7 +3,7 @@ import {
   Utensils, ArrowLeftRight, ChefHat, Users, TrendingUp, Printer,
   Search, CheckCircle, RotateCcw, ChevronRight, ChevronDown, Check, X,
   FileText, Shield, Sparkles, Bell, Percent, Store, Eye,
-  Layers, Tag, Info, ArrowLeft, QrCode, Wifi, Coffee, Save
+  Layers, Tag, Info, ArrowLeft, QrCode, Wifi, Coffee, Save, Sliders, Globe
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import {
@@ -12,8 +12,17 @@ import {
   DEFAULT_RESTAURANT_SETTINGS,
   SETTINGS_STORAGE_KEY
 } from '../../utils/restaurantSettings';
+import {
+  getMenuTags,
+  getMenuUnits,
+  getMenuAttributes
+} from '../../utils/menuSettingsHelper';
 import { PrintTemplatesManager } from './PrintTemplatesManager';
 import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
+import { MenuTagsModal } from './settings/MenuTagsModal';
+import { MenuUnitsModal } from './settings/MenuUnitsModal';
+import { MenuAttributesModal } from './settings/MenuAttributesModal';
+import { MenuTranslationsModal } from './settings/MenuTranslationsModal';
 
 export function SettingsView({ onBackToDashboard }) {
   const { t, lang, formatMoney } = useLanguage();
@@ -22,12 +31,38 @@ export function SettingsView({ onBackToDashboard }) {
       const saved = sessionStorage.getItem('aura_pos_settings_tab') || localStorage.getItem('aura_pos_settings_tab');
       if (saved) return saved;
     } catch (e) {}
-    return 'orders';
+    return 'menu';
   });
   const [searchQuery, setSearchQuery] = useState('');
   const [settings, setSettings] = useState(() => getRestaurantSettings());
   const [hasChanges, setHasChanges] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Menu sub-entities state
+  const [menuTags, setMenuTags] = useState(() => getMenuTags());
+  const [menuUnits, setMenuUnits] = useState(() => getMenuUnits());
+  const [menuAttributes, setMenuAttributes] = useState(() => getMenuAttributes());
+
+  // Modal open states for menu sub-entities
+  const [isTagsModalOpen, setIsTagsModalOpen] = useState(false);
+  const [isUnitsModalOpen, setIsUnitsModalOpen] = useState(false);
+  const [isAttrsModalOpen, setIsAttrsModalOpen] = useState(false);
+  const [isTranslationsModalOpen, setIsTranslationsModalOpen] = useState(false);
+
+  // Sync listener for menu tags/units/attributes
+  useEffect(() => {
+    const handleTagsChanged = (e) => { if (e.detail) setMenuTags(e.detail); };
+    const handleUnitsChanged = (e) => { if (e.detail) setMenuUnits(e.detail); };
+    const handleAttrsChanged = (e) => { if (e.detail) setMenuAttributes(e.detail); };
+    window.addEventListener('quan_tra_menu_tags_changed', handleTagsChanged);
+    window.addEventListener('quan_tra_menu_units_changed', handleUnitsChanged);
+    window.addEventListener('quan_tra_menu_attributes_changed', handleAttrsChanged);
+    return () => {
+      window.removeEventListener('quan_tra_menu_tags_changed', handleTagsChanged);
+      window.removeEventListener('quan_tra_menu_units_changed', handleUnitsChanged);
+      window.removeEventListener('quan_tra_menu_attributes_changed', handleAttrsChanged);
+    };
+  }, []);
 
   // Print templates expansion and sub-item selection
   const [printTemplatesExpanded, setPrintTemplatesExpanded] = useState(true);
@@ -112,6 +147,18 @@ export function SettingsView({ onBackToDashboard }) {
   // Categories list
   const TABS = [
     {
+      id: 'menu',
+      label: t('admin.settings.menuInventory') || 'Thực đơn & Kho hàng',
+      sublabel: t('admin.settings.menuInventoryDesc') || 'Thông tin món, giá vốn, định lượng & trừ kho',
+      icon: Utensils,
+      sections: [
+        { id: 'sec-menu-info', title: t('admin.settings.menuItemInfo') || 'Thông tin món, hàng hóa' },
+        { id: 'sec-cost-price', title: t('admin.settings.costPriceSection') || 'Giá vốn hàng hóa' },
+        { id: 'sec-production', title: t('admin.settings.productionInventory') || 'Sản xuất & Chế biến' },
+        { id: 'sec-inventory', title: t('admin.settings.inventoryAlerts') || 'Nhập hàng & Kiểm kho' }
+      ]
+    },
+    {
       id: 'orders',
       label: t('admin.settings.orders') || 'Đơn hàng',
       sublabel: t('admin.settings.ordersDesc') || 'Hóa đơn/Tạm tính, phục vụ món & thuế VAT',
@@ -128,6 +175,15 @@ export function SettingsView({ onBackToDashboard }) {
       icon: ChefHat,
       sections: [
         { id: 'sec-kitchen-ticket', title: t('admin.settings.ticketDispatch') || 'In chế biến & Điều phối' }
+      ]
+    },
+    {
+      id: 'tables',
+      label: t('admin.settings.tableReservation') || 'Đặt bàn',
+      sublabel: t('admin.settings.tableReservationDesc') || 'Giữ bàn quá giờ, cọc tiệc & thông báo bàn đặt',
+      icon: Store,
+      sections: [
+        { id: 'sec-table-reservation', title: t('admin.settings.tableReservationSection') || 'Quy định Đặt bàn & Phòng' }
       ]
     },
     {
@@ -581,6 +637,364 @@ export function SettingsView({ onBackToDashboard }) {
           {/* Main Setting Cards */}
           <div style={{ width: '100%', maxWidth: '980px', margin: '0 auto' }}>
             
+            {/* ═════════ TAB 1: THỰC ĐƠN & KHO HÀNG ═════════ */}
+            {activeTab === 'menu' && (
+              <div>
+                {/* Section 1: Thông tin món, hàng hóa (Khớp chính xác giao diện chuẩn KiotViet) */}
+                <div id="sec-menu-info" style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  marginBottom: '20px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    color: '#0f172a'
+                  }}>
+                    {t('admin.settings.menuItemInfo') || 'Thông tin món, hàng hóa'}
+                  </div>
+
+                  {/* Row: Thực đơn đa ngôn ngữ */}
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.menuMultilingual') || 'Thực đơn đa ngôn ngữ'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px', lineHeight: '1.4' }}>
+                        <span>{t('admin.settings.menuMultilingualDesc') || 'Dịch tên món và in hóa đơn song ngữ cho khách nước ngoài.'}</span>
+                        {' '}
+                        <button
+                          type="button"
+                          onClick={() => setIsTranslationsModalOpen(true)}
+                          style={{
+                            color: '#0284C7',
+                            fontWeight: 700,
+                            background: 'none',
+                            border: 'none',
+                            padding: 0,
+                            cursor: 'pointer',
+                            textDecoration: 'none'
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.textDecoration = 'underline'}
+                          onMouseLeave={e => e.currentTarget.style.textDecoration = 'none'}
+                        >
+                          {t('admin.settings.manageTranslations') || 'Quản lý bản dịch'}
+                        </button>
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={settings.menuMultilingual}
+                      onChange={(v) => updateSetting('menuMultilingual', v)}
+                    />
+                  </div>
+
+                  {/* Row: Tag món */}
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.tagItem') || 'Tag món'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.tagItemDesc') || 'Quản lý món theo từ khóa mô tả chi tiết như bán chạy, nên thử, món mới.'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsTagsModalOpen(true)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: '#0f172a',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        transition: 'background-color 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <span>{menuTags.length} {t('admin.settings.tagItem') || 'tag món'}</span>
+                      <ChevronRight size={15} color="#64748b" />
+                    </button>
+                  </div>
+
+                  {/* Row: Đơn vị tính */}
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.unitSetting') || 'Đơn vị tính'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.unitSettingDesc') || 'Quản lý món, hàng hóa theo đơn vị bán hoặc nhập như lon, lốc, thùng.'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsUnitsModalOpen(true)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: '#0f172a',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        transition: 'background-color 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <span>{menuUnits.length} {t('admin.settings.unitSetting') || 'đơn vị tính'}</span>
+                      <ChevronRight size={15} color="#64748b" />
+                    </button>
+                  </div>
+
+                  {/* Row: Thuộc tính */}
+                  <div style={{
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.itemAttributes') || 'Thuộc tính'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.itemAttributesDesc') || 'Quản lý các biến thể của món, hàng hóa theo thuộc tính size.'}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setIsAttrsModalOpen(true)}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        color: '#0f172a',
+                        fontSize: '12.5px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                        background: 'none',
+                        border: 'none',
+                        padding: '6px 10px',
+                        borderRadius: '6px',
+                        transition: 'background-color 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f1f5f9'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                      <span>{menuAttributes.length} {t('admin.settings.itemAttributes') || 'thuộc tính'}</span>
+                      <ChevronRight size={15} color="#64748b" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Section 2: Giá vốn hàng hóa */}
+                <div id="sec-cost-price" style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  marginBottom: '20px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    color: '#0f172a'
+                  }}>
+                    {t('admin.settings.costPriceSection') || 'Giá vốn hàng hóa'}
+                  </div>
+
+                  <div style={{ padding: '16px 20px' }}>
+                    <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b', marginBottom: '8px' }}>
+                      {t('admin.settings.costPriceMethod') || 'Phương pháp tính giá vốn'}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="costPriceMethod"
+                          checked={settings.costPriceMethod === 'fixed'}
+                          onChange={() => updateSetting('costPriceMethod', 'fixed')}
+                          style={{ marginTop: '3px', accentColor: '#1B5E20' }}
+                        />
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                            {t('admin.settings.fixedCost') || 'Giá vốn cố định'}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                            {t('admin.settings.fixedCostDesc') || 'Giá vốn được xác định theo giá nhập đầu tiên hoặc do người dùng tự nhập.'}
+                          </div>
+                        </div>
+                      </label>
+
+                      <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', cursor: 'pointer' }}>
+                        <input
+                          type="radio"
+                          name="costPriceMethod"
+                          checked={settings.costPriceMethod === 'average'}
+                          onChange={() => updateSetting('costPriceMethod', 'average')}
+                          style={{ marginTop: '3px', accentColor: '#1B5E20' }}
+                        />
+                        <div>
+                          <div style={{ fontSize: '13px', fontWeight: 600, color: '#0f172a' }}>
+                            {t('admin.settings.averageCost') || 'Giá vốn bình quân gia quyền'}
+                          </div>
+                          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '2px' }}>
+                            {t('admin.settings.averageCostDesc') || 'Giá vốn được tính bình quân liên tục theo các lần nhập nguyên vật liệu.'}
+                          </div>
+                        </div>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Section 3: Sản xuất & Chế biến */}
+                <div id="sec-production" style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  marginBottom: '20px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    color: '#0f172a'
+                  }}>
+                    {t('admin.settings.productionInventory') || 'Sản xuất & Chế biến'}
+                  </div>
+
+                  <div style={{
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.autoDeductInventory') || 'Tự động trừ tồn kho nguyên liệu khi bán món'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.autoDeductInventoryDesc') || 'Hệ thống tự động trừ kho nguyên vật liệu theo định lượng công thức của món.'}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={settings.autoDeductInventory}
+                      onChange={(v) => updateSetting('autoDeductInventory', v)}
+                    />
+                  </div>
+                </div>
+
+                {/* Section 4: Nhập hàng & Kiểm kho */}
+                <div id="sec-inventory" style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  marginBottom: '20px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    color: '#0f172a'
+                  }}>
+                    {t('admin.settings.inventoryAlerts') || 'Nhập hàng & Kiểm kho'}
+                  </div>
+
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.allowNegativeStock') || 'Cho phép bán âm kho'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.allowNegativeStockDesc') || 'Cho phép tiếp tục tạo đơn hàng và thanh toán khi số lượng tồn kho bằng 0.'}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={settings.allowNegativeStock}
+                      onChange={(v) => updateSetting('allowNegativeStock', v)}
+                    />
+                  </div>
+
+                  <div style={{
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.lowStockAlert') || 'Cảnh báo sắp hết nguyên liệu'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.lowStockAlertDesc') || 'Hiển thị thông báo khi lượng tồn kho nguyên liệu giảm xuống dưới ngưỡng an toàn.'}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={settings.lowStockAlert}
+                      onChange={(v) => updateSetting('lowStockAlert', v)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* ═════════ TAB: ĐƠN HÀNG ═════════ */}
 
             {activeTab === 'orders' && (
@@ -947,6 +1361,172 @@ export function SettingsView({ onBackToDashboard }) {
                     <ToggleSwitch
                       checked={settings.staffCanCancelKitchenItem}
                       onChange={(v) => updateSetting('staffCanCancelKitchenItem', v)}
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ═════════ TAB: ĐẶT BÀN & PHÒNG ═════════ */}
+            {activeTab === 'tables' && (
+              <div>
+                <div id="sec-table-reservation" style={{
+                  backgroundColor: '#ffffff',
+                  borderRadius: '12px',
+                  border: '1px solid #e2e8f0',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.03)',
+                  marginBottom: '20px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f1f5f9',
+                    fontSize: '15px',
+                    fontWeight: 800,
+                    color: '#0f172a'
+                  }}>
+                    {t('admin.settings.tableReservationSection') || 'Quy định Đặt bàn & Phòng'}
+                  </div>
+
+                  {/* Allow advance reservation */}
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.allowTableReservation') || 'Cho phép khách đặt bàn trước'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.allowTableReservationDesc') || 'Tiếp nhận thông tin đặt bàn trước của khách qua điện thoại hoặc trực tuyến.'}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={settings.allowTableReservation !== false}
+                      onChange={(v) => updateSetting('allowTableReservation', v)}
+                    />
+                  </div>
+
+                  {/* Table hold minutes */}
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.tableHoldMinutes') || 'Thời gian giữ bàn tối đa khi khách đến muộn (phút)'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.tableHoldMinutesDesc') || 'Số phút bàn được giữ nguyên trước khi hệ thống cảnh báo hoặc giải phóng bàn.'}
+                      </div>
+                    </div>
+                    <select
+                      value={settings.tableHoldMinutes || 30}
+                      onChange={(e) => updateSetting('tableHoldMinutes', parseInt(e.target.value, 10))}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        backgroundColor: '#ffffff',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value={15}>15 {t('timeMinutes') || 'phút'}</option>
+                      <option value={30}>30 {t('timeMinutes') || 'phút'}</option>
+                      <option value={45}>45 {t('timeMinutes') || 'phút'}</option>
+                      <option value={60}>60 {t('timeMinutes') || 'phút'}</option>
+                    </select>
+                  </div>
+
+                  {/* Auto-release table */}
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.autoReleaseLateReservation') || 'Tự động hủy bàn nếu khách không đến'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.autoReleaseLateReservationDesc') || 'Tự động chuyển bàn về trạng thái Trống nếu quá thời gian giữ bàn.'}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={settings.autoReleaseLateReservation !== false}
+                      onChange={(v) => updateSetting('autoReleaseLateReservation', v)}
+                    />
+                  </div>
+
+                  {/* Table reminder minutes */}
+                  <div style={{
+                    padding: '16px 20px',
+                    borderBottom: '1px solid #f8fafc',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.tableReminderMinutes') || 'Thông báo chuẩn bị bàn trước giờ hẹn (phút)'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.tableReminderMinutesDesc') || 'Hệ thống gửi chuông báo hoặc thông báo cho nhân viên chuẩn bị bàn chu đáo.'}
+                      </div>
+                    </div>
+                    <select
+                      value={settings.tableReminderMinutes || 15}
+                      onChange={(e) => updateSetting('tableReminderMinutes', parseInt(e.target.value, 10))}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '6px',
+                        border: '1px solid #cbd5e1',
+                        fontSize: '13px',
+                        fontWeight: 600,
+                        backgroundColor: '#ffffff',
+                        outline: 'none'
+                      }}
+                    >
+                      <option value={10}>10 {t('timeMinutes') || 'phút'}</option>
+                      <option value={15}>15 {t('timeMinutes') || 'phút'}</option>
+                      <option value={30}>30 {t('timeMinutes') || 'phút'}</option>
+                      <option value={45}>45 {t('timeMinutes') || 'phút'}</option>
+                    </select>
+                  </div>
+
+                  {/* Allow pre-ordering dishes */}
+                  <div style={{
+                    padding: '16px 20px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <div style={{ fontSize: '13.5px', fontWeight: 700, color: '#1e293b' }}>
+                        {t('admin.settings.allowPreOrderDishes') || 'Cho phép đặt món trước khi đến'}
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#64748b', marginTop: '3px' }}>
+                        {t('admin.settings.allowPreOrderDishesDesc') || 'Nhân viên có thể lưu trước các món khách chọn vào đơn đặt bàn.'}
+                      </div>
+                    </div>
+                    <ToggleSwitch
+                      checked={settings.allowPreOrderDishes !== false}
+                      onChange={(v) => updateSetting('allowPreOrderDishes', v)}
                     />
                   </div>
                 </div>
@@ -1840,6 +2420,27 @@ export function SettingsView({ onBackToDashboard }) {
         confirmText={t('admin.settings.resetToDefault') || 'Khôi phục'}
         cancelText={t('cancel') || 'Hủy'}
         dangerIcon="warning"
+      />
+
+      {/* ═══ MODALS QUẢN LÝ THỰC ĐƠN: TAG MÓN, ĐƠN VỊ TÍNH, THUỘC TÍNH, BẢN DỊCH ═══ */}
+      <MenuTagsModal
+        isOpen={isTagsModalOpen}
+        onClose={() => setIsTagsModalOpen(false)}
+        onTagsChanged={setMenuTags}
+      />
+      <MenuUnitsModal
+        isOpen={isUnitsModalOpen}
+        onClose={() => setIsUnitsModalOpen(false)}
+        onUnitsChanged={setMenuUnits}
+      />
+      <MenuAttributesModal
+        isOpen={isAttrsModalOpen}
+        onClose={() => setIsAttrsModalOpen(false)}
+        onAttributesChanged={setMenuAttributes}
+      />
+      <MenuTranslationsModal
+        isOpen={isTranslationsModalOpen}
+        onClose={() => setIsTranslationsModalOpen(false)}
       />
     </div>
   );

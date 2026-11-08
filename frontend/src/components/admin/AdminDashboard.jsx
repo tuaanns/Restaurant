@@ -26,6 +26,7 @@ import { TablesView } from './TablesView';
 import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
 import { DatePicker } from '../ui/DatePicker';
 import { initialMockData } from '../../mockData';
+import { getMenuUnits } from '../../utils/menuSettingsHelper';
 
 const DEFAULT_ADMIN_USERS = [
   { id: 1, name: 'Quản trị viên', username: 'admin', email: 'admin@aura.vn', role: 'admin', shift: 'Toàn ca (Quản lý nhà hàng)', phone: '0901.888.999', is_active: 1 },
@@ -2243,7 +2244,20 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                 <div>
                   <label style={labelStyle}>{t('admin.productUnit')}:</label>
-                  <input required type="text" value={productUnit} onChange={e => setProductUnit(e.target.value)} style={inputStyle} />
+                  <input
+                    required
+                    type="text"
+                    list="restaurant-units-list"
+                    value={productUnit}
+                    onChange={e => setProductUnit(e.target.value)}
+                    style={inputStyle}
+                    placeholder="VD: phần, dĩa, tô, ấm, ly..."
+                  />
+                  <datalist id="restaurant-units-list">
+                    {getMenuUnits().map(u => (
+                      <option key={u.id} value={u.name}>{u.desc || u.name}</option>
+                    ))}
+                  </datalist>
                 </div>
                 <div>
                   <label style={labelStyle}>{t('admin.productGroup')}:</label>

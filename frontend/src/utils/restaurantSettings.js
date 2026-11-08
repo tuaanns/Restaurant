@@ -31,7 +31,14 @@ export const DEFAULT_RESTAURANT_SETTINGS = {
   kitchenDelayAlertMinutes: 15,
   staffCanCancelKitchenItem: false,
 
-  // 4. Khách hàng
+  // 4. Đặt bàn & Phòng
+  allowTableReservation: true,
+  tableHoldMinutes: 30,
+  autoReleaseLateReservation: true,
+  tableReminderMinutes: 15,
+  allowPreOrderDishes: true,
+
+  // 5. Khách hàng
   enableLoyaltyPoints: true,
   pointRateVndPerPoint: 10000,
   pointRedeemVndPerPoint: 100,

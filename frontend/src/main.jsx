@@ -133,7 +133,14 @@ class ErrorBoundary extends Component {
   }
 }
 
-createRoot(document.getElementById('root')).render(
+// Clear any temporary synchronization fallback banner
+const existingBanner = document.getElementById('critical-fallback-banner');
+if (existingBanner && existingBanner.parentNode) {
+  existingBanner.parentNode.removeChild(existingBanner);
+}
+
+const rootElement = document.getElementById('root');
+createRoot(rootElement).render(
   <StrictMode>
     <ErrorBoundary>
       <LanguageProvider>
@@ -141,4 +148,4 @@ createRoot(document.getElementById('root')).render(
       </LanguageProvider>
     </ErrorBoundary>
   </StrictMode>,
-)
+);

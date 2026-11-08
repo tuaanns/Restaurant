@@ -7,6 +7,7 @@ import {
   UserCheck, Shield, Calendar, Phone, Mail
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { DatePicker } from '../ui/DatePicker';
 
 export function StaffView({
   users = [],
@@ -365,17 +366,15 @@ export function StaffView({
           </label>
           {createdTimeType === 'custom' && (
             <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <input
-                type="date"
+              <DatePicker
                 value={createdFrom}
+                placeholder="Từ ngày"
                 onChange={e => { setCreatedFrom(e.target.value); setCurrentPage(1); }}
-                style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontSize: '12px' }}
               />
-              <input
-                type="date"
+              <DatePicker
                 value={createdTo}
+                placeholder="Đến ngày"
                 onChange={e => { setCreatedTo(e.target.value); setCurrentPage(1); }}
-                style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontSize: '12px' }}
               />
             </div>
           )}

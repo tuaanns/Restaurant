@@ -24,6 +24,7 @@ import { MenuView } from './MenuView';
 import { StaffView } from './StaffView';
 import { TablesView } from './TablesView';
 import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
+import { DatePicker } from '../ui/DatePicker';
 import { initialMockData } from '../../mockData';
 
 const DEFAULT_ADMIN_USERS = [
@@ -2443,11 +2444,15 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
                     <label style={labelStyle}>{t('admin.fromDate')}: <span style={{ color: '#ef4444' }}>*</span></label>
-                    <input required type="date" value={promoFromDate} onChange={e => setPromoFromDate(e.target.value)} style={inputStyle} />
+                    <div style={{ marginTop: '4px' }}>
+                      <DatePicker value={promoFromDate} onChange={e => setPromoFromDate(e.target.value)} required />
+                    </div>
                   </div>
                   <div>
                     <label style={labelStyle}>{t('admin.toDate')}: <span style={{ color: '#ef4444' }}>*</span></label>
-                    <input required type="date" value={promoToDate} onChange={e => setPromoToDate(e.target.value)} style={inputStyle} />
+                    <div style={{ marginTop: '4px' }}>
+                      <DatePicker value={promoToDate} onChange={e => setPromoToDate(e.target.value)} required />
+                    </div>
                   </div>
                 </div>
 

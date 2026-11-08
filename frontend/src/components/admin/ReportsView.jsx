@@ -26,6 +26,7 @@ import {
 import { api } from '../../api';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { ReportPrintModal } from './ReportPrintModal';
+import { DatePicker } from '../ui/DatePicker';
 
 export function ReportsView({
   subTab = 'report_end_of_day',
@@ -788,19 +789,9 @@ export function ReportsView({
               {dateFilterMode === 'custom' && (
                 <div style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ position: 'relative' }}>
-                    <input
-                      type="date"
+                    <DatePicker
                       value={selectedDate}
                       onChange={(e) => setSelectedDate(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '7px 10px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '12.5px',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
                     />
                   </div>
 

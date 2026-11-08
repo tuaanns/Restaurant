@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { api } from '../../api';
 import { useLanguage } from '../../i18n/LanguageContext';
+import { DatePicker } from '../ui/DatePicker';
 
 export function CashTransactionModal({
   isOpen,
@@ -519,19 +520,10 @@ export function CashTransactionModal({
               <label style={{ display: 'block', fontWeight: 600, color: '#334155', marginBottom: '5px' }}>
                 {t('admin.cashbook.modal.time')}
               </label>
-              <input
-                type="datetime-local"
+              <DatePicker
                 value={transactedAt}
+                includeTime={true}
                 onChange={(e) => setTransactedAt(e.target.value)}
-                style={{
-                  width: '100%',
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  border: '1px solid #cbd5e1',
-                  fontSize: '13px',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
               />
             </div>
           </div>

@@ -25,6 +25,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { useCashBook } from '../../hooks';
 import { CashTransactionModal } from './CashTransactionModal';
 import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
+import { DatePicker } from '../ui/DatePicker';
 
 export function CashBookView({ currentUser = null }) {
   const { lang, t, formatCashCategory, formatCashTarget, formatCashCreatedBy } = useLanguage();
@@ -474,37 +475,17 @@ export function CashBookView({ currentUser = null }) {
               {dateFilterMode === 'custom' && (
                 <div style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                   <div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>{t('admin.cashbook.fromDate')}</div>
-                    <input
-                      type="date"
+                    <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>{t('admin.cashbook.fromDate')}</div>
+                    <DatePicker
                       value={fromDate}
                       onChange={(e) => setFromDate(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '6px 8px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '12px',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
                     />
                   </div>
                   <div>
-                    <div style={{ fontSize: '11px', color: '#64748b' }}>{t('admin.cashbook.toDate')}</div>
-                    <input
-                      type="date"
+                    <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>{t('admin.cashbook.toDate')}</div>
+                    <DatePicker
                       value={toDate}
                       onChange={(e) => setToDate(e.target.value)}
-                      style={{
-                        width: '100%',
-                        padding: '6px 8px',
-                        borderRadius: '6px',
-                        border: '1px solid #cbd5e1',
-                        fontSize: '12px',
-                        outline: 'none',
-                        boxSizing: 'border-box'
-                      }}
                     />
                   </div>
                 </div>

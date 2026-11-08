@@ -9,6 +9,7 @@ import {
 import { useLanguage } from '../../i18n/LanguageContext';
 import { api } from '../../api';
 import { ConfirmDeleteModal } from '../modals/ConfirmDeleteModal';
+import { DatePicker } from '../ui/DatePicker';
 
 // ── Default Columns Matching User's Image ──
 const DEFAULT_VISIBLE_COLUMNS = [
@@ -1084,17 +1085,15 @@ export function CustomersView({
           </label>
           {createdTimeType === 'custom' && (
             <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <input
-                type="date"
+              <DatePicker
                 value={createdFrom}
+                placeholder="Từ ngày"
                 onChange={e => { setCreatedFrom(e.target.value); setCurrentPage(1); }}
-                style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontSize: '12px' }}
               />
-              <input
-                type="date"
+              <DatePicker
                 value={createdTo}
+                placeholder="Đến ngày"
                 onChange={e => { setCreatedTo(e.target.value); setCurrentPage(1); }}
-                style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontSize: '12px' }}
               />
             </div>
           )}
@@ -1171,17 +1170,15 @@ export function CustomersView({
           </label>
           {lastTxType === 'custom' && (
             <div style={{ marginTop: '8px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-              <input
-                type="date"
+              <DatePicker
                 value={lastTxFrom}
+                placeholder="Từ ngày"
                 onChange={e => { setLastTxFrom(e.target.value); setCurrentPage(1); }}
-                style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontSize: '12px' }}
               />
-              <input
-                type="date"
+              <DatePicker
                 value={lastTxTo}
+                placeholder="Đến ngày"
                 onChange={e => { setLastTxTo(e.target.value); setCurrentPage(1); }}
-                style={{ width: '100%', padding: '6px 8px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontSize: '12px' }}
               />
             </div>
           )}
@@ -2111,11 +2108,10 @@ export function CustomersView({
                   <label style={{ display: 'block', fontSize: '12.5px', fontWeight: 700, color: THEME.slateDark, marginBottom: '5px' }}>
                     {t('admin.customersView.colBirthday')}
                   </label>
-                  <input
-                    type="date"
+                  <DatePicker
                     value={formBirthday}
+                    placeholder="Chọn ngày sinh"
                     onChange={e => setFormBirthday(e.target.value)}
-                    style={{ width: '100%', padding: '7.5px 12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, fontSize: '13px' }}
                   />
                 </div>
                 <div>

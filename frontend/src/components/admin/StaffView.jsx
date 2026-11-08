@@ -628,14 +628,14 @@ export function StaffView({
                     {filteredUsers.length} {t('admin.staffCount') || 'nhân viên'}
                   </td>
                   <td style={{ padding: '10px 14px', color: THEME.slateMuted }}>
-                    {isFiltered ? '(Đã lọc)' : 'Toàn bộ nhân sự'}
+                    {isFiltered ? (t('admin.filtered') || '(Đã lọc)') : (t('admin.allStaff') || 'Toàn bộ nhân sự')}
                   </td>
                   <td style={{ padding: '10px 14px' }}>—</td>
                   <td style={{ padding: '10px 14px' }}>—</td>
                   <td style={{ padding: '10px 14px' }}>—</td>
                   <td style={{ padding: '10px 14px' }}>—</td>
                   <td style={{ padding: '10px 14px', textAlign: 'center', color: '#059669' }}>
-                    {filteredUsers.filter(u => u.is_active !== undefined ? Boolean(u.is_active) : true).length} đang làm
+                    {filteredUsers.filter(u => u.is_active !== undefined ? Boolean(u.is_active) : true).length} {t('admin.activeStaff') || 'đang làm'}
                   </td>
                   <td style={{ padding: '10px 14px', textAlign: 'center' }}>—</td>
                 </tr>
@@ -903,8 +903,8 @@ export function StaffView({
 
               <span style={{ color: THEME.slateMuted }}>
                 {filteredUsers.length === 0
-                  ? '0 - 0 trong tổng 0'
-                  : `${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, filteredUsers.length)} trong tổng ${filteredUsers.length}`}
+                  ? `0 - 0 ${t('admin.customersView.inTotal') || 'trong tổng'} 0`
+                  : `${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, filteredUsers.length)} ${t('admin.customersView.inTotal') || 'trong tổng'} ${filteredUsers.length}`}
               </span>
             </div>
           </div>

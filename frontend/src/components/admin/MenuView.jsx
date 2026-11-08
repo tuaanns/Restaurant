@@ -867,7 +867,7 @@ export function MenuView({
                         {filteredProducts.length} {t('menu.items') || 'món'}
                       </td>
                       <td style={{ padding: '10px 14px', color: THEME.slateMuted }}>
-                        {isFiltered ? '(Đã lọc)' : 'Toàn bộ thực đơn'}
+                        {isFiltered ? (t('admin.filtered') || '(Đã lọc)') : (t('admin.allMenu') || 'Toàn bộ thực đơn')}
                       </td>
                       <td style={{ padding: '10px 14px' }}>—</td>
                       <td style={{ padding: '10px 14px', textAlign: 'center' }}>—</td>
@@ -876,7 +876,7 @@ export function MenuView({
                           filteredProducts.length > 0
                             ? Math.round(filteredProducts.reduce((acc, p) => acc + Number(p.price || 0), 0) / filteredProducts.length)
                             : 0
-                        )} <span style={{ fontSize: '11px', color: THEME.slateMuted, fontWeight: 500 }}>(TB)</span>
+                        )} <span style={{ fontSize: '11px', color: THEME.slateMuted, fontWeight: 500 }}>{t('admin.avgShort') || '(TB)'}</span>
                       </td>
                       <td style={{ padding: '10px 14px', textAlign: 'center' }}>—</td>
                       <td style={{ padding: '10px 14px', textAlign: 'center' }}>—</td>
@@ -886,7 +886,7 @@ export function MenuView({
                       <td style={{ padding: '10px 14px', color: THEME.forest }}>{filteredCategories.length} {t('admin.categories') || 'nhóm'}</td>
                       <td style={{ padding: '10px 14px' }}>—</td>
                       <td style={{ padding: '10px 14px', textAlign: 'center', color: THEME.forest, fontWeight: 800 }}>
-                        {filteredCategories.reduce((acc, c) => acc + (c.products_count ?? c.products?.length ?? 0), 0)} món
+                        {filteredCategories.reduce((acc, c) => acc + (c.products_count ?? c.products?.length ?? 0), 0)} {t('menu.items') || 'món'}
                       </td>
                       <td style={{ padding: '10px 14px', textAlign: 'center' }}>—</td>
                     </>
@@ -1235,8 +1235,8 @@ export function MenuView({
 
               <span style={{ color: THEME.slateMuted }}>
                 {activeDataList.length === 0
-                  ? '0 - 0 trong tổng 0'
-                  : `${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, activeDataList.length)} trong tổng ${activeDataList.length}`}
+                  ? `0 - 0 ${t('admin.customersView.inTotal') || 'trong tổng'} 0`
+                  : `${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, activeDataList.length)} ${t('admin.customersView.inTotal') || 'trong tổng'} ${activeDataList.length}`}
               </span>
             </div>
           </div>
@@ -1247,4 +1247,6 @@ export function MenuView({
     </div>
   );
 }
+
+export default MenuView;
 

@@ -456,7 +456,7 @@ export function TablesView({
                     gap: '4px'
                   }}
                 >
-                  <TableIcon size={14} /> Dạng bảng
+                  <TableIcon size={14} /> {t('admin.tableView') || 'Dạng bảng'}
                 </button>
                 <button
                   type="button"
@@ -477,7 +477,7 @@ export function TablesView({
                     gap: '4px'
                   }}
                 >
-                  <LayoutGrid size={14} /> Dạng thẻ
+                  <LayoutGrid size={14} /> {t('admin.cardView') || 'Dạng thẻ'}
                 </button>
               </div>
             </div>
@@ -883,23 +883,27 @@ export function TablesView({
                           {filteredTables.length} {t('admin.tables') || 'bàn'}
                         </td>
                         <td style={{ padding: '10px 14px', color: THEME.slateMuted }}>
-                          {isFiltered ? '(Đã lọc)' : 'Toàn bộ phòng bàn'}
+                          {isFiltered ? (t('admin.filtered') || '(Đã lọc)') : (t('admin.allTablesRooms') || 'Toàn bộ phòng bàn')}
                         </td>
                         <td style={{ padding: '10px 14px', textAlign: 'center', color: THEME.slateDark }}>
-                          {filteredTables.reduce((acc, t) => acc + Number(t.capacity || 4), 0)} chỗ
+                          {filteredTables.reduce((acc, t) => acc + Number(t.capacity || 4), 0)} {t('admin.seats') || t('table.seats') || 'chỗ'}
                         </td>
                         <td style={{ padding: '10px 14px', textAlign: 'center' }}>
-                          <span style={{ color: '#059669' }}>{filteredTables.filter(t => !t.status || t.status === 'empty').length} trống</span>
+                          <span style={{ color: '#059669' }}>
+                            {filteredTables.filter(t => !t.status || t.status === 'empty').length} {t('admin.emptyCount') || t('table.empty') || 'trống'}
+                          </span>
                           {' / '}
-                          <span style={{ color: '#b45309' }}>{filteredTables.filter(t => t.status === 'occupied').length} có khách</span>
+                          <span style={{ color: '#b45309' }}>
+                            {filteredTables.filter(t => t.status === 'occupied').length} {t('admin.occupiedCount') || t('table.occupied') || 'có khách'}
+                          </span>
                         </td>
                         <td style={{ padding: '10px 14px', textAlign: 'center' }}>—</td>
                       </>
                     ) : (
                       <>
-                        <td style={{ padding: '10px 14px', color: THEME.forest }}>{filteredAreas.length} khu vực</td>
+                        <td style={{ padding: '10px 14px', color: THEME.forest }}>{filteredAreas.length} {t('admin.areas') || 'khu vực'}</td>
                         <td style={{ padding: '10px 14px', textAlign: 'center', color: THEME.forest, fontWeight: 800 }}>
-                          {tables.length} bàn
+                          {tables.length} {t('admin.tables') || 'bàn'}
                         </td>
                         <td style={{ padding: '10px 14px' }}>—</td>
                         <td style={{ padding: '10px 14px', textAlign: 'center' }}>—</td>
@@ -1226,8 +1230,8 @@ export function TablesView({
 
                 <span style={{ color: THEME.slateMuted }}>
                   {activeDataList.length === 0
-                    ? '0 - 0 trong tổng 0'
-                    : `${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, activeDataList.length)} trong tổng ${activeDataList.length}`}
+                    ? `0 - 0 ${t('admin.customersView.inTotal') || 'trong tổng'} 0`
+                    : `${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, activeDataList.length)} ${t('admin.customersView.inTotal') || 'trong tổng'} ${activeDataList.length}`}
                 </span>
               </div>
             </div>
@@ -1342,8 +1346,8 @@ export function TablesView({
             }}>
               <span style={{ color: THEME.slateMuted }}>
                 {filteredTables.length === 0
-                  ? '0 bàn'
-                  : `Hiển thị ${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, filteredTables.length)} trong tổng ${filteredTables.length} bàn`}
+                  ? `0 ${t('admin.tables') || 'bàn'}`
+                  : `${t('admin.showing') || 'Hiển thị'} ${(currentPage - 1) * rowsPerPage + 1} - ${Math.min(currentPage * rowsPerPage, filteredTables.length)} ${t('admin.customersView.inTotal') || 'trong tổng'} ${filteredTables.length} ${t('admin.tables') || 'bàn'}`}
               </span>
               <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                 <button
@@ -1392,4 +1396,6 @@ export function TablesView({
     </div>
   );
 }
+
+export default TablesView;
 

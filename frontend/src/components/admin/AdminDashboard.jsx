@@ -2340,10 +2340,10 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
       {/* ══════════════ MODAL: PROMOTION (2 STEPS) ══════════════ */}
       {showPromoModal && (
         <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(15,23,42,0.65)', backdropFilter: 'blur(4px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 300, padding: '20px' }}>
-          <div style={{ width: '560px', maxWidth: '100%', backgroundColor: '#fff', borderRadius: '14px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', overflow: 'hidden' }}>
+          <div style={{ width: '560px', maxWidth: '100%', backgroundColor: '#fff', borderRadius: '14px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.3)', overflow: 'visible', position: 'relative' }}>
 
             {/* Modal header */}
-            <div style={{ padding: '18px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ padding: '18px 24px', borderBottom: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderRadius: '14px 14px 0 0' }}>
               <div>
                 <h3 style={{ fontSize: '17px', fontWeight: 800, color: '#0f172a' }}>
                   {editingPromo ? t('admin.editPromo') : t('admin.createPromo')}
@@ -2459,13 +2459,25 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
                   <div>
                     <label style={labelStyle}>{t('admin.fromDate')}: <span style={{ color: '#ef4444' }}>*</span></label>
                     <div style={{ marginTop: '4px' }}>
-                      <DatePicker value={promoFromDate} onChange={e => setPromoFromDate(e.target.value)} required />
+                      <DatePicker
+                        value={promoFromDate}
+                        onChange={e => setPromoFromDate(e.target.value)}
+                        placement="top"
+                        align="left"
+                        required
+                      />
                     </div>
                   </div>
                   <div>
                     <label style={labelStyle}>{t('admin.toDate')}: <span style={{ color: '#ef4444' }}>*</span></label>
                     <div style={{ marginTop: '4px' }}>
-                      <DatePicker value={promoToDate} onChange={e => setPromoToDate(e.target.value)} required />
+                      <DatePicker
+                        value={promoToDate}
+                        onChange={e => setPromoToDate(e.target.value)}
+                        placement="top"
+                        align="right"
+                        required
+                      />
                     </div>
                   </div>
                 </div>

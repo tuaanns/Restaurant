@@ -18,12 +18,60 @@ export function DatePicker({
   maxDate,
   style = {},
   className = '',
-  align = 'left', // 'left' | 'right'
+  align = 'auto', // 'auto' | 'left' | 'right'
+  placement = 'auto', // 'auto' | 'top' | 'bottom'
   required = false
 }) {
   const { lang } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const containerRef = useRef(null);
+
+  const [actualPlacement, setActualPlacement] = useState(placement === 'top' ? 'top' : 'bottom');
+  const [actualAlign, setActualAlign] = useState(align === 'right' ? 'right' : 'left');
+
+  // Compute position relative to viewport and container
+  const updatePosition = () => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+
+    // Determine vertical placement
+    if (placement === 'top') {
+      setActualPlacement('top');
+    } else if (placement === 'bottom') {
+      setActualPlacement('bottom');
+    } else {
+      const spaceBelow = window.innerHeight - rect.bottom;
+      const spaceAbove = rect.top;
+      // Calendar popup height is ~250px. If less than 280px below and more space above, open upwards
+      if (spaceBelow < 280 && spaceAbove > 240) {
+        setActualPlacement('top');
+      } else {
+        setActualPlacement('bottom');
+      }
+    }
+
+    // Determine horizontal alignment
+    if (align === 'right') {
+      setActualAlign('right');
+    } else if (align === 'left') {
+      setActualAlign('left');
+    } else {
+      const spaceRight = window.innerWidth - rect.left;
+      if (spaceRight < 255 && rect.right > 255) {
+        setActualAlign('right');
+      } else {
+        setActualAlign('left');
+      }
+    }
+  };
+
+  const handleToggle = () => {
+    if (disabled) return;
+    if (!isOpen) {
+      updatePosition();
+    }
+    setIsOpen(!isOpen);
+  };
 
   // Extract date and time parts
   const datePart = value ? value.split('T')[0] : '';
@@ -117,9 +165,7 @@ export function DatePicker({
       <button
         type="button"
         disabled={disabled}
-        onClick={() => {
-          if (!disabled) setIsOpen(!isOpen);
-        }}
+        onClick={handleToggle}
         style={{
           width: '100%',
           height: '36px',
@@ -180,13 +226,15 @@ export function DatePicker({
         <div
           style={{
             position: 'absolute',
-            top: 'calc(100% + 4px)',
-            [align === 'right' ? 'right' : 'left']: 0,
-            zIndex: 1000,
+            [actualPlacement === 'top' ? 'bottom' : 'top']: 'calc(100% + 4px)',
+            [actualAlign === 'right' ? 'right' : 'left']: 0,
+            zIndex: 1050,
             backgroundColor: '#ffffff',
             borderRadius: '10px',
             border: '1px solid #e2e8f0',
-            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
+            boxShadow: actualPlacement === 'top'
+              ? '0 -10px 25px -5px rgba(0, 0, 0, 0.15), 0 -8px 10px -6px rgba(0, 0, 0, 0.1)'
+              : '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1)',
             padding: '8px',
             width: '100%',
             minWidth: '232px',

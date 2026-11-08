@@ -22,6 +22,7 @@ import {
   QrCode,
   CreditCard,
   ArrowUpRight,
+  ArrowDownRight,
   Flame,
   PieChart as PieIcon,
   BarChart3,
@@ -154,67 +155,59 @@ export function OverviewDashboard({
   const [chartType, setChartType] = useState('bar'); // 'bar' | 'area'
 
   // Calculations (real-time direct values from backend stats)
-  const totalRevenue = typeof stats?.total_revenue === 'number' ? stats.total_revenue : 3901700;
-  const totalOrders = typeof stats?.total_orders_today === 'number' ? stats.total_orders_today : 28;
-  const occupiedTables = typeof stats?.occupied_tables === 'number' ? stats.occupied_tables : 6;
+  const totalRevenue = Number(stats?.total_revenue || 0);
+  const totalOrders = Number(stats?.total_orders_today || 0);
+  const occupiedTables = Number(stats?.occupied_tables || 0);
   const totalTables = tables?.length || 24;
-  const billingTables = typeof stats?.billing_tables === 'number' ? stats.billing_tables : 2;
-  const staffCount = typeof stats?.cashiers_count === 'number' ? stats.cashiers_count : (users?.length || 2);
+  const billingTables = Number(stats?.billing_tables || 0);
+  const staffCount = users?.length || Number(stats?.cashiers_count || 1);
+  const revenueGrowth = typeof stats?.revenue_growth === 'number' ? stats.revenue_growth : null;
+  const ordersGrowth = typeof stats?.orders_growth === 'number' ? stats.orders_growth : null;
 
-  // Hourly dataset for "Hôm nay" (real-time data from database)
+  // Real-time hourly dataset for "Hôm nay" from backend
   const hourlyData = useMemo(() => {
     if (stats?.hourly_data && Array.isArray(stats.hourly_data) && stats.hourly_data.length > 0) {
-      const hasRealOrders = stats.hourly_data.some(d => (d.revenue > 0 || d.orders > 0));
-      if (hasRealOrders) {
-        return stats.hourly_data;
-      }
+      return stats.hourly_data.map(d => ({
+        time: d.time,
+        revenue: Number(d.revenue || 0),
+        orders: Number(d.orders || 0)
+      }));
     }
     return [
-      { time: '08:00', revenue: 240000, orders: 3 },
-      { time: '10:00', revenue: 450000, orders: 5 },
-      { time: '12:00', revenue: 980000, orders: 8 },
-      { time: '14:00', revenue: 320000, orders: 3 },
-      { time: '16:00', revenue: 290000, orders: 2 },
-      { time: '18:00', revenue: 860000, orders: 4 },
-      { time: '20:00', revenue: 580000, orders: 2 },
-      { time: '22:00', revenue: 181700, orders: 1 },
+      { time: '08:00', revenue: 0, orders: 0 },
+      { time: '10:00', revenue: 0, orders: 0 },
+      { time: '12:00', revenue: 0, orders: 0 },
+      { time: '14:00', revenue: 0, orders: 0 },
+      { time: '16:00', revenue: 0, orders: 0 },
+      { time: '18:00', revenue: 0, orders: 0 },
+      { time: '20:00', revenue: 0, orders: 0 },
+      { time: '22:00', revenue: 0, orders: 0 },
     ];
-  }, [stats]);
+  }, [stats?.hourly_data]);
 
-  // 7-day dataset (real-time data from database)
+  // Real-time 7-day dataset from database
   const sevenDaysData = useMemo(() => {
     if (stats?.seven_days_data && Array.isArray(stats.seven_days_data) && stats.seven_days_data.length > 0) {
-      const hasReal = stats.seven_days_data.some(d => (d.revenue > 0 || d.orders > 0));
-      if (hasReal) {
-        return stats.seven_days_data;
-      }
+      return stats.seven_days_data.map(d => ({
+        time: d.time,
+        revenue: Number(d.revenue || 0),
+        orders: Number(d.orders || 0)
+      }));
     }
-    return [
-      { time: 'Thứ 2', revenue: 2850000, orders: 22 },
-      { time: 'Thứ 3', revenue: 3120000, orders: 25 },
-      { time: 'Thứ 4', revenue: 3400000, orders: 26 },
-      { time: 'Thứ 5', revenue: 2980000, orders: 21 },
-      { time: 'Thứ 6', revenue: 4200000, orders: 32 },
-      { time: 'Thứ 7', revenue: 5650000, orders: 41 },
-      { time: 'Chủ Nhật', revenue: totalRevenue, orders: totalOrders },
-    ];
-  }, [stats, totalRevenue, totalOrders]);
+    return [];
+  }, [stats?.seven_days_data]);
 
-  // 30-day dataset (real-time data from database)
+  // Real-time 30-day dataset from database
   const thirtyDaysData = useMemo(() => {
     if (stats?.thirty_days_data && Array.isArray(stats.thirty_days_data) && stats.thirty_days_data.length > 0) {
-      const hasReal = stats.thirty_days_data.some(d => (d.revenue > 0 || d.orders > 0));
-      if (hasReal) {
-        return stats.thirty_days_data;
-      }
+      return stats.thirty_days_data.map(d => ({
+        time: d.time,
+        revenue: Number(d.revenue || 0),
+        orders: Number(d.orders || 0)
+      }));
     }
-    return [
-      { time: 'Tuần 1', revenue: 21400000, orders: 168 },
-      { time: 'Tuần 2', revenue: 24800000, orders: 195 },
-      { time: 'Tuần 3', revenue: 26500000, orders: 210 },
-      { time: 'Tuần này', revenue: 28200000, orders: 224 },
-    ];
-  }, [stats]);
+    return [];
+  }, [stats?.thirty_days_data]);
 
   // Current active dataset
   const currentChartData = timeRange === 'today'
@@ -223,40 +216,41 @@ export function OverviewDashboard({
     ? sevenDaysData
     : thirtyDaysData;
 
-  // Payment Breakdown
+  // Payment Breakdown scope ('today' | 'all')
+  const [paymentScope, setPaymentScope] = useState('today');
   const paymentData = useMemo(() => {
-    const raw = stats?.payment_breakdown || {};
-    const cash = Number(raw.cash) || 1850000;
-    const qr = Number(raw.qr_banking) || 1450000;
-    const card = Number(raw.card) || 601700;
-    const sum = cash + qr + card || 1;
+    const raw = (paymentScope === 'today' ? stats?.payment_breakdown_today : stats?.payment_breakdown) || stats?.payment_breakdown || {};
+    const cash = Number(raw.cash || 0);
+    const qr = Number(raw.qr_banking || 0);
+    const card = Number(raw.card || 0);
+    const sum = cash + qr + card;
 
     return [
-      { name: t('admin.cash') || 'Tiền Mặt', value: cash, percent: Math.round((cash / sum) * 100), color: '#10b981', sub: t('admin.atCounter') || 'Tại quầy', icon: Banknote },
-      { name: t('admin.bankTransfer') || 'Chuyển Khoản VietQR', value: qr, percent: Math.round((qr / sum) * 100), color: '#1B5E20', sub: 'MBBank', icon: QrCode },
-      { name: t('admin.cardPayment') || 'Quẹt Thẻ POS', value: card, percent: Math.round((card / sum) * 100), color: '#8b5cf6', sub: 'ATM/Visa', icon: CreditCard },
+      { name: t('admin.cash') || 'Tiền Mặt', value: cash, percent: sum > 0 ? Math.round((cash / sum) * 100) : 0, color: '#10b981', sub: t('admin.atCounter') || 'Tại quầy', icon: Banknote },
+      { name: t('admin.bankTransfer') || 'Chuyển Khoản VietQR', value: qr, percent: sum > 0 ? Math.round((qr / sum) * 100) : 0, color: '#1B5E20', sub: 'MBBank', icon: QrCode },
+      { name: t('admin.cardPayment') || 'Quẹt Thẻ POS', value: card, percent: sum > 0 ? Math.round((card / sum) * 100) : 0, color: '#8b5cf6', sub: 'ATM/Visa', icon: CreditCard },
     ];
-  }, [stats, t]);
+  }, [stats?.payment_breakdown_today, stats?.payment_breakdown, paymentScope, t]);
 
   const totalPaymentSum = paymentData.reduce((acc, cur) => acc + cur.value, 0);
 
-  // Top Selling Dishes
+  // Top Selling Dishes scope ('today' | 'all')
+  const [dishScope, setDishScope] = useState('today');
   const topProductsList = useMemo(() => {
-    if (stats?.top_products && Array.isArray(stats.top_products) && stats.top_products.length > 0) {
-      return stats.top_products.map((p, idx) => ({
+    const source = dishScope === 'today'
+      ? (stats?.top_products_today || [])
+      : (stats?.top_products || []);
+    if (Array.isArray(source) && source.length > 0) {
+      return source.map((p, idx) => ({
         rank: idx + 1,
         name: p.product_name,
-        qty: p.total_qty || 0,
-        revenue: p.total_sales || 0
+        qty: Number(p.total_qty || 0),
+        revenue: Number(p.total_sales || 0),
+        unit: p.unit || 'phần'
       }));
     }
-    return [
-      { rank: 1, name: 'Cơm pilaf truyền thống', qty: 12, revenue: 2280000, unit: 'phần' },
-      { rank: 2, name: 'Kazan kebab', qty: 8, revenue: 2240000, unit: 'phần' },
-      { rank: 3, name: 'Thịt nướng xiên thập cẩm', qty: 3, revenue: 5400000, unit: 'mẹt' },
-      { rank: 4, name: 'Pizza Pepperoni', qty: 6, revenue: 2040000, unit: 'cái' },
-    ];
-  }, [stats]);
+    return [];
+  }, [stats?.top_products_today, stats?.top_products, dishScope]);
 
   const maxDishQty = Math.max(...topProductsList.map(p => p.qty || 1), 1);
 
@@ -296,9 +290,21 @@ export function OverviewDashboard({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
-            <span style={{ fontSize: '12px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-              <ArrowUpRight size={14} /> +18.4%
-            </span>
+            {revenueGrowth !== null ? (
+              <span style={{
+                fontSize: '12px',
+                color: revenueGrowth > 0 ? '#059669' : revenueGrowth < 0 ? '#d97706' : '#64748b',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                {revenueGrowth >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                {revenueGrowth > 0 ? `+${revenueGrowth}%` : `${revenueGrowth}%`}
+              </span>
+            ) : (
+              <span style={{ fontSize: '11px', color: '#94a3b8' }}>0%</span>
+            )}
             <span style={{ fontSize: '11px', color: '#94a3b8' }}>
               {t('admin.allShiftsCalc')}
             </span>
@@ -347,9 +353,21 @@ export function OverviewDashboard({
           </div>
 
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
-            <span style={{ fontSize: '12px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-              <ArrowUpRight size={14} /> +8.2%
-            </span>
+            {ordersGrowth !== null ? (
+              <span style={{
+                fontSize: '12px',
+                color: ordersGrowth > 0 ? '#059669' : ordersGrowth < 0 ? '#d97706' : '#64748b',
+                fontWeight: 700,
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '3px'
+              }}>
+                {ordersGrowth >= 0 ? <ArrowUpRight size={14} /> : <ArrowDownRight size={14} />}
+                {ordersGrowth > 0 ? `+${ordersGrowth}%` : `${ordersGrowth}%`}
+              </span>
+            ) : (
+              <span style={{ fontSize: '11px', color: '#94a3b8' }}>0%</span>
+            )}
             <span style={{ fontSize: '11px', color: '#94a3b8' }}>
               {t('admin.activeOnTables')} {totalTables} {t('table.tables')}
             </span>
@@ -441,10 +459,10 @@ export function OverviewDashboard({
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '12px', paddingTop: '10px', borderTop: '1px solid #f1f5f9' }}>
             <span style={{ fontSize: '12px', color: '#059669', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
               <span style={{ width: '7px', height: '7px', borderRadius: '50%', backgroundColor: '#10b981' }} />
-              {t('admin.activeInDb')}
+              {users.filter(u => u.is_active !== 0).length} {t('admin.working') || 'đang hoạt động'}
             </span>
             <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-              Ca sáng & Ca chiều
+              {t('admin.allStaff') || 'Toàn bộ nhân sự'}
             </span>
           </div>
 
@@ -727,7 +745,7 @@ export function OverviewDashboard({
       }}>
         {/* Bento 1: Top Món Ăn Bán Chạy Nhất */}
         <BentoCard style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#fee2e2', color: '#ef4444', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <Flame size={17} />
@@ -736,89 +754,154 @@ export function OverviewDashboard({
                 <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: 800, color: '#0f172a' }}>
                   {t('admin.topDishes')}
                 </h3>
-                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Xếp hạng theo số lượng bán trong ngày</span>
+                <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                  {dishScope === 'today' ? 'Xếp hạng theo số lượng bán hôm nay' : 'Xếp hạng theo số lượng bán toàn thời gian'}
+                </span>
               </div>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 700, color: '#1B5E20', backgroundColor: '#E8F5E9', padding: '3px 8px', borderRadius: '6px' }}>
-              Thời gian thực
-            </span>
+
+            {/* Scope Toggle: Hôm nay | Toàn thời gian */}
+            <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '3px' }}>
+              <button
+                type="button"
+                onClick={() => setDishScope('today')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '11px',
+                  fontWeight: dishScope === 'today' ? 700 : 500,
+                  backgroundColor: dishScope === 'today' ? '#ffffff' : 'transparent',
+                  color: dishScope === 'today' ? '#1B5E20' : '#64748b',
+                  cursor: 'pointer',
+                  boxShadow: dishScope === 'today' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                }}
+              >
+                Hôm nay
+              </button>
+              <button
+                type="button"
+                onClick={() => setDishScope('all')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '11px',
+                  fontWeight: dishScope === 'all' ? 700 : 500,
+                  backgroundColor: dishScope === 'all' ? '#ffffff' : 'transparent',
+                  color: dishScope === 'all' ? '#1B5E20' : '#64748b',
+                  cursor: 'pointer',
+                  boxShadow: dishScope === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                }}
+              >
+                Toàn thời gian
+              </button>
+            </div>
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {topProductsList.map((dish, i) => {
-              const rankBg = i === 0
-                ? 'linear-gradient(135deg, #f59e0b, #d97706)'
-                : i === 1
-                ? 'linear-gradient(135deg, #94a3b8, #64748b)'
-                : i === 2
-                ? 'linear-gradient(135deg, #b45309, #78350f)'
-                : '#1B5E20';
-              const percentOfMax = Math.round((dish.qty / maxDishQty) * 100);
-
-              return (
-                <div
-                  key={dish.name + i}
+          {topProductsList.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '42px 16px', color: '#94a3b8', fontSize: '13px' }}>
+              <Utensils size={36} style={{ margin: '0 auto 10px auto', opacity: 0.35 }} />
+              <div style={{ fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
+                {dishScope === 'today' ? 'Chưa có món ăn nào bán ra hôm nay' : 'Chưa có dữ liệu món bán'}
+              </div>
+              {dishScope === 'today' && (stats?.top_products?.length > 0) && (
+                <button
+                  type="button"
+                  onClick={() => setDishScope('all')}
                   style={{
-                    padding: '12px 14px',
-                    borderRadius: '10px',
-                    backgroundColor: '#f8fafc',
-                    border: '1px solid #f1f5f9',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '8px'
+                    marginTop: '10px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    color: '#1B5E20',
+                    cursor: 'pointer',
+                    fontWeight: 700
                   }}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <span style={{
-                        width: '24px',
-                        height: '24px',
-                        borderRadius: '6px',
-                        background: rankBg,
-                        color: '#ffffff',
-                        fontSize: '11.5px',
-                        fontWeight: 800,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0
-                      }}>
-                        {dish.rank || i + 1}
-                      </span>
-                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
-                        {formatDishName ? formatDishName(dish.name) : dish.name}
-                      </span>
+                  Xem xếp hạng toàn thời gian &gt;
+                </button>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              {topProductsList.map((dish, i) => {
+                const rankBg = i === 0
+                  ? 'linear-gradient(135deg, #f59e0b, #d97706)'
+                  : i === 1
+                  ? 'linear-gradient(135deg, #94a3b8, #64748b)'
+                  : i === 2
+                  ? 'linear-gradient(135deg, #b45309, #78350f)'
+                  : '#1B5E20';
+                const percentOfMax = Math.round((dish.qty / maxDishQty) * 100);
+
+                return (
+                  <div
+                    key={dish.name + i}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #f1f5f9',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{
+                          width: '24px',
+                          height: '24px',
+                          borderRadius: '6px',
+                          background: rankBg,
+                          color: '#ffffff',
+                          fontSize: '11.5px',
+                          fontWeight: 800,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0
+                        }}>
+                          {dish.rank || i + 1}
+                        </span>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                          {formatDishName ? formatDishName(dish.name) : dish.name}
+                        </span>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#1B5E20' }}>
+                          {formatMoney(dish.revenue)}
+                        </span>
+                        <span style={{ fontSize: '11.5px', color: '#64748b', marginLeft: '6px' }}>
+                          ({dish.qty} {dish.unit || 'phần'})
+                        </span>
+                      </div>
                     </div>
 
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '13.5px', fontWeight: 800, color: '#1B5E20' }}>
-                        {formatMoney(dish.revenue)}
-                      </span>
-                      <span style={{ fontSize: '11.5px', color: '#64748b', marginLeft: '6px' }}>
-                        ({dish.qty} {dish.unit || 'phần'})
-                      </span>
+                    {/* Progress bar showing sales volume share */}
+                    <div style={{ width: '100%', height: '5px', backgroundColor: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
+                      <div style={{
+                        width: `${percentOfMax}%`,
+                        height: '100%',
+                        background: i === 0 ? 'linear-gradient(90deg, #1B5E20, #4ade80)' : '#1B5E20',
+                        borderRadius: '9999px',
+                        transition: 'width 0.4s ease'
+                      }} />
                     </div>
                   </div>
-
-                  {/* Progress bar showing sales volume share */}
-                  <div style={{ width: '100%', height: '5px', backgroundColor: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
-                    <div style={{
-                      width: `${percentOfMax}%`,
-                      height: '100%',
-                      background: i === 0 ? 'linear-gradient(90deg, #1B5E20, #4ade80)' : '#1B5E20',
-                      borderRadius: '9999px',
-                      transition: 'width 0.4s ease'
-                    }} />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </BentoCard>
 
         {/* Bento 2: Cơ Cấu Phương Thức Thanh Toán (Donut Chart + Legend) */}
         <BentoCard style={{ padding: '22px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px', flexWrap: 'wrap', gap: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: '#ecfdf5', color: '#059669', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 <PieIcon size={17} />
@@ -827,102 +910,173 @@ export function OverviewDashboard({
                 <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: 800, color: '#0f172a' }}>
                   {t('admin.paymentMethods')}
                 </h3>
-                <span style={{ fontSize: '11.5px', color: '#64748b' }}>Cơ cấu dòng tiền thu ngân theo nguồn</span>
-              </div>
-            </div>
-            <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#0f172a' }}>
-              {formatMoney(totalPaymentSum)}
-            </span>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: '16px', alignItems: 'center' }}>
-            {/* Donut Chart */}
-            <div style={{ width: '170px', height: '170px', position: 'relative' }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={paymentData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={75}
-                    paddingAngle={4}
-                    dataKey="value"
-                  >
-                    {paymentData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    content={
-                      <ShadcnCustomTooltip isCurrency={true} />
-                    }
-                  />
-                </PieChart>
-              </ResponsiveContainer>
-
-              {/* Center donut label */}
-              <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                textAlign: 'center',
-                pointerEvents: 'none'
-              }}>
-                <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>TỔNG THU</div>
-                <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#0f172a' }}>100%</div>
+                <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                  {paymentScope === 'today' ? 'Dòng tiền thu ngân hôm nay' : 'Dòng tiền thu ngân toàn thời gian'}
+                </span>
               </div>
             </div>
 
-            {/* Methods Breakdown List */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {paymentData.map((m, i) => {
-                const IconComponent = m.icon;
-                return (
-                  <div
-                    key={i}
-                    style={{
-                      padding: '10px 12px',
-                      borderRadius: '10px',
-                      backgroundColor: '#f8fafc',
-                      border: '1px solid #f1f5f9',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}
-                  >
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                      <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: m.color, flexShrink: 0 }} />
-                      <div>
-                        <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>{m.name}</div>
-                        <div style={{ fontSize: '11px', color: '#64748b' }}>{m.sub}</div>
-                      </div>
-                    </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {/* Scope Toggle: Hôm nay | Toàn thời gian */}
+              <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '3px' }}>
+                <button
+                  type="button"
+                  onClick={() => setPaymentScope('today')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '11px',
+                    fontWeight: paymentScope === 'today' ? 700 : 500,
+                    backgroundColor: paymentScope === 'today' ? '#ffffff' : 'transparent',
+                    color: paymentScope === 'today' ? '#1B5E20' : '#64748b',
+                    cursor: 'pointer',
+                    boxShadow: paymentScope === 'today' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                  }}
+                >
+                  Hôm nay
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPaymentScope('all')}
+                  style={{
+                    padding: '4px 10px',
+                    borderRadius: '6px',
+                    border: 'none',
+                    fontSize: '11px',
+                    fontWeight: paymentScope === 'all' ? 700 : 500,
+                    backgroundColor: paymentScope === 'all' ? '#ffffff' : 'transparent',
+                    color: paymentScope === 'all' ? '#1B5E20' : '#64748b',
+                    cursor: 'pointer',
+                    boxShadow: paymentScope === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                  }}
+                >
+                  Toàn thời gian
+                </button>
+              </div>
 
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
-                        {formatMoney(m.value)}
-                      </div>
-                      <span style={{
-                        fontSize: '10.5px',
-                        fontWeight: 700,
-                        color: m.color,
-                        backgroundColor: '#ffffff',
-                        padding: '1px 6px',
-                        borderRadius: '4px',
-                        border: '1px solid #e2e8f0',
-                        display: 'inline-block',
-                        marginTop: '2px'
-                      }}>
-                        {m.percent}%
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
+              <span style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                {formatMoney(totalPaymentSum)}
+              </span>
             </div>
           </div>
+
+          {totalPaymentSum === 0 ? (
+            <div style={{ textAlign: 'center', padding: '42px 16px', color: '#94a3b8', fontSize: '13px' }}>
+              <PieIcon size={36} style={{ margin: '0 auto 10px auto', opacity: 0.35 }} />
+              <div style={{ fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
+                {paymentScope === 'today' ? 'Chưa phát sinh giao dịch thanh toán nào hôm nay' : 'Chưa có dữ liệu thanh toán'}
+              </div>
+              {paymentScope === 'today' && (
+                <button
+                  type="button"
+                  onClick={() => setPaymentScope('all')}
+                  style={{
+                    marginTop: '10px',
+                    backgroundColor: '#ffffff',
+                    border: '1px solid #cbd5e1',
+                    padding: '6px 14px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    color: '#1B5E20',
+                    cursor: 'pointer',
+                    fontWeight: 700
+                  }}
+                >
+                  Xem cơ cấu toàn thời gian &gt;
+                </button>
+              )}
+            </div>
+          ) : (
+            <div style={{ display: 'grid', gridTemplateColumns: '170px 1fr', gap: '16px', alignItems: 'center' }}>
+              {/* Donut Chart */}
+              <div style={{ width: '170px', height: '170px', position: 'relative' }}>
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={paymentData}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={50}
+                      outerRadius={75}
+                      paddingAngle={4}
+                      dataKey="value"
+                    >
+                      {paymentData.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip
+                      content={
+                        <ShadcnCustomTooltip isCurrency={true} />
+                      }
+                    />
+                  </PieChart>
+                </ResponsiveContainer>
+
+                {/* Center donut label */}
+                <div style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  textAlign: 'center',
+                  pointerEvents: 'none'
+                }}>
+                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>TỔNG THU</div>
+                  <div style={{ fontSize: '11.5px', fontWeight: 800, color: '#0f172a' }}>100%</div>
+                </div>
+              </div>
+
+              {/* Methods Breakdown List */}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                {paymentData.map((m, i) => {
+                  const IconComponent = m.icon;
+                  return (
+                    <div
+                      key={i}
+                      style={{
+                        padding: '10px 12px',
+                        borderRadius: '10px',
+                        backgroundColor: '#f8fafc',
+                        border: '1px solid #f1f5f9',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: m.color, flexShrink: 0 }} />
+                        <div>
+                          <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>{m.name}</div>
+                          <div style={{ fontSize: '11px', color: '#64748b' }}>{m.sub}</div>
+                        </div>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <div style={{ fontSize: '13px', fontWeight: 800, color: '#0f172a' }}>
+                          {formatMoney(m.value)}
+                        </div>
+                        <span style={{
+                          fontSize: '10.5px',
+                          fontWeight: 700,
+                          color: m.color,
+                          backgroundColor: '#ffffff',
+                          padding: '1px 6px',
+                          borderRadius: '4px',
+                          border: '1px solid #e2e8f0',
+                          display: 'inline-block',
+                          marginTop: '2px'
+                        }}>
+                          {m.percent}%
+                        </span>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </BentoCard>
       </div>
 

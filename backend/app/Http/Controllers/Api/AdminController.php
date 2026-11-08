@@ -35,29 +35,68 @@ class AdminController extends Controller
     public function getStats()
     {
         $today = Carbon::today();
+        $yesterday = Carbon::yesterday();
 
-        // Tổng doanh thu từ các đơn đã thanh toán hoặc tạm tính
+        // Tổng doanh thu từ các đơn hôm nay
         $todayOrders = Order::whereDate('created_at', $today)->get();
-        $totalRevenue = $todayOrders->where('status', 'paid')->sum('total_amount');
+        $totalRevenue = (float)$todayOrders->where('status', 'paid')->sum('total_amount');
         if ($totalRevenue == 0) {
-            $totalRevenue = $todayOrders->sum('total_amount');
+            $totalRevenue = (float)$todayOrders->sum('total_amount');
         }
 
         $paidOrdersCount = $todayOrders->where('status', 'paid')->count();
         $activeOrdersCount = $todayOrders->where('status', 'active')->count();
 
-        // Top món bán chạy
-        $topProducts = OrderItem::select('product_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
+        // So sánh với hôm qua để tính tăng trưởng thực tế
+        $yesterdayOrders = Order::whereDate('created_at', $yesterday)->get();
+        $yesterdayRevenue = (float)$yesterdayOrders->where('status', 'paid')->sum('total_amount');
+        if ($yesterdayRevenue == 0) {
+            $yesterdayRevenue = (float)$yesterdayOrders->sum('total_amount');
+        }
+        $yesterdayOrdersCount = $yesterdayOrders->count();
+
+        $revenueGrowth = 0.0;
+        if ($yesterdayRevenue > 0) {
+            $revenueGrowth = round((($totalRevenue - $yesterdayRevenue) / $yesterdayRevenue) * 100, 1);
+        } elseif ($totalRevenue > 0) {
+            $revenueGrowth = 100.0;
+        }
+
+        $ordersGrowth = 0.0;
+        if ($yesterdayOrdersCount > 0) {
+            $ordersGrowth = round((($todayOrders->count() - $yesterdayOrdersCount) / $yesterdayOrdersCount) * 100, 1);
+        } elseif ($todayOrders->count() > 0) {
+            $ordersGrowth = 100.0;
+        }
+
+        // Top món bán chạy hôm nay
+        $todayOrderIds = $todayOrders->pluck('id');
+        $topProductsToday = OrderItem::whereIn('order_id', $todayOrderIds)
+            ->select('product_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
             ->groupBy('product_name')
             ->orderByDesc('total_qty')
             ->limit(5)
             ->get();
 
-        // Thống kê theo phương thức thanh toán
-        $paymentMethods = [
-            'cash' => Order::where('payment_method', 'cash')->sum('total_amount'),
-            'qr_banking' => Order::where('payment_method', 'qr_banking')->sum('total_amount'),
-            'card' => Order::where('payment_method', 'card')->sum('total_amount'),
+        // Top món bán chạy toàn thời gian
+        $topProductsAllTime = OrderItem::select('product_name', DB::raw('SUM(quantity) as total_qty'), DB::raw('SUM(subtotal) as total_sales'))
+            ->groupBy('product_name')
+            ->orderByDesc('total_qty')
+            ->limit(5)
+            ->get();
+
+        // Thống kê theo phương thức thanh toán hôm nay
+        $paymentMethodsToday = [
+            'cash' => (float)$todayOrders->where('payment_method', 'cash')->sum('total_amount'),
+            'qr_banking' => (float)$todayOrders->where('payment_method', 'qr_banking')->sum('total_amount'),
+            'card' => (float)$todayOrders->where('payment_method', 'card')->sum('total_amount'),
+        ];
+
+        // Thống kê theo phương thức thanh toán toàn thời gian
+        $paymentMethodsAllTime = [
+            'cash' => (float)Order::where('payment_method', 'cash')->sum('total_amount'),
+            'qr_banking' => (float)Order::where('payment_method', 'qr_banking')->sum('total_amount'),
+            'card' => (float)Order::where('payment_method', 'card')->sum('total_amount'),
         ];
 
         // Số bàn đang phục vụ
@@ -119,8 +158,12 @@ class AdminController extends Controller
                 'occupied_tables' => $occupiedTables,
                 'billing_tables' => $billingTables,
                 'empty_tables' => $emptyTables,
-                'top_products' => $topProducts,
-                'payment_breakdown' => $paymentMethods,
+                'revenue_growth' => $revenueGrowth,
+                'orders_growth' => $ordersGrowth,
+                'top_products_today' => $topProductsToday,
+                'top_products' => $topProductsAllTime,
+                'payment_breakdown_today' => $paymentMethodsToday,
+                'payment_breakdown' => $paymentMethodsAllTime,
                 'cashiers_count' => User::where('role', 'cashier')->count(),
                 'hourly_data' => $hourlyData,
                 'seven_days_data' => $sevenDaysData,

@@ -694,3 +694,4 @@ export function MenuAttributesModal({ isOpen, onClose, onAttributesChanged }) {
     </div>
   );
 }
+

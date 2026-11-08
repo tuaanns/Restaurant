@@ -672,7 +672,7 @@ export function ReportsView({
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         {/* ─── CỘT BỘ LỌC (FILTER SIDEBAR) ─── */}
         <div style={{
-          width: '300px',
+          width: '320px',
           backgroundColor: '#ffffff',
           borderRight: '1px solid #e2e8f0',
           padding: '16px',

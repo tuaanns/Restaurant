@@ -124,3 +124,4 @@ export function saveMenuAttributes(attrs) {
     console.warn('Lỗi lưu menu attributes vào localStorage:', e);
   }
 }
+

@@ -619,3 +619,4 @@ export function MenuTagsModal({ isOpen, onClose, onTagsChanged }) {
     </div>
   );
 }
+

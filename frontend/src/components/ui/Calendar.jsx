@@ -262,10 +262,12 @@ export function Calendar({
     <div
       className={`shadcn-calendar ${className}`}
       style={{
-        width: '272px',
+        width: '100%',
+        maxWidth: '228px',
         backgroundColor: '#ffffff',
         userSelect: 'none',
         fontFamily: 'inherit',
+        boxSizing: 'border-box',
         ...style
       }}
     >
@@ -274,7 +276,8 @@ export function Calendar({
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        padding: '4px 2px 12px 2px'
+        padding: '2px 0 8px 0',
+        gap: '2px'
       }}>
         {/* Prev month button */}
         <button
@@ -282,9 +285,9 @@ export function Calendar({
           onClick={handlePrevMonth}
           title="Previous month"
           style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
+            width: '26px',
+            height: '26px',
+            borderRadius: '5px',
             border: '1px solid #e2e8f0',
             backgroundColor: 'transparent',
             display: 'flex',
@@ -292,16 +295,18 @@ export function Calendar({
             justifyContent: 'center',
             cursor: 'pointer',
             color: '#475569',
+            flexShrink: 0,
+            padding: 0,
             transition: 'background-color 0.15s'
           }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
-          <ChevronLeft size={15} />
+          <ChevronLeft size={13} />
         </button>
 
         {/* Center: Month and Year Dropdown buttons (matching shadcn preview in user image) */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '3px', flex: 1, justifyContent: 'center' }}>
           {/* Month selector */}
           <div ref={monthDropdownRef} style={{ position: 'relative' }}>
             <button
@@ -311,14 +316,14 @@ export function Calendar({
                 setIsYearSelectOpen(false);
               }}
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
-                padding: '4px 8px',
-                borderRadius: '6px',
+                gap: '3px',
+                padding: '3px 6px',
+                borderRadius: '5px',
                 border: '1px solid transparent',
                 backgroundColor: isMonthSelectOpen ? '#f1f5f9' : 'transparent',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#0f172a',
                 cursor: 'pointer'
@@ -327,16 +332,16 @@ export function Calendar({
               onMouseLeave={e => { if (!isMonthSelectOpen) e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
               <span>{localeData.months[currentMonth]}</span>
-              <ChevronDown size={13} color="#64748b" />
+              <ChevronDown size={11} color="#64748b" />
             </button>
 
             {isMonthSelectOpen && (
               <div style={{
                 position: 'absolute',
-                top: '32px',
+                top: '28px',
                 left: '0',
-                width: '130px',
-                maxHeight: '190px',
+                width: '115px',
+                maxHeight: '180px',
                 overflowY: 'auto',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
@@ -356,9 +361,9 @@ export function Calendar({
                     style={{
                       width: '100%',
                       textAlign: 'left',
-                      padding: '5px 8px',
-                      borderRadius: '5px',
-                      fontSize: '12px',
+                      padding: '4px 6px',
+                      borderRadius: '4px',
+                      fontSize: '11.5px',
                       fontWeight: mIdx === currentMonth ? 700 : 500,
                       backgroundColor: mIdx === currentMonth ? rangeMidBg : 'transparent',
                       color: mIdx === currentMonth ? activeBg : '#334155',
@@ -384,14 +389,14 @@ export function Calendar({
                 setIsMonthSelectOpen(false);
               }}
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
-                padding: '4px 8px',
-                borderRadius: '6px',
+                gap: '3px',
+                padding: '3px 6px',
+                borderRadius: '5px',
                 border: '1px solid transparent',
                 backgroundColor: isYearSelectOpen ? '#f1f5f9' : 'transparent',
-                fontSize: '13px',
+                fontSize: '12px',
                 fontWeight: 700,
                 color: '#0f172a',
                 cursor: 'pointer'
@@ -400,16 +405,16 @@ export function Calendar({
               onMouseLeave={e => { if (!isYearSelectOpen) e.currentTarget.style.backgroundColor = 'transparent'; }}
             >
               <span>{currentYear}</span>
-              <ChevronDown size={13} color="#64748b" />
+              <ChevronDown size={11} color="#64748b" />
             </button>
 
             {isYearSelectOpen && (
               <div style={{
                 position: 'absolute',
-                top: '32px',
+                top: '28px',
                 right: '0',
-                width: '90px',
-                maxHeight: '190px',
+                width: '80px',
+                maxHeight: '180px',
                 overflowY: 'auto',
                 backgroundColor: '#ffffff',
                 border: '1px solid #e2e8f0',
@@ -429,9 +434,9 @@ export function Calendar({
                     style={{
                       width: '100%',
                       textAlign: 'center',
-                      padding: '5px 6px',
-                      borderRadius: '5px',
-                      fontSize: '12px',
+                      padding: '4px 6px',
+                      borderRadius: '4px',
+                      fontSize: '11.5px',
                       fontWeight: y === currentYear ? 700 : 500,
                       backgroundColor: y === currentYear ? rangeMidBg : 'transparent',
                       color: y === currentYear ? activeBg : '#334155',
@@ -455,9 +460,9 @@ export function Calendar({
           onClick={handleNextMonth}
           title="Next month"
           style={{
-            width: '28px',
-            height: '28px',
-            borderRadius: '6px',
+            width: '26px',
+            height: '26px',
+            borderRadius: '5px',
             border: '1px solid #e2e8f0',
             backgroundColor: 'transparent',
             display: 'flex',
@@ -465,31 +470,33 @@ export function Calendar({
             justifyContent: 'center',
             cursor: 'pointer',
             color: '#475569',
+            flexShrink: 0,
+            padding: 0,
             transition: 'background-color 0.15s'
           }}
           onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f1f5f9'}
           onMouseLeave={e => e.currentTarget.style.backgroundColor = 'transparent'}
         >
-          <ChevronRight size={15} />
+          <ChevronRight size={13} />
         </button>
       </div>
 
-      {/* ─── 2. WEEKDAY LABELS (Su Mo Tu We Th Fr Sa) ─── */}
+      {/* ─── 2. WEEKDAY LABELS (Su Mo Tu We Th Fr Sa / CN T2 T3 T4 T5 T6 T7) ─── */}
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(7, 1fr)',
         gap: '2px',
-        marginBottom: '6px'
+        marginBottom: '4px'
       }}>
         {localeData.weekdays.map((wd, i) => (
           <div
             key={i}
             style={{
               textAlign: 'center',
-              fontSize: '11px',
-              fontWeight: 600,
+              fontSize: '10.5px',
+              fontWeight: 700,
               color: '#64748b',
-              padding: '4px 0'
+              padding: '2px 0'
             }}
           >
             {wd}
@@ -501,7 +508,7 @@ export function Calendar({
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(7, 1fr)',
-        gap: '3px'
+        gap: '2px'
       }}>
         {calendarDays.map((item, idx) => {
           const isSelected = mode === 'single'
@@ -515,7 +522,7 @@ export function Calendar({
           let cellBg = 'transparent';
           let cellColor = item.isCurrentMonth ? '#0f172a' : '#cbd5e1';
           let fontWeight = item.isCurrentMonth ? 500 : 400;
-          let borderRadius = '7px';
+          let borderRadius = '6px';
 
           if (isSelected) {
             cellBg = activeBg;
@@ -536,20 +543,23 @@ export function Calendar({
               type="button"
               onClick={() => handleDayClick(item)}
               style={{
-                width: '36px',
-                height: '34px',
+                width: '100%',
+                height: '28px',
                 borderRadius: borderRadius,
                 backgroundColor: cellBg,
                 color: cellColor,
-                fontSize: '12px',
+                fontSize: '11.5px',
                 fontWeight: fontWeight,
-                border: isToday && !isSelected ? `1px solid ${activeBg}` : 'none',
+                border: isToday && !isSelected ? `1.5px solid ${activeBg}` : 'none',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 cursor: 'pointer',
                 transition: 'all 0.12s ease',
-                position: 'relative'
+                position: 'relative',
+                padding: 0,
+                outline: 'none',
+                boxSizing: 'border-box'
               }}
               onMouseEnter={e => {
                 if (!isSelected && !isRangeMiddle) {
@@ -570,8 +580,8 @@ export function Calendar({
 
       {/* ─── 4. QUICK FOOTER ("Hôm nay" button) ─── */}
       <div style={{
-        marginTop: '10px',
-        paddingTop: '8px',
+        marginTop: '8px',
+        paddingTop: '6px',
         borderTop: '1px solid #f1f5f9',
         display: 'flex',
         justifyContent: 'space-between',
@@ -583,7 +593,7 @@ export function Calendar({
           style={{
             background: 'none',
             border: 'none',
-            fontSize: '11.5px',
+            fontSize: '11px',
             fontWeight: 700,
             color: activeBg,
             cursor: 'pointer',
@@ -597,7 +607,7 @@ export function Calendar({
         </button>
 
         {selectedStr && (
-          <span style={{ fontSize: '11px', color: '#64748b' }}>
+          <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 600 }}>
             {selectedStr.split('-').reverse().join('/')}
           </span>
         )}

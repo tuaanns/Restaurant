@@ -147,7 +147,7 @@ export function OverviewDashboard({
   formatMoney,
   formatDishName
 }) {
-  const { t } = useLanguage();
+  const { t, formatDishName: ctxFormatDishName, formatDishUnit } = useLanguage();
 
   // Chart controls: active metric (revenue vs orders), time range (today vs 7days vs 30days), chart style (bar vs area)
   const [activeMetric, setActiveMetric] = useState('revenue'); // 'revenue' | 'orders'
@@ -246,7 +246,7 @@ export function OverviewDashboard({
         name: p.product_name,
         qty: Number(p.total_qty || 0),
         revenue: Number(p.total_sales || 0),
-        unit: p.unit || 'phần'
+        unit: p.unit || (t('admin.portionUnit') || 'phần')
       }));
     }
     return [];
@@ -415,7 +415,7 @@ export function OverviewDashboard({
               {billingTables} {t('table.tables')} {t('admin.waitingPayment')}
             </span>
             <span style={{ fontSize: '11px', color: '#94a3b8' }}>
-              {Math.round((occupiedTables / (totalTables || 1)) * 100)}% công suất
+              {Math.round((occupiedTables / (totalTables || 1)) * 100)}% {t('admin.capacityRate') || 'công suất'}
             </span>
           </div>
 
@@ -509,11 +509,11 @@ export function OverviewDashboard({
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <div style={{ width: '8px', height: '8px', borderRadius: '50%', backgroundColor: '#1B5E20' }} />
               <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 800, color: '#0f172a', letterSpacing: '-0.3px' }}>
-                Biểu Đồ Doanh Thu & Lưu Lượng Đơn
+                {t('admin.chartTitle') || 'Biểu Đồ Doanh Thu & Lưu Lượng Đơn'}
               </h3>
             </div>
             <p style={{ margin: '4px 0 0 0', fontSize: '12.5px', color: '#64748b' }}>
-              Thống kê trực quan số liệu bán hàng theo khung giờ và chu kỳ kinh doanh
+              {t('admin.chartSubtitle') || 'Thống kê trực quan số liệu bán hàng theo khung giờ và chu kỳ kinh doanh'}
             </p>
           </div>
 
@@ -526,9 +526,9 @@ export function OverviewDashboard({
             gap: '4px'
           }}>
             {[
-              { id: 'today', label: 'Hôm nay' },
-              { id: '7days', label: '7 ngày qua' },
-              { id: '30days', label: '30 ngày qua' }
+              { id: 'today', label: t('admin.reports.today') || 'Hôm nay' },
+              { id: '7days', label: t('admin.reports.last7days') || '7 ngày qua' },
+              { id: '30days', label: t('admin.last30days') || '30 ngày qua' }
             ].map(tab => (
               <button
                 key={tab.id}
@@ -573,7 +573,7 @@ export function OverviewDashboard({
             }}
           >
             <div style={{ fontSize: '11.5px', color: activeMetric === 'revenue' ? '#1B5E20' : '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Doanh Thu ({timeRange === 'today' ? 'Hôm nay' : timeRange === '7days' ? '7 ngày' : '30 ngày'})
+              {t('admin.revenueMetric') || 'Doanh Thu'} ({timeRange === 'today' ? (t('admin.reports.today') || 'Hôm nay') : timeRange === '7days' ? (t('admin.reports.last7days') || '7 ngày qua') : (t('admin.last30days') || '30 ngày qua')})
             </div>
             <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
               {formatMoney(currentChartData.reduce((acc, c) => acc + (c.revenue || 0), 0))}
@@ -593,10 +593,10 @@ export function OverviewDashboard({
             }}
           >
             <div style={{ fontSize: '11.5px', color: activeMetric === 'orders' ? '#059669' : '#64748b', fontWeight: 700, textTransform: 'uppercase' }}>
-              Số Đơn Hàng ({timeRange === 'today' ? 'Hôm nay' : timeRange === '7days' ? '7 ngày' : '30 ngày'})
+              {t('admin.ordersMetric') || 'Số Đơn Hàng'} ({timeRange === 'today' ? (t('admin.reports.today') || 'Hôm nay') : timeRange === '7days' ? (t('admin.reports.last7days') || '7 ngày qua') : (t('admin.last30days') || '30 ngày qua')})
             </div>
             <div style={{ fontSize: '20px', fontWeight: 800, color: '#0f172a', marginTop: '4px' }}>
-              {currentChartData.reduce((acc, c) => acc + (c.orders || 0), 0)} <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>đơn</span>
+              {currentChartData.reduce((acc, c) => acc + (c.orders || 0), 0)} <span style={{ fontSize: '13px', fontWeight: 600, color: '#64748b' }}>{t('admin.ordersUnit') || 'đơn'}</span>
             </div>
           </div>
 
@@ -610,7 +610,7 @@ export function OverviewDashboard({
           }}>
             <button
               onClick={() => setChartType('bar')}
-              title="Biểu đồ cột (Bar Chart)"
+              title={t('admin.barChartTitle') || 'Biểu đồ cột (Bar Chart)'}
               style={{
                 padding: '6px 10px',
                 borderRadius: '6px',
@@ -627,7 +627,7 @@ export function OverviewDashboard({
             </button>
             <button
               onClick={() => setChartType('area')}
-              title="Biểu đồ đường cong (Area Chart)"
+              title={t('admin.areaChartTitle') || 'Biểu đồ đường cong (Area Chart)'}
               style={{
                 padding: '6px 10px',
                 borderRadius: '6px',
@@ -679,7 +679,7 @@ export function OverviewDashboard({
                   content={
                     <ShadcnCustomTooltip
                       isCurrency={activeMetric === 'revenue'}
-                      unit={activeMetric === 'revenue' ? 'đ' : 'đơn'}
+                      unit={activeMetric === 'revenue' ? 'đ' : (t('admin.ordersUnit') || 'đơn')}
                     />
                   }
                 />
@@ -720,7 +720,7 @@ export function OverviewDashboard({
                   content={
                     <ShadcnCustomTooltip
                       isCurrency={activeMetric === 'revenue'}
-                      unit={activeMetric === 'revenue' ? 'đ' : 'đơn'}
+                      unit={activeMetric === 'revenue' ? 'đ' : (t('admin.ordersUnit') || 'đơn')}
                     />
                   }
                 />
@@ -755,7 +755,7 @@ export function OverviewDashboard({
                   {t('admin.topDishes')}
                 </h3>
                 <span style={{ fontSize: '11.5px', color: '#64748b' }}>
-                  {dishScope === 'today' ? 'Xếp hạng theo số lượng bán hôm nay' : 'Xếp hạng theo số lượng bán toàn thời gian'}
+                  {dishScope === 'today' ? (t('admin.topDishesTodaySub') || 'Xếp hạng theo số lượng bán hôm nay') : (t('admin.topDishesAllSub') || 'Xếp hạng theo số lượng bán toàn thời gian')}
                 </span>
               </div>
             </div>
@@ -777,7 +777,7 @@ export function OverviewDashboard({
                   boxShadow: dishScope === 'today' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
                 }}
               >
-                Hôm nay
+                {t('admin.reports.today') || 'Hôm nay'}
               </button>
               <button
                 type="button"
@@ -794,7 +794,7 @@ export function OverviewDashboard({
                   boxShadow: dishScope === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
                 }}
               >
-                Toàn thời gian
+                {t('admin.cashbook.allTime') || 'Toàn thời gian'}
               </button>
             </div>
           </div>
@@ -803,7 +803,7 @@ export function OverviewDashboard({
             <div style={{ textAlign: 'center', padding: '42px 16px', color: '#94a3b8', fontSize: '13px' }}>
               <Utensils size={36} style={{ margin: '0 auto 10px auto', opacity: 0.35 }} />
               <div style={{ fontWeight: 600, color: '#64748b', marginBottom: '4px' }}>
-                {dishScope === 'today' ? 'Chưa có món ăn nào bán ra hôm nay' : 'Chưa có dữ liệu món bán'}
+                {dishScope === 'today' ? (t('admin.noDishesSoldToday') || 'Chưa có món ăn nào bán ra hôm nay') : (t('admin.noDishesSoldAll') || 'Chưa có dữ liệu món bán')}
               </div>
               {dishScope === 'today' && (stats?.top_products?.length > 0) && (
                 <button
@@ -821,7 +821,7 @@ export function OverviewDashboard({
                     fontWeight: 700
                   }}
                 >
-                  Xem xếp hạng toàn thời gian &gt;
+                  {t('admin.viewAllTimeRanking') || 'Xem xếp hạng toàn thời gian'} &gt;
                 </button>
               )}
             </div>
@@ -868,7 +868,7 @@ export function OverviewDashboard({
                           {dish.rank || i + 1}
                         </span>
                         <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
-                          {formatDishName ? formatDishName(dish.name) : dish.name}
+                          {(formatDishName || ctxFormatDishName) ? (formatDishName || ctxFormatDishName)(dish.name) : dish.name}
                         </span>
                       </div>
 
@@ -877,7 +877,7 @@ export function OverviewDashboard({
                           {formatMoney(dish.revenue)}
                         </span>
                         <span style={{ fontSize: '11.5px', color: '#64748b', marginLeft: '6px' }}>
-                          ({dish.qty} {dish.unit || 'phần'})
+                          ({dish.qty} {formatDishUnit ? formatDishUnit(dish.unit) : (dish.unit || t('admin.portionUnit') || 'phần')})
                         </span>
                       </div>
                     </div>
@@ -911,7 +911,7 @@ export function OverviewDashboard({
                   {t('admin.paymentMethods')}
                 </h3>
                 <span style={{ fontSize: '11.5px', color: '#64748b' }}>
-                  {paymentScope === 'today' ? 'Dòng tiền thu ngân hôm nay' : 'Dòng tiền thu ngân toàn thời gian'}
+                  {paymentScope === 'today' ? (t('admin.cashflowTodaySub') || 'Dòng tiền thu ngân hôm nay') : (t('admin.cashflowAllSub') || 'Dòng tiền thu ngân toàn thời gian')}
                 </span>
               </div>
             </div>
@@ -934,7 +934,7 @@ export function OverviewDashboard({
                     boxShadow: paymentScope === 'today' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
                   }}
                 >
-                  Hôm nay
+                  {t('admin.reports.today') || 'Hôm nay'}
                 </button>
                 <button
                   type="button"
@@ -951,7 +951,7 @@ export function OverviewDashboard({
                     boxShadow: paymentScope === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
                   }}
                 >
-                  Toàn thời gian
+                  {t('admin.cashbook.allTime') || 'Toàn thời gian'}
                 </button>
               </div>
 
@@ -967,7 +967,7 @@ export function OverviewDashboard({
                 <ResponsiveContainer width="100%" height="100%">
                   <PieChart>
                     <Pie
-                      data={totalPaymentSum > 0 ? paymentData.filter(p => p.value > 0) : [{ name: 'Chưa có giao dịch', value: 1, color: '#f1f5f9' }]}
+                      data={totalPaymentSum > 0 ? paymentData.filter(p => p.value > 0) : [{ name: t('admin.noTransactions') || 'Chưa có giao dịch', value: 1, color: '#f1f5f9' }]}
                       cx="50%"
                       cy="50%"
                       innerRadius={50}
@@ -998,7 +998,9 @@ export function OverviewDashboard({
                   textAlign: 'center',
                   pointerEvents: 'none'
                 }}>
-                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>TỔNG THU</div>
+                  <div style={{ fontSize: '10px', color: '#94a3b8', fontWeight: 700, textTransform: 'uppercase' }}>
+                    {t('admin.totalCollected') || 'TỔNG THU'}
+                  </div>
                   <div style={{ fontSize: '11.5px', fontWeight: 800, color: totalPaymentSum > 0 ? '#0f172a' : '#94a3b8' }}>
                     {totalPaymentSum > 0 ? '100%' : '0 đ'}
                   </div>

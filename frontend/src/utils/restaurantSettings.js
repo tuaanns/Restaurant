@@ -24,7 +24,7 @@ export const DEFAULT_RESTAURANT_SETTINGS = {
   serviceChargeRate: '0', // '0' | '5' | '10'
 
   // 3. Bar/Bếp
-  autoPrintKitchenTicket: true,
+  autoPrintKitchenTicket: false,
   splitKitchenBarTickets: true,
   groupItemsOnTicket: false,
   kitchenAlertSound: true,

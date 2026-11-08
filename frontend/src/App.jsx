@@ -25,6 +25,27 @@ import { CheckCircle2, AlertCircle } from 'lucide-react';
 import { useLanguage } from './i18n/LanguageContext';
 import { api } from './api';
 import { initialMockData } from './mockData';
+import { getRestaurantSettings } from './utils/restaurantSettings';
+import { SALES_CHANNELS, getSalesChannel, formatChannelName } from './utils/salesChannelsHelper';
+
+// Âm thanh báo bếp nhẹ nhàng
+function playKitchenChime() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'triangle';
+    osc.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
+    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.6);
+  } catch (e) {}
+}
 
 export function App() {
   const { t, formatTableName } = useLanguage();
@@ -150,6 +171,21 @@ export function App() {
   // Selected table & order (Ban đầu chưa chọn bàn nào, chỉ khi click chọn bàn mới hiển thị)
   const [selectedTable, setSelectedTable] = useState(null);
   const [order, setOrder] = useState(null);
+
+  // Multi-tab order management (Hệ thống nhiều tab đơn hàng song song)
+  const [orderTabs, setOrderTabs] = useState([
+    {
+      id: 'tab_default',
+      title: 'Hóa đơn 1',
+      table: null,
+      order: null,
+      salesChannel: 'direct',
+      channelOrderCode: ''
+    }
+  ]);
+  const [activeTabId, setActiveTabId] = useState('tab_default');
+  const [salesChannel, setSalesChannel] = useState('direct');
+  const [channelOrderCode, setChannelOrderCode] = useState('');
 
   // Modals
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -294,19 +330,262 @@ export function App() {
     setAdminTab('overview');
   };
 
+  // ─── MULTI-TAB ORDER SESSION HANDLERS ───
+  const handleSwitchTab = (targetTabId) => {
+    if (targetTabId === activeTabId) return;
+
+    // Lưu snapshot tab hiện tại
+    const updated = orderTabs.map(t => {
+      if (t.id === activeTabId) {
+        const title = selectedTable ? selectedTable.name : (t.title || 'Hóa đơn');
+        return {
+          ...t,
+          table: selectedTable,
+          order: order,
+          salesChannel: salesChannel,
+          channelOrderCode: channelOrderCode,
+          title
+        };
+      }
+      return t;
+    });
+
+    const target = updated.find(t => t.id === targetTabId);
+    if (target) {
+      setOrderTabs(updated);
+      setActiveTabId(targetTabId);
+      setSelectedTable(target.table || null);
+      setOrder(target.order || null);
+      setSalesChannel(target.salesChannel || 'direct');
+      setChannelOrderCode(target.channelOrderCode || '');
+    }
+  };
+
+  const handleCreateNewTab = () => {
+    const newTabId = `tab_${Date.now()}`;
+    const newOrder = {
+      id: Date.now(),
+      order_code: `ORD-${Date.now().toString().slice(-4)}`,
+      table_id: null,
+      subtotal: 0,
+      discount_percent: 0,
+      discount_amount: 0,
+      vat_percent: 8,
+      vat_amount: 0,
+      total_amount: 0,
+      sales_channel: 'direct',
+      items: []
+    };
+
+    setOrderTabs(prev => {
+      const saved = prev.map(t => {
+        if (t.id === activeTabId) {
+          const title = selectedTable ? selectedTable.name : (t.title || 'Hóa đơn');
+          return {
+            ...t,
+            table: selectedTable,
+            order: order,
+            salesChannel: salesChannel,
+            channelOrderCode: channelOrderCode,
+            title
+          };
+        }
+        return t;
+      });
+
+      const nextNum = saved.length + 1;
+      const newTab = {
+        id: newTabId,
+        title: `Hóa đơn ${nextNum}`,
+        table: null,
+        order: newOrder,
+        salesChannel: 'direct',
+        channelOrderCode: ''
+      };
+      return [...saved, newTab];
+    });
+
+    setActiveTabId(newTabId);
+    setSelectedTable(null);
+    setOrder(newOrder);
+    setSalesChannel('direct');
+    setChannelOrderCode('');
+    showToast('Đã mở tab hóa đơn mới (+)', 'info');
+  };
+
+  const handleCloseTab = (tabIdToClose) => {
+    const tabToClose = orderTabs.find(t => t.id === tabIdToClose);
+    if (!tabToClose) return;
+
+    const hasItems = (tabIdToClose === activeTabId)
+      ? (order?.items && order.items.length > 0)
+      : (tabToClose.order?.items && tabToClose.order.items.length > 0);
+
+    if (hasItems) {
+      const confirmed = window.confirm(
+        t('order.closeTabConfirm') || `Hóa đơn "${tabToClose.title}" đang có món. Bạn có chắc chắn muốn đóng tab này không?`
+      );
+      if (!confirmed) return;
+    }
+
+    if (orderTabs.length <= 1) {
+      // Chỉ còn 1 tab duy nhất: Reset về trạng thái đơn trống
+      setSelectedTable(null);
+      setOrder(null);
+      setSalesChannel('direct');
+      setChannelOrderCode('');
+      setOrderTabs([{
+        id: tabIdToClose,
+        title: 'Hóa đơn 1',
+        table: null,
+        order: null,
+        salesChannel: 'direct',
+        channelOrderCode: ''
+      }]);
+      return;
+    }
+
+    const remaining = orderTabs.filter(t => t.id !== tabIdToClose);
+    setOrderTabs(remaining);
+
+    if (tabIdToClose === activeTabId) {
+      const nextTab = remaining[remaining.length - 1];
+      setActiveTabId(nextTab.id);
+      setSelectedTable(nextTab.table || null);
+      setOrder(nextTab.order || null);
+      setSalesChannel(nextTab.salesChannel || 'direct');
+      setChannelOrderCode(nextTab.channelOrderCode || '');
+    }
+  };
+
+  const handleSelectSalesChannel = (channelId) => {
+    setSalesChannel(channelId);
+    setOrder(prev => prev ? { ...prev, sales_channel: channelId } : prev);
+    setOrderTabs(prev => prev.map(t => {
+      if (t.id === activeTabId) {
+        return {
+          ...t,
+          salesChannel: channelId,
+          order: t.order ? { ...t.order, sales_channel: channelId } : t.order
+        };
+      }
+      return t;
+    }));
+  };
+
+  const handleChangeChannelOrderCode = (code) => {
+    setChannelOrderCode(code);
+    setOrder(prev => prev ? { ...prev, channel_order_code: code } : prev);
+    setOrderTabs(prev => prev.map(t => {
+      if (t.id === activeTabId) {
+        return {
+          ...t,
+          channelOrderCode: code,
+          order: t.order ? { ...t.order, channel_order_code: code } : t.order
+        };
+      }
+      return t;
+    }));
+  };
+
+  const handleSelectTakeawayTable = () => {
+    const takeawayTable = tables.find(t => t.is_takeaway || (t.name && t.name.toLowerCase().includes('mang về')));
+    if (takeawayTable) {
+      handleSelectTable(takeawayTable);
+    } else {
+      handleSelectTable({ id: 'takeaway', name: 'MANG VỀ', is_takeaway: true });
+    }
+    handleSelectSalesChannel('takeaway');
+  };
+
   // Chọn bàn
   const handleSelectTable = async (table) => {
+    // 1. Kiểm tra xem đã có tab nào trong orderTabs đang mở cho bàn này chưa
+    const existingTab = orderTabs.find(t => t.table && t.table.id === table.id);
+    if (existingTab && existingTab.id !== activeTabId) {
+      handleSwitchTab(existingTab.id);
+      return;
+    }
+
+    // 2. Nếu tab hiện tại đã có món của một bàn KHÁC, tự động mở tab mới cho bàn này
+    const currentHasItems = order?.items && order.items.length > 0;
+    const isDifferentTable = selectedTable && selectedTable.id !== table.id;
+
+    if (currentHasItems && isDifferentTable) {
+      // Lưu lại tab hiện tại
+      const savedTabs = orderTabs.map(t => {
+        if (t.id === activeTabId) {
+          return {
+            ...t,
+            table: selectedTable,
+            order: order,
+            salesChannel: salesChannel,
+            channelOrderCode: channelOrderCode,
+            title: selectedTable.name
+          };
+        }
+        return t;
+      });
+
+      // Tạo tab mới cho bàn được chọn
+      const newTabId = `tab_${Date.now()}`;
+      let tableOrder = null;
+      try {
+        const res = await api.getTableOrder(table.id);
+        if (res && res.order) tableOrder = res.order;
+      } catch (err) {
+        if (table.order && table.order.items) {
+          tableOrder = table.order;
+        } else {
+          tableOrder = {
+            id: Date.now(),
+            order_code: `ORD-${table.name.replace(/\s+/g, '')}`,
+            table_id: table.id,
+            subtotal: 0,
+            discount_percent: 0,
+            discount_amount: 0,
+            vat_percent: 8,
+            vat_amount: 0,
+            total_amount: 0,
+            sales_channel: 'direct',
+            items: []
+          };
+        }
+      }
+
+      const newTab = {
+        id: newTabId,
+        title: table.name,
+        table: table,
+        order: tableOrder,
+        salesChannel: 'direct',
+        channelOrderCode: ''
+      };
+
+      setOrderTabs([...savedTabs, newTab]);
+      setActiveTabId(newTabId);
+      setSelectedTable(table);
+      setOrder(tableOrder);
+      setSalesChannel('direct');
+      setChannelOrderCode('');
+      return;
+    }
+
+    // 3. Tab hiện tại chưa có món hoặc là cùng bàn: nạp bàn vào tab hiện tại
     setSelectedTable(table);
+    let loadedOrder = null;
     try {
       const res = await api.getTableOrder(table.id);
       if (res && res.order) {
+        loadedOrder = res.order;
         setOrder(res.order);
       }
     } catch (err) {
       if (table.order && table.order.items) {
+        loadedOrder = table.order;
         setOrder(table.order);
       } else {
-        setOrder({
+        loadedOrder = {
           id: Date.now(),
           order_code: `ORD-${table.name.replace(/\s+/g, '')}`,
           table_id: table.id,
@@ -316,10 +595,26 @@ export function App() {
           vat_percent: 8,
           vat_amount: 0,
           total_amount: 0,
+          sales_channel: salesChannel,
           items: []
-        });
+        };
+        setOrder(loadedOrder);
       }
     }
+
+    setOrderTabs(prev => prev.map(t => {
+      if (t.id === activeTabId) {
+        return {
+          ...t,
+          table: table,
+          title: table.name,
+          order: loadedOrder || t.order,
+          salesChannel: salesChannel,
+          channelOrderCode: channelOrderCode
+        };
+      }
+      return t;
+    }));
   };
 
   // Cập nhật số lượng món
@@ -353,7 +648,7 @@ export function App() {
       const vatAmount = Math.round((subtotal - discountAmount) * ((prev.vat_percent || 8) / 100));
       const totalAmount = subtotal - discountAmount + vatAmount;
 
-      return {
+      const updated = {
         ...prev,
         items: updatedItems,
         subtotal,
@@ -361,6 +656,8 @@ export function App() {
         vat_amount: vatAmount,
         total_amount: totalAmount,
       };
+      setOrderTabs(tabsPrev => tabsPrev.map(t => t.id === activeTabId ? { ...t, order: updated } : t));
+      return updated;
     });
   };
 
@@ -370,6 +667,7 @@ export function App() {
       const res = await api.deleteItem(itemId);
       if (res && res.order) {
         setOrder(res.order);
+        setOrderTabs(tabsPrev => tabsPrev.map(t => t.id === activeTabId ? { ...t, order: res.order } : t));
         // Nếu còn 0 món thì reset bàn về empty
         if (res.order.items && res.order.items.length === 0) {
           setTables(prev => prev.map(t => {
@@ -404,7 +702,7 @@ export function App() {
         setSelectedTable(prevT => prevT ? { ...prevT, status: 'empty', guest_count: 0, started_at: null, notes: null } : prevT);
       }
 
-      return {
+      const updated = {
         ...prev,
         items: updatedItems,
         subtotal,
@@ -412,32 +710,55 @@ export function App() {
         vat_amount: vatAmount,
         total_amount: totalAmount,
       };
+      setOrderTabs(tabsPrev => tabsPrev.map(t => t.id === activeTabId ? { ...t, order: updated } : t));
+      return updated;
     });
   };
 
   // Thêm món vào bàn
   const handleAddItemToOrder = async (product, quantity = 1, note = '') => {
-    if (!order) return;
+    let curOrder = order;
+    if (!curOrder) {
+      curOrder = {
+        id: Date.now(),
+        order_code: `ORD-${Date.now().toString().slice(-4)}`,
+        table_id: selectedTable?.id || null,
+        subtotal: 0,
+        discount_percent: 0,
+        discount_amount: 0,
+        vat_percent: 8,
+        vat_amount: 0,
+        total_amount: 0,
+        sales_channel: salesChannel,
+        channel_order_code: channelOrderCode,
+        items: []
+      };
+      setOrder(curOrder);
+    }
+
     try {
-      const res = await api.addItem(order.id, {
-        product_id: product.id,
-        quantity,
-        note
-      });
-      if (res && res.order) {
-        setOrder(res.order);
-        loadData();
-        return;
+      if (curOrder.id) {
+        const res = await api.addItem(curOrder.id, {
+          product_id: product.id,
+          quantity,
+          note
+        });
+        if (res && res.order) {
+          setOrder(res.order);
+          setOrderTabs(tabsPrev => tabsPrev.map(t => t.id === activeTabId ? { ...t, order: res.order } : t));
+          loadData();
+          return;
+        }
       }
     } catch (err) {}
 
     // Fallback
     setOrder(prev => {
-      if (!prev) return prev;
-      const existing = prev.items.find(it => it.product_id === product.id && it.note === note && it.status === 'new_pending');
+      const base = prev || curOrder;
+      const existing = (base.items || []).find(it => it.product_id === product.id && it.note === note && it.status === 'new_pending');
       let newItems = [];
       if (existing) {
-        newItems = prev.items.map(it => {
+        newItems = base.items.map(it => {
           if (it.id === existing.id) {
             const q = it.quantity + quantity;
             return { ...it, quantity: q, subtotal: q * it.price };
@@ -447,7 +768,7 @@ export function App() {
       } else {
         const newItem = {
           id: Date.now(),
-          order_id: prev.id,
+          order_id: base.id,
           product_id: product.id,
           product_name: product.name,
           unit: product.unit || 'phần',
@@ -458,35 +779,39 @@ export function App() {
           status: 'new_pending',
           is_auto_added: false
         };
-        newItems = [...prev.items, newItem];
+        newItems = [...(base.items || []), newItem];
       }
 
       const subtotal = newItems.reduce((acc, it) => acc + (it.subtotal || 0), 0);
-      const discountAmount = Math.round(subtotal * ((prev.discount_percent || 0) / 100));
-      const vatAmount = Math.round((subtotal - discountAmount) * ((prev.vat_percent || 8) / 100));
+      const discountAmount = Math.round(subtotal * ((base.discount_percent || 0) / 100));
+      const vatAmount = Math.round((subtotal - discountAmount) * ((base.vat_percent || 8) / 100));
       const totalAmount = subtotal - discountAmount + vatAmount;
 
-      return {
-        ...prev,
+      const updated = {
+        ...base,
         items: newItems,
         subtotal,
         discount_amount: discountAmount,
         vat_amount: vatAmount,
         total_amount: totalAmount,
       };
+      setOrderTabs(tabsPrev => tabsPrev.map(t => t.id === activeTabId ? { ...t, order: updated } : t));
+      return updated;
     });
 
-    setTables(prev => prev.map(t => {
-      if (t.id === selectedTable.id) {
-        return {
-          ...t,
-          status: 'occupied',
-          guest_count: t.guest_count > 0 ? t.guest_count : 2,
-          notes: `${(order?.items?.length || 0) + 1} món`
-        };
-      }
-      return t;
-    }));
+    if (selectedTable) {
+      setTables(prev => prev.map(t => {
+        if (t.id === selectedTable.id) {
+          return {
+            ...t,
+            status: 'occupied',
+            guest_count: t.guest_count > 0 ? t.guest_count : 2,
+            notes: `${(order?.items?.length || 0) + 1} món`
+          };
+        }
+        return t;
+      }));
+    }
   };
 
   // In trực tiếp phiếu báo bếp K80 qua iframe ngầm, không mở modal xem trước hay dialog khổ in
@@ -583,47 +908,50 @@ export function App() {
     }
   };
 
-  // Báo Bếp (F10) - Tự động in và gửi bếp trực tiếp, không hiện modal xem trước hay dialog khổ in
+  // Báo Bếp (F10) - Gửi thông báo trực tiếp xuống bếp, không hiện popup hay mẫu in
   const handleDirectSendKitchen = async () => {
     if (!order || !order.id) {
-      showToast('Vui lòng chọn bàn có đơn trước khi báo bếp!', 'warning');
+      showToast('Vui lòng chọn bàn hoặc thêm món trước khi báo bếp!', 'warning');
       return;
     }
     const items = order.items || [];
     if (items.length === 0) {
-      showToast('Bàn chưa có món nào để báo bếp!', 'warning');
+      showToast('Đơn chưa có món nào để báo bếp!', 'warning');
       return;
     }
 
     const pendingItems = items.filter(it => it.status === 'new_pending');
     const itemsToPrint = pendingItems.length > 0 ? pendingItems : items;
-    const tableName = selectedTable ? formatTableName(selectedTable.name) : 'Bàn';
+    const tableName = selectedTable ? formatTableName(selectedTable.name) : (orderTabs.find(t => t.id === activeTabId)?.title || 'Đơn hàng');
 
     try {
       const res = await api.sendToKitchen(order.id);
       if (res && res.order) {
         setOrder(res.order);
+        setOrderTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, order: res.order } : t));
         loadData();
       }
     } catch (err) {
       console.warn('sendToKitchen err:', err);
     }
 
-    setOrder(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        items: prev.items.map(it => ({
-          ...it,
-          status: 'sent_kitchen'
-        }))
-      };
-    });
+    const updated = {
+      ...order,
+      items: (order.items || []).map(it => ({
+        ...it,
+        status: 'sent_kitchen'
+      }))
+    };
+    setOrder(updated);
+    setOrderTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, order: updated } : t));
 
-    showToast(`Đã tự động gửi & in báo bếp thành công cho ${tableName} (${itemsToPrint.length} món)!`, 'success');
+    // Phát âm thanh báo bếp nếu được bật
+    const settings = getRestaurantSettings();
+    if (settings.kitchenAlertSound !== false) {
+      playKitchenChime();
+    }
 
-    // Tự động in lệnh báo bếp ngầm định dạng khổ K80 chuẩn
-    printDirectKitchenSlip(tableName, itemsToPrint);
+    showToast(`Đã gửi thông báo xuống bếp thành công cho ${tableName} (${itemsToPrint.length} món)!`, 'success');
   };
 
   // Báo Bếp Modal (fallback)
@@ -638,12 +966,13 @@ export function App() {
       const res = await api.printPreBill(order.id);
       if (res && res.order) {
         setOrder(res.order);
+        setOrderTabs(prev => prev.map(t => t.id === activeTabId ? { ...t, order: res.order } : t));
         loadData();
       }
     } catch (err) {}
 
     setTables(prev => prev.map(t => {
-      if (t.id === selectedTable.id) {
+      if (selectedTable && t.id === selectedTable.id) {
         return { ...t, status: 'billing', notes: 'Đã in tạm tính' };
       }
       return t;
@@ -655,7 +984,11 @@ export function App() {
   const handleConfirmCheckout = async (paymentData) => {
     if (!order) return;
     try {
-      await api.checkout(order.id, paymentData);
+      await api.checkout(order.id, {
+        ...paymentData,
+        sales_channel: salesChannel,
+        channel_order_code: channelOrderCode
+      });
       loadData();
       try {
         window.dispatchEvent(new CustomEvent('aura_pos_data_changed'));
@@ -663,43 +996,74 @@ export function App() {
       } catch (e) {}
     } catch (err) {}
 
-    setTables(prev => prev.map(t => {
-      if (t.id === selectedTable.id) {
-        return {
-          ...t,
-          status: 'empty',
-          guest_count: 0,
-          started_at: null,
-          duration: null,
-          notes: null,
-          order: null
-        };
-      }
-      return t;
-    }));
+    if (selectedTable) {
+      setTables(prev => prev.map(t => {
+        if (t.id === selectedTable.id) {
+          return {
+            ...t,
+            status: 'empty',
+            guest_count: 0,
+            started_at: null,
+            duration: null,
+            notes: null,
+            order: null
+          };
+        }
+        return t;
+      }));
 
-    setSelectedTable(prev => prev ? {
-      ...prev,
-      status: 'empty',
-      guest_count: 0,
-      started_at: null,
-      duration: null,
-      notes: null,
-      order: null
-    } : prev);
+      setSelectedTable(prev => prev ? {
+        ...prev,
+        status: 'empty',
+        guest_count: 0,
+        started_at: null,
+        duration: null,
+        notes: null,
+        order: null
+      } : prev);
+    }
 
-    setOrder({
+    // Nếu đang mở nhiều tab, đóng tab vừa thanh toán và chuyển về tab còn lại
+    if (orderTabs.length > 1) {
+      const remaining = orderTabs.filter(t => t.id !== activeTabId);
+      const nextTab = remaining[remaining.length - 1];
+      setOrderTabs(remaining);
+      setActiveTabId(nextTab.id);
+      setSelectedTable(nextTab.table || null);
+      setOrder(nextTab.order || null);
+      setSalesChannel(nextTab.salesChannel || 'direct');
+      setChannelOrderCode(nextTab.channelOrderCode || '');
+      showToast('Thanh toán thành công!', 'success');
+      return;
+    }
+
+    // Nếu chỉ có 1 tab, reset tab về trạng thái đơn trống
+    const freshOrder = {
       id: Date.now(),
       order_code: `ORD-${Date.now().toString().slice(-4)}`,
-      table_id: selectedTable.id,
+      table_id: selectedTable?.id || null,
       subtotal: 0,
       discount_percent: 0,
       discount_amount: 0,
       vat_percent: 8,
       vat_amount: 0,
       total_amount: 0,
+      sales_channel: 'direct',
       items: []
-    });
+    };
+    setSelectedTable(null);
+    setOrder(freshOrder);
+    setSalesChannel('direct');
+    setChannelOrderCode('');
+    setOrderTabs([{
+      id: activeTabId,
+      title: 'Hóa đơn 1',
+      table: null,
+      order: freshOrder,
+      salesChannel: 'direct',
+      channelOrderCode: ''
+    }]);
+    showToast('Thanh toán thành công!', 'success');
   };
 
   // Chuyển Bàn
@@ -1127,6 +1491,20 @@ export function App() {
               promotions={promotions}
               isMobile={isMobile}
               onBackToTables={() => setMobileTab('tables')}
+
+              // Multi-tab order session props
+              tabs={orderTabs}
+              activeTabId={activeTabId}
+              onSelectTab={handleSwitchTab}
+              onCreateTab={handleCreateNewTab}
+              onCloseTab={handleCloseTab}
+
+              // Sales channel props
+              salesChannel={salesChannel}
+              onSelectChannel={handleSelectSalesChannel}
+              channelOrderCode={channelOrderCode}
+              onChangeChannelOrderCode={handleChangeChannelOrderCode}
+              onSelectTakeawayTable={handleSelectTakeawayTable}
             />
           )}
         </div>

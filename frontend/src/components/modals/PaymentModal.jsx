@@ -4,6 +4,7 @@ import { useLanguage } from '../../i18n/LanguageContext';
 import { api } from '../../api';
 import { VIETNAM_BANKS } from '../admin/BankAccountsView';
 import { getRestaurantSettings } from '../../utils/restaurantSettings';
+import { formatChannelName } from '../../utils/salesChannelsHelper';
 
 function playSuccessChime() {
   try {
@@ -179,7 +180,7 @@ export function PaymentModal({
           <div>
             <div style={{ fontSize: '16px', fontWeight: 800 }}>{t('payment.title')} (F9)</div>
             <div style={{ fontSize: '12px', color: '#94a3b8' }}>
-            {t('table.tableLabel') || t('table.tables')}: <strong style={{ color: '#38bdf8' }}>{formatTableName(selectedTable?.name)}</strong>{order?.order_code ? ` • ${order.order_code}` : ''}
+              {t('table.tableLabel') || t('table.tables')}: <strong style={{ color: '#38bdf8' }}>{formatTableName(selectedTable?.name) || 'Đơn tự do'}</strong>{order?.order_code ? ` • ${order.order_code}` : ''}{order?.sales_channel && order.sales_channel !== 'direct' ? ` • ${formatChannelName(order.sales_channel, lang)}` : ''}{order?.channel_order_code ? ` (${order.channel_order_code})` : ''}
             </div>
           </div>
           <button onClick={onClose} style={{ color: '#94a3b8' }}>

@@ -204,6 +204,14 @@ export const translations = {
       applyPromotion: 'Áp dụng Khuyến Mãi / CTKM',
       selectPromotion: 'Chọn',
       removePromotion: 'Hủy khuyến mãi',
+      salesChannel: 'Kênh bán',
+      channelOrderCode: 'Mã đơn app',
+      channelCodePlaceholder: 'VD: #SPF-8392...',
+      newTab: 'Hóa đơn mới',
+      addTabTooltip: 'Thêm tab hóa đơn mới (+)',
+      closeTabConfirm: 'Hóa đơn này đang có món. Bạn có chắc chắn muốn đóng tab này không?',
+      quickTakeaway: 'Bán mang về',
+      pickTable: 'Chọn bàn',
     },
 
     // === FOOTER ===
@@ -1647,6 +1655,14 @@ export const translations = {
       applyPromotion: 'Apply Promotion / Voucher',
       selectPromotion: 'Select',
       removePromotion: 'Remove promotion',
+      salesChannel: 'Sales Channel',
+      channelOrderCode: 'App Order ID',
+      channelCodePlaceholder: 'e.g.: #SPF-8392...',
+      newTab: 'New Bill',
+      addTabTooltip: 'Add new bill tab (+)',
+      closeTabConfirm: 'This bill has items. Are you sure you want to close this tab?',
+      quickTakeaway: 'Takeaway',
+      pickTable: 'Choose Table',
     },
 
     footer: {
@@ -3071,6 +3087,14 @@ export const translations = {
       applyPromotion: '프로모션 / 쿠폰 적용',
       selectPromotion: '선택',
       removePromotion: '프로모션 취소',
+      salesChannel: '판매 채널',
+      channelOrderCode: '배달앱 주문 번호',
+      channelCodePlaceholder: '예: #SPF-8392...',
+      newTab: '새 주문서',
+      addTabTooltip: '새 주문서 탭 추가 (+)',
+      closeTabConfirm: '이 주문서에 메뉴가 포함되어 있습니다. 정말 닫으시겠습니까?',
+      quickTakeaway: '포장 판매',
+      pickTable: '테이블 선택',
     },
 
     footer: {
@@ -4495,6 +4519,14 @@ export const translations = {
       applyPromotion: 'Применить акцию / промокод',
       selectPromotion: 'Выбрать',
       removePromotion: 'Удалить акцию',
+      salesChannel: 'Канал продаж',
+      channelOrderCode: 'Код заказа',
+      channelCodePlaceholder: 'Напр.: #SPF-8392...',
+      newTab: 'Новый чек',
+      addTabTooltip: 'Добавить новую вкладку чека (+)',
+      closeTabConfirm: 'В этом счете есть позиции. Вы уверены, что хотите закрыть эту вкладку?',
+      quickTakeaway: 'На вынос',
+      pickTable: 'Выбрать стол',
     },
 
     footer: {

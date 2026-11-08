@@ -3,6 +3,7 @@ import { X, Printer } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { api } from '../../api';
 import { getRestaurantSettings } from '../../utils/restaurantSettings';
+import { formatChannelName } from '../../utils/salesChannelsHelper';
 
 /**
  * Chuyển đổi số tiền thành chữ Tiếng Việt chuẩn theo văn phong hóa đơn tài chính
@@ -288,6 +289,11 @@ export function PreBillModal({
                 <div style={{ fontSize: '11px', marginTop: '1px' }}>
                   {timeStr}
                 </div>
+                {order?.sales_channel && order.sales_channel !== 'direct' && (
+                  <div style={{ fontSize: '11px', marginTop: '2px', fontWeight: 700, color: '#0f172a' }}>
+                    [{formatChannelName(order.sales_channel, lang)}{order.channel_order_code ? ` - ${order.channel_order_code}` : ''}]
+                  </div>
+                )}
               </div>
             </div>
 

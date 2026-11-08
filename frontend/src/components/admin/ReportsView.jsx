@@ -1379,12 +1379,12 @@ export function ReportsView({
                   <div>
                     <div style={{ fontWeight: 700 }}>{t('admin.reports.signCashier')}</div>
                     <div style={{ fontSize: '11px', color: '#64748b' }}>{t('admin.reports.signHint')}</div>
-                    <div style={{ marginTop: '50px', fontWeight: 600 }}>Thu Hằng</div>
+                    <div style={{ minHeight: '65px' }}></div>
                   </div>
                   <div>
                     <div style={{ fontWeight: 700 }}>{t('admin.reports.signPreparedBy')}</div>
                     <div style={{ fontSize: '11px', color: '#64748b' }}>{t('admin.reports.signHint')}</div>
-                    <div style={{ marginTop: '50px', fontWeight: 600 }}>{currentUser?.name || 'Hoàng Nam'}</div>
+                    <div style={{ minHeight: '65px' }}></div>
                   </div>
                 </div>
               </div>

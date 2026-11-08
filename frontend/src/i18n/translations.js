@@ -1143,6 +1143,18 @@ export const translations = {
       noTransactions: 'Chưa có giao dịch',
       portionUnit: 'phần',
 
+      // Cancelled Dishes
+      cancelledDishes: 'Món Ăn Bị Hủy',
+      cancelledDishesTodaySub: 'Thống kê các món bị hủy trong ca hôm nay',
+      cancelledDishesAllSub: 'Thống kê toàn bộ món bị hủy và lý do hủy',
+      noCancelledDishesToday: 'Chưa có món nào bị hủy hôm nay',
+      noCancelledDishesAll: 'Chưa có dữ liệu món bị hủy',
+      totalCancelledItems: 'Tổng số lượng hủy',
+      totalCancelledValue: 'Tổng tiền hủy',
+      cancelledReason: 'Lý do',
+      cancelledTime: 'Thời gian hủy',
+      cancelledOrder: 'Mã đơn / Bàn',
+
       // Descriptions & Subtitles
       userDataDbDesc: 'Danh sách tài khoản nhân sự và phân quyền hệ thống',
       autoGenCodeDesc: 'Mã món được tự động sinh — không cần nhập tay',
@@ -2483,6 +2495,18 @@ export const translations = {
       totalCollected: 'TOTAL',
       noTransactions: 'No transactions',
       portionUnit: 'portion',
+
+      // Cancelled Dishes
+      cancelledDishes: 'Cancelled Dishes',
+      cancelledDishesTodaySub: "Dishes cancelled during today's shift",
+      cancelledDishesAllSub: 'All-time cancelled dishes & void reasons',
+      noCancelledDishesToday: 'No dishes cancelled today',
+      noCancelledDishesAll: 'No cancelled dishes data yet',
+      totalCancelledItems: 'Total Cancelled',
+      totalCancelledValue: 'Total Void Value',
+      cancelledReason: 'Reason',
+      cancelledTime: 'Cancelled At',
+      cancelledOrder: 'Order / Table',
 
       // Descriptions & Subtitles
       userDataDbDesc: 'Data stored in the users table in database',
@@ -3825,6 +3849,18 @@ export const translations = {
       noTransactions: '거래 내역 없음',
       portionUnit: '인분',
 
+      // Cancelled Dishes
+      cancelledDishes: '취소된 메뉴',
+      cancelledDishesTodaySub: '오늘 영업 중 취소된 메뉴 내역',
+      cancelledDishesAllSub: '전체 취소된 메뉴 및 취소 사유',
+      noCancelledDishesToday: '오늘 취소된 메뉴가 없습니다',
+      noCancelledDishesAll: '취소된 메뉴 데이터가 없습니다',
+      totalCancelledItems: '총 취소 수량',
+      totalCancelledValue: '총 취소 금액',
+      cancelledReason: '사유',
+      cancelledTime: '취소 시간',
+      cancelledOrder: '주문번호 / 테이블',
+
       // Descriptions & Subtitles
       userDataDbDesc: '데이터베이스의 users 테이블에 저장된 데이터',
       autoGenCodeDesc: '품목 코드는 자동 생성됩니다 — 수동 입력 불필요',
@@ -5165,6 +5201,18 @@ export const translations = {
       totalCollected: 'ИТОГО',
       noTransactions: 'Нет транзакций',
       portionUnit: 'порц.',
+
+      // Cancelled Dishes
+      cancelledDishes: 'Отмененные блюда',
+      cancelledDishesTodaySub: 'Блюда, отмененные за сегодняшнюю смену',
+      cancelledDishesAllSub: 'Все отмененные блюда и причины отмены',
+      noCancelledDishesToday: 'Сегодня отмененных блюд нет',
+      noCancelledDishesAll: 'Нет данных об отмененных блюдах',
+      totalCancelledItems: 'Всего отменено',
+      totalCancelledValue: 'Сумма отмен',
+      cancelledReason: 'Причина',
+      cancelledTime: 'Время отмены',
+      cancelledOrder: 'Заказ / Стол',
 
       // Descriptions & Subtitles
       userDataDbDesc: 'Данные хранятся в таблице users базы данных',

@@ -309,7 +309,10 @@ class PosController extends Controller
     {
         $item = OrderItem::with('order')->findOrFail($itemId);
         $order = $item->order;
-        $item->delete();
+        $item->update([
+            'status' => 'cancelled',
+            'note' => request()->input('reason', $item->note ?: 'Khách hủy món')
+        ]);
 
         $order->recalculateTotals();
 
@@ -326,20 +329,23 @@ class PosController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Đã xóa món',
+            'message' => 'Đã hủy món',
             'order' => $order->fresh(['items', 'customer', 'table'])
         ]);
     }
 
     /**
-     * Huỷ toàn bộ order (xoá sạch món, reset bàn về empty)
+     * Huỷ toàn bộ order (chuyển trạng thái các món thành cancelled, reset bàn về empty)
      */
     public function clearOrder($orderId)
     {
         $order = Order::with(['items', 'table'])->findOrFail($orderId);
 
-        // Xoá tất cả items
-        $order->items()->delete();
+        // Lưu vết món bị hủy
+        $order->items()->update([
+            'status' => 'cancelled',
+            'note' => request()->input('reason', 'Hủy toàn bộ đơn bàn')
+        ]);
 
         // Reset totals về 0
         $order->update([

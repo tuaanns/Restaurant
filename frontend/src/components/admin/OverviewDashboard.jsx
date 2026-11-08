@@ -28,7 +28,10 @@ import {
   BarChart3,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  Ban,
+  XCircle,
+  CheckCircle
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
@@ -253,6 +256,43 @@ export function OverviewDashboard({
   }, [stats?.top_products_today, stats?.top_products, dishScope]);
 
   const maxDishQty = Math.max(...topProductsList.map(p => p.qty || 1), 1);
+
+  // Cancelled Dishes scope ('today' | 'all')
+  const [cancelledScope, setCancelledScope] = useState('today');
+  const cancelledStats = useMemo(() => {
+    return (cancelledScope === 'today' ? stats?.cancelled_stats_today : stats?.cancelled_stats) || {
+      total_qty: 0,
+      total_value: 0,
+      count: 0
+    };
+  }, [stats?.cancelled_stats_today, stats?.cancelled_stats, cancelledScope]);
+
+  const cancelledDishesList = useMemo(() => {
+    const source = cancelledScope === 'today'
+      ? (stats?.cancelled_products_today || [])
+      : (stats?.cancelled_products || []);
+    if (Array.isArray(source) && source.length > 0) {
+      return source.map((p, idx) => ({
+        rank: idx + 1,
+        name: p.product_name,
+        qty: Number(p.total_qty || 0),
+        value: Number(p.total_value || p.total_sales || 0),
+        unit: p.unit || (t('admin.portionUnit') || 'phần'),
+        reason: p.reason || '',
+        cancelled_at: p.cancelled_at || ''
+      }));
+    }
+    return [];
+  }, [stats?.cancelled_products_today, stats?.cancelled_products, cancelledScope, t]);
+
+  const cancelledDetailsList = useMemo(() => {
+    const source = cancelledScope === 'today'
+      ? (stats?.cancelled_list_today || [])
+      : (stats?.cancelled_list || []);
+    return Array.isArray(source) ? source : [];
+  }, [stats?.cancelled_list_today, stats?.cancelled_list, cancelledScope]);
+
+  const maxCancelledQty = Math.max(...cancelledDishesList.map(p => p.qty || 1), 1);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
@@ -1057,6 +1097,255 @@ export function OverviewDashboard({
         </BentoCard>
       </div>
 
+      {/* ══════════════ ROW 4: MÓN ĂN BỊ HỦY (CANCELLED DISHES) ══════════════ */}
+      <BentoCard style={{ padding: '22px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '18px', flexWrap: 'wrap', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ width: '34px', height: '34px', borderRadius: '10px', backgroundColor: '#fef2f2', color: '#dc2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Ban size={18} />
+            </div>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h3 style={{ margin: 0, fontSize: '15.5px', fontWeight: 800, color: '#0f172a' }}>
+                  {t('admin.cancelledDishes') || 'Món Ăn Bị Hủy'}
+                </h3>
+                {cancelledStats.count > 0 && (
+                  <span style={{
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    backgroundColor: '#fee2e2',
+                    color: '#dc2626',
+                    padding: '2px 8px',
+                    borderRadius: '9999px'
+                  }}>
+                    {cancelledStats.count} {t('admin.portionUnit') || 'lượt hủy'}
+                  </span>
+                )}
+              </div>
+              <span style={{ fontSize: '11.5px', color: '#64748b' }}>
+                {cancelledScope === 'today'
+                  ? (t('admin.cancelledDishesTodaySub') || 'Thống kê các món bị hủy trong ca hôm nay')
+                  : (t('admin.cancelledDishesAllSub') || 'Thống kê toàn bộ món bị hủy và lý do hủy')}
+              </span>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+            {/* Summary Pills */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              backgroundColor: '#f8fafc',
+              padding: '4px 10px',
+              borderRadius: '8px',
+              border: '1px solid #e2e8f0',
+              fontSize: '12px'
+            }}>
+              <span style={{ color: '#64748b' }}>{t('admin.totalCancelledItems') || 'Tổng hủy'}:</span>
+              <strong style={{ color: cancelledStats.total_qty > 0 ? '#dc2626' : '#0f172a' }}>
+                {cancelledStats.total_qty} {formatDishUnit ? formatDishUnit('phần') : (t('admin.portionUnit') || 'phần')}
+              </strong>
+              <span style={{ color: '#cbd5e1' }}>|</span>
+              <span style={{ color: '#64748b' }}>{t('admin.totalCancelledValue') || 'Thiệt hại'}:</span>
+              <strong style={{ color: cancelledStats.total_value > 0 ? '#dc2626' : '#0f172a' }}>
+                {formatMoney(cancelledStats.total_value)}
+              </strong>
+            </div>
+
+            {/* Scope Toggle: Hôm nay | Toàn thời gian */}
+            <div style={{ display: 'inline-flex', backgroundColor: '#f1f5f9', padding: '3px', borderRadius: '8px', gap: '3px' }}>
+              <button
+                type="button"
+                onClick={() => setCancelledScope('today')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '11px',
+                  fontWeight: cancelledScope === 'today' ? 700 : 500,
+                  backgroundColor: cancelledScope === 'today' ? '#ffffff' : 'transparent',
+                  color: cancelledScope === 'today' ? '#1B5E20' : '#64748b',
+                  cursor: 'pointer',
+                  boxShadow: cancelledScope === 'today' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                }}
+              >
+                {t('admin.reports.today') || 'Hôm nay'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setCancelledScope('all')}
+                style={{
+                  padding: '4px 10px',
+                  borderRadius: '6px',
+                  border: 'none',
+                  fontSize: '11px',
+                  fontWeight: cancelledScope === 'all' ? 700 : 500,
+                  backgroundColor: cancelledScope === 'all' ? '#ffffff' : 'transparent',
+                  color: cancelledScope === 'all' ? '#1B5E20' : '#64748b',
+                  cursor: 'pointer',
+                  boxShadow: cancelledScope === 'all' ? '0 1px 2px rgba(0,0,0,0.06)' : 'none'
+                }}
+              >
+                {t('admin.cashbook.allTime') || 'Toàn thời gian'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {cancelledDishesList.length === 0 ? (
+          <div style={{
+            textAlign: 'center',
+            padding: '36px 16px',
+            backgroundColor: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px dashed #cbd5e1'
+          }}>
+            <div style={{
+              width: '42px',
+              height: '42px',
+              borderRadius: '50%',
+              backgroundColor: '#ecfdf5',
+              color: '#059669',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              margin: '0 auto 10px auto'
+            }}>
+              <CheckCircle size={22} />
+            </div>
+            <div style={{ fontWeight: 700, color: '#0f172a', fontSize: '13.5px', marginBottom: '4px' }}>
+              {cancelledScope === 'today'
+                ? (t('admin.noCancelledDishesToday') || 'Chưa có món nào bị hủy hôm nay')
+                : (t('admin.noCancelledDishesAll') || 'Chưa có dữ liệu món bị hủy')}
+            </div>
+            <div style={{ fontSize: '12px', color: '#64748b', maxWidth: '380px', margin: '0 auto' }}>
+              Quy trình phục vụ diễn ra chuẩn xác, không có món nào bị hủy hoặc trả lại.
+            </div>
+          </div>
+        ) : (
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))',
+            gap: '16px'
+          }}>
+            {/* Cột 1: Xếp hạng món bị hủy nhiều nhất */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '2px' }}>
+                Xếp hạng món bị hủy
+              </div>
+              {cancelledDishesList.map((dish, i) => {
+                const percent = Math.round((dish.qty / maxCancelledQty) * 100);
+                return (
+                  <div
+                    key={dish.name + i}
+                    style={{
+                      padding: '12px 14px',
+                      borderRadius: '10px',
+                      backgroundColor: '#f8fafc',
+                      border: '1px solid #fee2e2',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '8px'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{
+                          width: '22px',
+                          height: '22px',
+                          borderRadius: '6px',
+                          backgroundColor: '#fee2e2',
+                          color: '#dc2626',
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}>
+                          {i + 1}
+                        </span>
+                        <span style={{ fontSize: '13px', fontWeight: 700, color: '#0f172a' }}>
+                          {(formatDishName || ctxFormatDishName) ? (formatDishName || ctxFormatDishName)(dish.name) : dish.name}
+                        </span>
+                      </div>
+
+                      <div style={{ textAlign: 'right' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#dc2626' }}>
+                          {formatMoney(dish.value)}
+                        </span>
+                        <span style={{ fontSize: '11px', color: '#64748b', marginLeft: '6px' }}>
+                          ({dish.qty} {formatDishUnit ? formatDishUnit(dish.unit) : (dish.unit || 'phần')})
+                        </span>
+                      </div>
+                    </div>
+
+                    <div style={{ width: '100%', height: '4px', backgroundColor: '#e2e8f0', borderRadius: '9999px', overflow: 'hidden' }}>
+                      <div style={{
+                        width: `${percent}%`,
+                        height: '100%',
+                        backgroundColor: '#ef4444',
+                        borderRadius: '9999px'
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+
+            {/* Cột 2: Danh sách chi tiết các lần hủy gần nhất */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <div style={{ fontSize: '12px', fontWeight: 700, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '2px' }}>
+                Nhật ký hủy gần nhất
+              </div>
+              <div style={{
+                maxHeight: '260px',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '8px'
+              }}>
+                {cancelledDetailsList.map((item, idx) => (
+                  <div
+                    key={item.id || idx}
+                    style={{
+                      padding: '10px 12px',
+                      borderRadius: '8px',
+                      backgroundColor: '#ffffff',
+                      border: '1px solid #e2e8f0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between'
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#0f172a' }}>
+                        {(formatDishName || ctxFormatDishName) ? (formatDishName || ctxFormatDishName)(item.product_name) : item.product_name}
+                        <span style={{ marginLeft: '6px', fontSize: '11.5px', color: '#dc2626', fontWeight: 700 }}>
+                          x{item.quantity}
+                        </span>
+                      </div>
+                      <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px', display: 'flex', gap: '8px' }}>
+                        <span>{item.table_name || item.order_code || 'Bàn'}</span>
+                        {item.note && <span style={{ color: '#d97706' }}>• {item.note}</span>}
+                      </div>
+                    </div>
+
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '12.5px', fontWeight: 800, color: '#dc2626' }}>
+                        {formatMoney(item.subtotal || item.price * item.quantity)}
+                      </div>
+                      <div style={{ fontSize: '10.5px', color: '#94a3b8' }}>
+                        {item.cancelled_at ? new Date(item.cancelled_at).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : ''}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+      </BentoCard>
     </div>
   );
 }

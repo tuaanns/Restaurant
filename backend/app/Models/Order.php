@@ -72,7 +72,17 @@ class Order extends Model
 
     public function items()
     {
+        return $this->hasMany(OrderItem::class, 'order_id')->where('status', '!=', 'cancelled');
+    }
+
+    public function allItems()
+    {
         return $this->hasMany(OrderItem::class, 'order_id');
+    }
+
+    public function cancelledItems()
+    {
+        return $this->hasMany(OrderItem::class, 'order_id')->where('status', 'cancelled');
     }
 
     public function kitchenTickets()

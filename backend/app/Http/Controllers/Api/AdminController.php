@@ -148,6 +148,95 @@ class AdminController extends Controller
             ];
         }
 
+        // Thống kê món bị hủy hôm nay
+        $todayCancelledQuery = OrderItem::leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
+            ->leftJoin('dining_tables', 'orders.table_id', '=', 'dining_tables.id')
+            ->where(function ($q) {
+                $q->where('order_items.status', 'cancelled')
+                  ->orWhere('orders.status', 'cancelled');
+            })
+            ->whereDate('order_items.updated_at', $today);
+
+        $cancelledStatsToday = [
+            'total_qty' => (int)(clone $todayCancelledQuery)->sum('order_items.quantity'),
+            'total_value' => (float)(clone $todayCancelledQuery)->sum('order_items.subtotal'),
+            'count' => (int)(clone $todayCancelledQuery)->count(),
+        ];
+
+        $cancelledProductsToday = (clone $todayCancelledQuery)
+            ->select(
+                'order_items.product_name',
+                'order_items.unit',
+                DB::raw('SUM(order_items.quantity) as total_qty'),
+                DB::raw('SUM(order_items.subtotal) as total_value'),
+                DB::raw('MAX(order_items.note) as reason'),
+                DB::raw('MAX(order_items.updated_at) as cancelled_at')
+            )
+            ->groupBy('order_items.product_name', 'order_items.unit')
+            ->orderByDesc('total_qty')
+            ->get();
+
+        $cancelledListToday = (clone $todayCancelledQuery)
+            ->select(
+                'order_items.id',
+                'order_items.product_name',
+                'order_items.quantity',
+                'order_items.price',
+                'order_items.subtotal',
+                'order_items.unit',
+                'order_items.note',
+                'order_items.updated_at as cancelled_at',
+                'orders.order_code',
+                'dining_tables.name as table_name'
+            )
+            ->orderByDesc('order_items.updated_at')
+            ->limit(10)
+            ->get();
+
+        // Thống kê món bị hủy toàn thời gian
+        $allCancelledQuery = OrderItem::leftJoin('orders', 'order_items.order_id', '=', 'orders.id')
+            ->leftJoin('dining_tables', 'orders.table_id', '=', 'dining_tables.id')
+            ->where(function ($q) {
+                $q->where('order_items.status', 'cancelled')
+                  ->orWhere('orders.status', 'cancelled');
+            });
+
+        $cancelledStatsAllTime = [
+            'total_qty' => (int)(clone $allCancelledQuery)->sum('order_items.quantity'),
+            'total_value' => (float)(clone $allCancelledQuery)->sum('order_items.subtotal'),
+            'count' => (int)(clone $allCancelledQuery)->count(),
+        ];
+
+        $cancelledProductsAllTime = (clone $allCancelledQuery)
+            ->select(
+                'order_items.product_name',
+                'order_items.unit',
+                DB::raw('SUM(order_items.quantity) as total_qty'),
+                DB::raw('SUM(order_items.subtotal) as total_value'),
+                DB::raw('MAX(order_items.note) as reason'),
+                DB::raw('MAX(order_items.updated_at) as cancelled_at')
+            )
+            ->groupBy('order_items.product_name', 'order_items.unit')
+            ->orderByDesc('total_qty')
+            ->get();
+
+        $cancelledListAllTime = (clone $allCancelledQuery)
+            ->select(
+                'order_items.id',
+                'order_items.product_name',
+                'order_items.quantity',
+                'order_items.price',
+                'order_items.subtotal',
+                'order_items.unit',
+                'order_items.note',
+                'order_items.updated_at as cancelled_at',
+                'orders.order_code',
+                'dining_tables.name as table_name'
+            )
+            ->orderByDesc('order_items.updated_at')
+            ->limit(10)
+            ->get();
+
         return response()->json([
             'success' => true,
             'stats' => [
@@ -164,6 +253,12 @@ class AdminController extends Controller
                 'top_products' => $topProductsAllTime,
                 'payment_breakdown_today' => $paymentMethodsToday,
                 'payment_breakdown' => $paymentMethodsAllTime,
+                'cancelled_stats_today' => $cancelledStatsToday,
+                'cancelled_products_today' => $cancelledProductsToday,
+                'cancelled_list_today' => $cancelledListToday,
+                'cancelled_stats' => $cancelledStatsAllTime,
+                'cancelled_products' => $cancelledProductsAllTime,
+                'cancelled_list' => $cancelledListAllTime,
                 'cashiers_count' => User::where('role', 'cashier')->count(),
                 'hourly_data' => $hourlyData,
                 'seven_days_data' => $sevenDaysData,

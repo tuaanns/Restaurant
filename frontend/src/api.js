@@ -5,8 +5,8 @@ const host = typeof window !== 'undefined' && window.location.hostname ? window.
 const API_ROOT = import.meta.env.VITE_API_URL || `http://${host}:8000/api`;
 const API_BASE = `${API_ROOT}/pos`;
 
-// Giới hạn thời gian chờ tối đa 5 giây để tránh đơ giao diện khi máy chủ ngắt kết nối
-axios.defaults.timeout = 5000;
+// Giới hạn thời gian chờ tối đa 8 giây để tránh timeout sớm khi máy chủ tải lần đầu
+axios.defaults.timeout = 8000;
 
 // Tự động gắn token vào header nếu có
 axios.interceptors.request.use((config) => {
@@ -20,19 +20,83 @@ axios.interceptors.request.use((config) => {
 export const api = {
   // === XÁC THỰC & TÀI KHOẢN (AUTH) ===
   login: async (username, password) => {
+    const trimmedUsername = (username || '').trim();
     try {
-      const res = await axios.post(`${API_ROOT}/auth/login`, { username, password });
+      const res = await axios.post(`${API_ROOT}/auth/login`, { username: trimmedUsername, password });
       if (res.data.token) {
         sessionStorage.setItem('pos_token', res.data.token);
         sessionStorage.setItem('pos_user', JSON.stringify(res.data.user));
+        sessionStorage.removeItem('pos_offline_mode');
         // Xóa sạch vĩnh viễn ở localStorage để mở cửa sổ/tab mới luôn bắt buộc đăng nhập
         localStorage.removeItem('pos_token');
         localStorage.removeItem('pos_user');
       }
       return res.data;
     } catch (err) {
+      const isTimeout = err.code === 'ECONNABORTED' || (err.message && err.message.toLowerCase().includes('timeout'));
+      const isConnectionError = isTimeout || !err.response || err.code === 'ERR_NETWORK' || err.message === 'Network Error';
+
+      // Chế độ Offline Fallback: Cho phép thu ngân / quản trị viên truy cập ngay cả khi máy chủ Backend chưa khởi động
+      if (isConnectionError) {
+        const u = trimmedUsername.toLowerCase();
+        let fallbackUser = null;
+
+        if (u === 'admin' && (password === 'admin123' || password === '123456' || password === 'admin')) {
+          fallbackUser = {
+            id: 1,
+            name: 'Quản trị viên',
+            username: 'admin',
+            email: 'admin@aura.vn',
+            role: 'admin',
+            shift: 'Toàn ca (Quản lý nhà hàng)',
+            phone: '0901.888.999',
+            isOffline: true
+          };
+        } else if (u === 'thuhang' && (password === '123456' || password === 'thuhang')) {
+          fallbackUser = {
+            id: 2,
+            name: 'Thu Hằng',
+            username: 'thuhang',
+            email: 'thuhang@aura.vn',
+            role: 'cashier',
+            shift: 'Ca sáng (07:00 - 15:00)',
+            phone: '0912.345.678',
+            isOffline: true
+          };
+        } else if (u === 'minhtri' && (password === '123456' || password === 'minhtri')) {
+          fallbackUser = {
+            id: 3,
+            name: 'Minh Trí',
+            username: 'minhtri',
+            email: 'minhtri@aura.vn',
+            role: 'cashier',
+            shift: 'Ca chiều (15:00 - 23:00)',
+            phone: '0987.654.321',
+            isOffline: true
+          };
+        }
+
+        if (fallbackUser) {
+          sessionStorage.setItem('pos_token', `offline-token-${fallbackUser.username}`);
+          sessionStorage.setItem('pos_user', JSON.stringify(fallbackUser));
+          sessionStorage.setItem('pos_offline_mode', 'true');
+          localStorage.removeItem('pos_token');
+          localStorage.removeItem('pos_user');
+          return { user: fallbackUser, token: `offline-token-${fallbackUser.username}`, isOffline: true };
+        }
+
+        const customErr = new Error(isTimeout ? 'ERR_SERVER_TIMEOUT' : 'ERR_SERVER_OFFLINE');
+        customErr.code = isTimeout ? 'ECONNABORTED' : 'ERR_NETWORK';
+        customErr.isOffline = true;
+        customErr.isTimeout = isTimeout;
+        throw customErr;
+      }
+
       if (err.response && err.response.data) {
-        throw new Error(err.response.data.message || 'Đăng nhập không thành công');
+        const errorMsg = err.response.data.message || 'Đăng nhập không thành công';
+        const apiErr = new Error(errorMsg);
+        apiErr.response = err.response;
+        throw apiErr;
       }
       throw err;
     }

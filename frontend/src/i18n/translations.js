@@ -103,6 +103,11 @@ export const translations = {
       posBranch: 'Điểm bán & Chi nhánh:',
       printerStatus: 'Máy in hóa đơn & bếp:',
       printerReady: 'Khổ K80 Thermal (Sẵn sàng)',
+      serverTimeout: 'Không thể kết nối đến máy chủ Backend (quá thời gian chờ). Vui lòng kiểm tra lại tiến trình máy chủ hoặc chạy file start_pos.bat.',
+      serverOffline: 'Máy chủ Backend đang ngoại tuyến. Vui lòng bật máy chủ bằng file start_pos.bat.',
+      offlineLoginNotice: 'Đang hoạt động ở chế độ ngoại tuyến (Offline Mode).',
+      techSupportLabel: 'Hỗ trợ kỹ thuật:',
+      storeAddress: '103 Trần Hưng Đạo, Phú Quốc • v4.2.0',
     },
 
     // === HEADER POS ===
@@ -1558,6 +1563,11 @@ export const translations = {
       posBranch: 'POS & Branch:',
       printerStatus: 'Receipt & Kitchen Printer:',
       printerReady: 'K80 Thermal (Ready)',
+      serverTimeout: 'Unable to connect to Backend server (connection timed out). Please check the server process or run start_pos.bat.',
+      serverOffline: 'Backend server is currently offline. Please start the server using start_pos.bat.',
+      offlineLoginNotice: 'Operating in Offline Mode.',
+      techSupportLabel: 'Technical Support:',
+      storeAddress: '103 Tran Hung Dao, Phu Quoc • v4.2.0',
     },
 
     header: {
@@ -2990,6 +3000,11 @@ export const translations = {
       posBranch: '매장 및 지점:',
       printerStatus: '영수증 및 주방 프린터:',
       printerReady: 'K80 감열식 (준비됨)',
+      serverTimeout: '백엔드 서버에 연결할 수 없습니다 (대기 시간 초과). 서버 프로세스를 확인하거나 start_pos.bat을 실행하세요.',
+      serverOffline: '백엔드 서버가 현재 오프라인 상태입니다. start_pos.bat 파일로 서버를 실행하세요.',
+      offlineLoginNotice: '오프라인 모드로 실행 중입니다.',
+      techSupportLabel: '기술 지원:',
+      storeAddress: '푸꾸옥 쩐흥다오 103번지 • v4.2.0',
     },
 
     header: {
@@ -4422,6 +4437,11 @@ export const translations = {
       posBranch: 'Точка продаж и филиал:',
       printerStatus: 'Принтер чеков и кухни:',
       printerReady: 'Термопечать K80 (Готов)',
+      serverTimeout: 'Не удалось подключиться к серверу бэкенда (превышено время ожидания). Проверьте процесс сервера или запустите start_pos.bat.',
+      serverOffline: 'Сервер бэкенда в данный момент не в сети. Пожалуйста, запустите сервер с помощью start_pos.bat.',
+      offlineLoginNotice: 'Работа в автономном режиме (Offline Mode).',
+      techSupportLabel: 'Техническая поддержка:',
+      storeAddress: 'ул. Чан Хынг Дао, 103, Фукуок • v4.2.0',
     },
 
     header: {

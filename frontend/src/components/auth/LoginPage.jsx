@@ -43,7 +43,15 @@ export function LoginPage({ onLoginSuccess }) {
         onLoginSuccess(res.user);
       }
     } catch (err) {
-      setErrorMsg(err.message || t('login.wrongCredentials') || 'Tên đăng nhập hoặc mật khẩu không chính xác');
+      if (err.isTimeout || err.code === 'ECONNABORTED' || (err.message && err.message.toLowerCase().includes('timeout'))) {
+        setErrorMsg(t('login.serverTimeout') || 'Không thể kết nối đến máy chủ Backend (quá thời gian chờ). Vui lòng kiểm tra lại tiến trình máy chủ hoặc chạy file start_pos.bat.');
+      } else if (err.isOffline || err.code === 'ERR_NETWORK' || err.message === 'ERR_SERVER_OFFLINE' || err.message === 'Network Error') {
+        setErrorMsg(t('login.serverOffline') || 'Máy chủ Backend đang ngoại tuyến. Vui lòng bật máy chủ bằng file start_pos.bat.');
+      } else if (err.response && (err.response.status === 401 || err.response.status === 422)) {
+        setErrorMsg(t('login.wrongCredentials') || 'Tên đăng nhập hoặc mật khẩu không chính xác!');
+      } else {
+        setErrorMsg(err.message && !err.message.includes('5000ms') && !err.message.includes('8000ms') && !err.message.includes('timeout') ? err.message : (t('login.wrongCredentials') || 'Tên đăng nhập hoặc mật khẩu không chính xác!'));
+      }
     } finally {
       setLoading(false);
     }
@@ -329,10 +337,11 @@ export function LoginPage({ onLoginSuccess }) {
           lineHeight: 1.6
         }}>
           <div>
-            Hỗ trợ kỹ thuật: <strong style={{ color: '#1B5E20', fontWeight: 700 }}>0348974111</strong>
+            {t('login.techSupportLabel') || 'Hỗ trợ kỹ thuật:'}{' '}
+            <strong style={{ color: '#1B5E20', fontWeight: 700 }}>0348974111</strong>
           </div>
           <div style={{ color: '#94a3b8', fontSize: '11px', marginTop: '4px' }}>
-            103 Trần Hưng Đạo, Phú Quốc • v4.2.0
+            {t('login.storeAddress') || '103 Trần Hưng Đạo, Phú Quốc • v4.2.0'}
           </div>
         </div>
       </div>
@@ -377,7 +386,7 @@ export function LoginPage({ onLoginSuccess }) {
               </button>
             </div>
             <p style={{ fontSize: '12.5px', color: '#475569', lineHeight: 1.5, margin: '0 0 14px 0' }}>
-              Để bảo mật dữ liệu doanh thu và kho hàng của quán, vui lòng liên hệ quản lý hoặc bộ phận kỹ thuật để được cấp lại mật khẩu:
+              {t('login.forgotModalNotice') || 'Để bảo mật dữ liệu doanh thu và kho hàng của quán, vui lòng liên hệ quản lý hoặc bộ phận kỹ thuật để được cấp lại mật khẩu:'}
             </p>
             <div style={{
               backgroundColor: '#f8fafc',
@@ -388,7 +397,7 @@ export function LoginPage({ onLoginSuccess }) {
               textAlign: 'center'
             }}>
               <div style={{ fontSize: '11px', color: '#64748b', marginBottom: '2px' }}>
-                Hotline hỗ trợ kỹ thuật POS:
+                {t('login.posTechnicalSupport') || 'Hotline hỗ trợ kỹ thuật POS'}:
               </div>
               <div style={{ fontSize: '16px', fontWeight: 800, color: '#1B5E20' }}>
                 0348974111
@@ -408,7 +417,7 @@ export function LoginPage({ onLoginSuccess }) {
                 cursor: 'pointer'
               }}
             >
-              Đã hiểu
+              {t('login.gotIt') || 'Đã hiểu'}
             </button>
           </div>
         </div>

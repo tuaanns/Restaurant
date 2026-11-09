@@ -294,3 +294,4 @@ export function AddSalesChannelModal({ isOpen, onClose, onCreated }) {
     </div>
   );
 }
+

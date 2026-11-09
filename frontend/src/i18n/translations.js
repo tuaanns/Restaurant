@@ -1138,6 +1138,10 @@ export const translations = {
 
       // Overview stats subtexts & units
       allShiftsCalc: 'Tính trên tất cả các ca',
+      yesterdayRevenueLabel: 'Doanh thu hôm qua',
+      yesterdayOrdersLabel: 'Đơn hôm qua',
+      newDayNotice: 'Hôm nay là ngày mới chưa phát sinh đơn hàng. Dữ liệu các ngày trước vẫn được lưu đầy đủ.',
+      viewLast7Days: 'Xem 7 ngày qua →',
       ordersUnit: 'đơn',
       activeOnTables: 'Hoạt động trên',
       waitingPayment: 'bàn chờ thanh toán',
@@ -2585,6 +2589,10 @@ export const translations = {
 
       // Overview stats subtexts & units
       allShiftsCalc: 'Calculated across all shifts',
+      yesterdayRevenueLabel: 'Yesterday revenue',
+      yesterdayOrdersLabel: 'Yesterday orders',
+      newDayNotice: 'Today is a new day with no orders yet. Previous data is safely stored.',
+      viewLast7Days: 'View last 7 days →',
       ordersUnit: 'orders',
       activeOnTables: 'Active across',
       waitingPayment: 'tables awaiting payment',
@@ -4032,6 +4040,10 @@ export const translations = {
 
       // Overview stats subtexts & units
       allShiftsCalc: '모든 교대 근무 기준',
+      yesterdayRevenueLabel: '어제 매출',
+      yesterdayOrdersLabel: '어제 주문',
+      newDayNotice: '오늘은 새 날이라 아직 주문이 없습니다. 이전 데이터는 안전하게 보관되어 있습니다.',
+      viewLast7Days: '최근 7일 보기 →',
       ordersUnit: '주문',
       activeOnTables: '활동 중',
       waitingPayment: '테이블 결제 대기',
@@ -5479,6 +5491,10 @@ export const translations = {
 
       // Overview stats subtexts & units
       allShiftsCalc: 'По всем сменам',
+      yesterdayRevenueLabel: 'Выручка вчера',
+      yesterdayOrdersLabel: 'Заказы вчера',
+      newDayNotice: 'Сегодня новый день, заказов пока нет. Данные за предыдущие дни сохранены.',
+      viewLast7Days: 'Посмотреть за 7 дней →',
       ordersUnit: 'заказов',
       activeOnTables: 'Активно на',
       waitingPayment: 'столов ожидают оплаты',

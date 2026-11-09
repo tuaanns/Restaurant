@@ -249,6 +249,8 @@ class AdminController extends Controller
                 'empty_tables' => $emptyTables,
                 'revenue_growth' => $revenueGrowth,
                 'orders_growth' => $ordersGrowth,
+                'yesterday_revenue' => (float)$yesterdayRevenue,
+                'yesterday_orders_count' => $yesterdayOrdersCount,
                 'top_products_today' => $topProductsToday,
                 'top_products' => $topProductsAllTime,
                 'payment_breakdown_today' => $paymentMethodsToday,

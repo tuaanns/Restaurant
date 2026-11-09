@@ -19,7 +19,7 @@ export function TransferTableModal({
 
   const handleTransfer = () => {
     if (!selectedTargetId) return;
-    onConfirmTransfer(currentTable.id, selectedTargetId);
+    onConfirmTransfer(currentTable ? currentTable.id : null, selectedTargetId);
     onClose();
   };
 
@@ -74,7 +74,7 @@ export function TransferTableModal({
             borderRadius: '8px',
             border: '1px solid #e2e8f0'
           }}>
-            {t('transfer.from')}: <strong style={{ color: '#1B5E20' }}>{formatTableName(currentTable?.name)}</strong>
+            {t('transfer.from')}: <strong style={{ color: '#1B5E20' }}>{currentTable ? formatTableName(currentTable.name) : (t('order.newTab') || 'Hóa đơn mới')}</strong>
             {' → '}{t('transfer.selectTarget')}
           </div>
 

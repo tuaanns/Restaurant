@@ -1,11 +1,11 @@
 import React from 'react';
-import { Store, ShoppingBag, Bike, Video, PhoneCall, Globe } from 'lucide-react';
+import { Store, ShoppingBag, ShoppingCart, Bike, Video, PhoneCall, Globe } from 'lucide-react';
 
-export const SALES_CHANNELS = [
+export const DEFAULT_SALES_CHANNELS = [
   {
     id: 'direct',
     label: {
-      vi: 'Khách trực tiếp',
+      vi: 'Khách trực tiếp (Tại quán)',
       en: 'Dine-in / Direct',
       ko: '매장 방문',
       ru: 'В заведении'
@@ -162,13 +162,63 @@ export const SALES_CHANNELS = [
   }
 ];
 
+export const SALES_CHANNELS = DEFAULT_SALES_CHANNELS;
+
+const STORAGE_KEY = 'aura_custom_sales_channels';
+
+export function getCustomSalesChannels() {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+export function getAllSalesChannels() {
+  const custom = getCustomSalesChannels();
+  return [...DEFAULT_SALES_CHANNELS, ...custom];
+}
+
+export function addCustomSalesChannel(channel) {
+  const custom = getCustomSalesChannels();
+  const id = channel.id || `custom_${Date.now()}`;
+  const newChannel = {
+    ...channel,
+    id,
+    isCustom: true
+  };
+  const updated = [...custom, newChannel];
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('aura_sales_channels_updated', { detail: updated }));
+  } catch (e) {}
+  return newChannel;
+}
+
+export function deleteCustomSalesChannel(channelId) {
+  const custom = getCustomSalesChannels();
+  const updated = custom.filter(c => c.id !== channelId);
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+    window.dispatchEvent(new CustomEvent('aura_sales_channels_updated', { detail: updated }));
+  } catch (e) {}
+}
+
 export function getSalesChannel(channelId) {
-  return SALES_CHANNELS.find(c => c.id === channelId) || SALES_CHANNELS[0];
+  const all = getAllSalesChannels();
+  return all.find(c => c.id === channelId) || all[0];
 }
 
 export function formatChannelName(channelId, lang = 'vi', short = false) {
   const channel = getSalesChannel(channelId);
-  const target = short ? channel.shortLabel : channel.label;
+  if (!channel) return channelId || '';
+  if (typeof channel.label === 'string') {
+    return channel.label;
+  }
+  const target = short ? (channel.shortLabel || channel.label) : channel.label;
+  if (typeof target === 'string') return target;
   return (target && target[lang]) || (target && target.vi) || channelId || '';
 }
 
@@ -178,6 +228,8 @@ export function renderChannelIcon(iconType, size = 14, color = 'currentColor') {
       return React.createElement(Store, { size, color });
     case 'bag':
       return React.createElement(ShoppingBag, { size, color });
+    case 'cart':
+      return React.createElement(ShoppingCart, { size, color });
     case 'bike':
       return React.createElement(Bike, { size, color });
     case 'video':

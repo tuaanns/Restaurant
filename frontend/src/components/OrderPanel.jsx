@@ -26,10 +26,13 @@ import { useLanguage } from '../i18n/LanguageContext';
 import { getRestaurantSettings } from '../utils/restaurantSettings';
 import {
   SALES_CHANNELS,
+  getAllSalesChannels,
+  deleteCustomSalesChannel,
   getSalesChannel,
   formatChannelName,
   renderChannelIcon
 } from '../utils/salesChannelsHelper';
+import { AddSalesChannelModal } from './modals/AddSalesChannelModal';
 
 export function OrderPanel({
   selectedTable,
@@ -68,7 +71,28 @@ export function OrderPanel({
 }) {
   const { t, lang, formatTableName, formatDishName, formatPromoName } = useLanguage();
   const [isChannelDropdownOpen, setIsChannelDropdownOpen] = useState(false);
+  const [isAddChannelModalOpen, setIsAddChannelModalOpen] = useState(false);
+  const [allChannels, setAllChannels] = useState(() => getAllSalesChannels());
   const channelDropdownRef = useRef(null);
+
+  // Sync custom channels if updated anywhere
+  useEffect(() => {
+    function handleChannelsUpdated() {
+      setAllChannels(getAllSalesChannels());
+    }
+    window.addEventListener('aura_sales_channels_updated', handleChannelsUpdated);
+    return () => window.removeEventListener('aura_sales_channels_updated', handleChannelsUpdated);
+  }, []);
+
+  const handleChannelCreated = (newChannel) => {
+    setAllChannels(getAllSalesChannels());
+    if (onSelectChannel) {
+      onSelectChannel(newChannel.id);
+    }
+    if (onShowToast) {
+      onShowToast(t('order.channelAddSuccess') || 'Đã thêm kênh bán hàng mới thành công!', 'success');
+    }
+  };
 
   // Close channel dropdown on outside click
   useEffect(() => {
@@ -369,73 +393,48 @@ export function OrderPanel({
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          {selectedTable ? (
+          <button
+            id="btn-transfer-table"
+            onClick={onOpenTransferModal}
+            title={t('order.transfer') || 'Chuyển bàn'}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '6px 10px',
+              borderRadius: '6px',
+              border: '1px solid #e2e8f0',
+              backgroundColor: '#ffffff',
+              fontSize: '12px',
+              fontWeight: 600,
+              color: '#334155',
+              cursor: 'pointer'
+            }}
+          >
+            <ArrowLeftRight size={13} />
+            <span>{t('order.transfer') || 'Chuyển bàn'}</span>
+          </button>
+
+          {isMobile && onBackToTables && (
             <button
-              id="btn-transfer-table"
-              onClick={onOpenTransferModal}
-              title={t('order.transfer')}
+              onClick={onBackToTables}
+              title="Chọn bàn trên sơ đồ"
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '5px',
-                padding: '6px 10px',
+                gap: '4px',
+                padding: '6px 9px',
                 borderRadius: '6px',
-                border: '1px solid #e2e8f0',
+                border: '1px solid #cbd5e1',
                 backgroundColor: '#ffffff',
                 fontSize: '12px',
                 fontWeight: 600,
-                color: '#334155'
+                color: '#334155',
+                cursor: 'pointer'
               }}
             >
-              <ArrowLeftRight size={13} />
-              <span>{t('order.transfer')}</span>
+              <span>{t('order.pickTable') || 'Chọn bàn'}</span>
             </button>
-          ) : (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-              {onSelectTakeawayTable && (
-                <button
-                  onClick={onSelectTakeawayTable}
-                  title="Gán đơn này là Bán mang về"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '5px 9px',
-                    borderRadius: '6px',
-                    border: '1px solid #bae6fd',
-                    backgroundColor: '#e0f2fe',
-                    fontSize: '11.5px',
-                    fontWeight: 700,
-                    color: '#0284c7',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <ShoppingBag size={12} />
-                  <span>{t('order.quickTakeaway') || 'Mang về'}</span>
-                </button>
-              )}
-              {isMobile && onBackToTables && (
-                <button
-                  onClick={onBackToTables}
-                  title="Chọn bàn trên sơ đồ"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    padding: '5px 9px',
-                    borderRadius: '6px',
-                    border: '1px solid #cbd5e1',
-                    backgroundColor: '#ffffff',
-                    fontSize: '11.5px',
-                    fontWeight: 600,
-                    color: '#334155',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <span>{t('order.pickTable') || 'Chọn bàn'}</span>
-                </button>
-              )}
-            </div>
           )}
 
           <button
@@ -456,9 +455,9 @@ export function OrderPanel({
         </div>
       </div>
 
-      {/* ═══ 3. SUBHEADER: Customer, Sales Channel Selector & Price Tier ═══ */}
+      {/* ═══ 3. SUBHEADER: Customer, Price Tier & Compact Sales Channel Dropdown Icon ═══ */}
       <div style={{
-        padding: '8px 16px',
+        padding: '8px 14px',
         backgroundColor: '#f8fafc',
         borderBottom: '1px solid #f1f5f9',
         display: 'flex',
@@ -481,8 +480,10 @@ export function OrderPanel({
             overflow: 'hidden',
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
-            flex: 1
+            flex: 1,
+            minWidth: 0
           }}
+          title={order?.customer ? `${order.customer.name} (${order.customer.phone || ''})` : (t('customer.title') + ' (F4)')}
         >
           <User size={13} color="#64748b" style={{ flexShrink: 0 }} />
           <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -490,128 +491,211 @@ export function OrderPanel({
           </span>
         </div>
 
-        {/* Sales Channel Selector Dropdown */}
-        <div style={{ position: 'relative' }} ref={channelDropdownRef}>
-          <button
-            type="button"
-            id="btn-sales-channel"
-            onClick={() => setIsChannelDropdownOpen(prev => !prev)}
-            title={t('order.salesChannel') || 'Chọn kênh bán'}
+        {/* Right side: Price Tier & Compact Sales Channel Shopping Bag Button */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+          {/* Price Tier Selector */}
+          <div
+            title={t('order.standardPriceList') || 'Bảng giá chung (Niêm yết)'}
             style={{
-              display: 'inline-flex',
+              display: 'flex',
               alignItems: 'center',
-              gap: '5px',
-              padding: '4px 8px',
-              borderRadius: '6px',
-              backgroundColor: currentChannel.bgColor,
-              border: `1px solid ${currentChannel.borderColor}`,
-              color: currentChannel.color,
+              gap: '4px',
+              color: '#64748b',
               fontSize: '11.5px',
-              fontWeight: 700,
+              fontWeight: 500,
               cursor: 'pointer',
-              transition: 'all 0.15s ease'
+              whiteSpace: 'nowrap'
             }}
           >
-            {renderChannelIcon(currentChannel.iconType, 13, currentChannel.color)}
-            <span>{formatChannelName(salesChannel, lang, true)}</span>
-            <ChevronDown size={11} color={currentChannel.color} />
-          </button>
+            <span>{t('order.standardPriceList') || 'Bảng giá chung (Niêm yết)'}</span>
+            <ChevronDown size={11} color="#94a3b8" />
+          </div>
 
-          {/* Sales Channel Menu Popover */}
-          {isChannelDropdownOpen && (
-            <div style={{
-              position: 'absolute',
-              right: 0,
-              top: 'calc(100% + 4px)',
-              width: '240px',
-              backgroundColor: '#ffffff',
-              borderRadius: '10px',
-              border: '1px solid #e2e8f0',
-              boxShadow: '0 12px 28px -4px rgba(0,0,0,0.18)',
-              padding: '6px',
-              zIndex: 100
-            }}>
+          {/* Compact Sales Channel Shopping Bag Icon Dropdown */}
+          <div style={{ position: 'relative' }} ref={channelDropdownRef}>
+            <button
+              type="button"
+              id="btn-sales-channel"
+              onClick={() => setIsChannelDropdownOpen(prev => !prev)}
+              title={`${t('order.salesChannel') || 'Kênh bán hàng'}: ${formatChannelName(salesChannel, lang)}`}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '4px',
+                height: '28px',
+                padding: '0 8px',
+                borderRadius: '6px',
+                backgroundColor: currentChannel.bgColor || '#f8fafc',
+                border: `1px solid ${currentChannel.borderColor || '#cbd5e1'}`,
+                color: currentChannel.color || '#334155',
+                cursor: 'pointer',
+                transition: 'all 0.15s ease'
+              }}
+            >
+              <ShoppingBag size={14} color={currentChannel.color || '#334155'} />
+              <ChevronDown size={11} color={currentChannel.color || '#64748b'} />
+            </button>
+
+            {/* Sales Channel Menu Popover */}
+            {isChannelDropdownOpen && (
               <div style={{
-                padding: '6px 10px',
-                fontSize: '10.5px',
-                fontWeight: 800,
-                color: '#64748b',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                borderBottom: '1px solid #f1f5f9',
-                marginBottom: '4px'
+                position: 'absolute',
+                right: 0,
+                top: 'calc(100% + 4px)',
+                width: '260px',
+                maxHeight: '380px',
+                backgroundColor: '#ffffff',
+                borderRadius: '10px',
+                border: '1px solid #e2e8f0',
+                boxShadow: '0 12px 28px -4px rgba(0,0,0,0.18)',
+                padding: '6px',
+                zIndex: 100,
+                display: 'flex',
+                flexDirection: 'column'
               }}>
-                {t('order.salesChannel') || 'KÊNH BÁN HÀNG'}
-              </div>
+                <div style={{
+                  padding: '6px 10px',
+                  fontSize: '11px',
+                  fontWeight: 800,
+                  color: '#64748b',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  borderBottom: '1px solid #f1f5f9',
+                  marginBottom: '4px',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <span>{t('order.salesChannel') || 'Kênh Bán Hàng'}</span>
+                  <span style={{ fontSize: '10.5px', fontWeight: 600, color: currentChannel.color }}>
+                    {formatChannelName(salesChannel, lang, true)}
+                  </span>
+                </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxHeight: '300px', overflowY: 'auto' }}>
-                {SALES_CHANNELS.map((ch) => {
-                  const isSelected = ch.id === salesChannel;
-                  return (
-                    <div
-                      key={ch.id}
-                      onClick={() => {
-                        if (onSelectChannel) onSelectChannel(ch.id);
-                        setIsChannelDropdownOpen(false);
-                      }}
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        padding: '7px 10px',
-                        borderRadius: '7px',
-                        backgroundColor: isSelected ? ch.bgColor : 'transparent',
-                        color: isSelected ? ch.color : '#1e293b',
-                        cursor: 'pointer',
-                        fontSize: '12px',
-                        fontWeight: isSelected ? 800 : 500,
-                        transition: 'background-color 0.12s'
-                      }}
-                      onMouseEnter={(e) => {
-                        if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc';
-                      }}
-                      onMouseLeave={(e) => {
-                        if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
-                      }}
-                    >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <div style={{
-                          width: '24px',
-                          height: '24px',
-                          borderRadius: '6px',
-                          backgroundColor: ch.bgColor,
-                          color: ch.color,
+                <div style={{ flex: 1, overflowY: 'auto', maxHeight: '250px' }}>
+                  {allChannels.map((ch) => {
+                    const isSelected = ch.id === salesChannel;
+                    return (
+                      <div
+                        key={ch.id}
+                        onClick={() => {
+                          if (onSelectChannel) onSelectChannel(ch.id);
+                          setIsChannelDropdownOpen(false);
+                        }}
+                        style={{
+                          width: '100%',
                           display: 'flex',
                           alignItems: 'center',
-                          justifyContent: 'center',
-                          border: `1px solid ${ch.borderColor}`
-                        }}>
-                          {renderChannelIcon(ch.iconType, 13, ch.color)}
+                          justifyContent: 'space-between',
+                          padding: '7px 10px',
+                          borderRadius: '6px',
+                          border: isSelected ? `1.5px solid ${ch.borderColor}` : '1px solid transparent',
+                          backgroundColor: isSelected ? ch.bgColor : 'transparent',
+                          color: ch.color,
+                          cursor: 'pointer',
+                          fontSize: '12px',
+                          fontWeight: isSelected ? 800 : 500,
+                          marginBottom: '2px',
+                          transition: 'background-color 0.12s ease',
+                          boxSizing: 'border-box'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (!isSelected) e.currentTarget.style.backgroundColor = '#f8fafc';
+                        }}
+                        onMouseLeave={(e) => {
+                          if (!isSelected) e.currentTarget.style.backgroundColor = 'transparent';
+                        }}
+                      >
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{
+                            width: '24px',
+                            height: '24px',
+                            borderRadius: '6px',
+                            backgroundColor: ch.bgColor,
+                            color: ch.color,
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            border: `1px solid ${ch.borderColor}`,
+                            flexShrink: 0
+                          }}>
+                            {renderChannelIcon(ch.iconType, 13, ch.color)}
+                          </div>
+                          <div>
+                            <div>{formatChannelName(ch.id, lang)}</div>
+                          </div>
                         </div>
-                        <div>
-                          <div>{formatChannelName(ch.id, lang)}</div>
+
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          {isSelected && <CheckCircle2 size={14} color={ch.color} />}
+                          {ch.isCustom && (
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (window.confirm(t('order.channelDeleteConfirm') || 'Bạn có chắc muốn xóa kênh bán này không?')) {
+                                  deleteCustomSalesChannel(ch.id);
+                                  setAllChannels(getAllSalesChannels());
+                                  if (salesChannel === ch.id && onSelectChannel) {
+                                    onSelectChannel('direct');
+                                  }
+                                }
+                              }}
+                              title="Xóa kênh bán"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                padding: '2px',
+                                color: '#94a3b8',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center'
+                              }}
+                            >
+                              <X size={12} />
+                            </button>
+                          )}
                         </div>
                       </div>
-                      {isSelected && <CheckCircle2 size={14} color={ch.color} />}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-        </div>
+                    );
+                  })}
+                </div>
 
-        {/* Price Tier Selector */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          color: '#64748b',
-          cursor: 'pointer',
-          flexShrink: 0
-        }}>
-          <span>{t('order.standardPriceList')}</span>
-          <ChevronDown size={12} />
+                {/* + Thêm kênh bán */}
+                <div style={{ borderTop: '1px solid #f1f5f9', marginTop: '4px', paddingTop: '4px' }}>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsAddChannelModalOpen(true);
+                      setIsChannelDropdownOpen(false);
+                    }}
+                    style={{
+                      width: '100%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      padding: '8px 10px',
+                      borderRadius: '6px',
+                      border: '1px dashed #A5D6A7',
+                      backgroundColor: '#E8F5E9',
+                      color: '#1B5E20',
+                      cursor: 'pointer',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      transition: 'all 0.15s ease'
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#C8E6C9'}
+                    onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#E8F5E9'}
+                  >
+                    <Plus size={14} color="#1B5E20" />
+                    <span>{t('order.addSalesChannel') || '+ Thêm kênh bán mới'}</span>
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -1142,6 +1226,13 @@ export function OrderPanel({
           </span>
         </button>
       </div>
+
+      {/* Modal Thêm Kênh Bán Hàng Mới */}
+      <AddSalesChannelModal
+        isOpen={isAddChannelModalOpen}
+        onClose={() => setIsAddChannelModalOpen(false)}
+        onCreated={handleChannelCreated}
+      />
     </div>
   );
 }

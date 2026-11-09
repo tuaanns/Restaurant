@@ -1068,26 +1068,32 @@ export function App() {
 
   // Chuyển Bàn
   const handleConfirmTransfer = async (fromId, toId) => {
-    try {
-      await api.transferTable(fromId, toId);
-      loadData();
-    } catch (err) {}
+    if (fromId) {
+      try {
+        await api.transferTable(fromId, toId);
+        loadData();
+      } catch (err) {}
+    }
 
     const target = tables.find(t => t.id === toId);
     if (target) {
+      const hasItems = order?.items && order.items.length > 0;
+      const targetStatus = selectedTable ? selectedTable.status : (hasItems ? 'occupied' : 'empty');
+      const targetOrder = (selectedTable && selectedTable.order) ? selectedTable.order : order;
+
       setTables(prev => prev.map(t => {
         if (t.id === toId) {
           return {
             ...t,
-            status: selectedTable.status,
-            guest_count: selectedTable.guest_count,
-            started_at: selectedTable.started_at,
-            duration: selectedTable.duration,
-            notes: selectedTable.notes,
-            order: selectedTable.order
+            status: targetStatus,
+            guest_count: selectedTable?.guest_count || target.capacity || 4,
+            started_at: selectedTable?.started_at || new Date().toISOString(),
+            duration: selectedTable?.duration || null,
+            notes: selectedTable?.notes || null,
+            order: targetOrder
           };
         }
-        if (t.id === fromId) {
+        if (fromId && t.id === fromId) {
           return {
             ...t,
             status: 'empty',
@@ -1103,12 +1109,24 @@ export function App() {
 
       setSelectedTable({
         ...target,
-        status: selectedTable.status,
-        guest_count: selectedTable.guest_count,
-        started_at: selectedTable.started_at,
-        duration: selectedTable.duration,
-        notes: selectedTable.notes,
+        status: targetStatus,
+        guest_count: selectedTable?.guest_count || target.capacity || 4,
+        started_at: selectedTable?.started_at || new Date().toISOString(),
+        duration: selectedTable?.duration || null,
+        notes: selectedTable?.notes || null,
+        order: targetOrder
       });
+
+      setOrderTabs(prev => prev.map(tab => {
+        if (tab.id === activeTabId) {
+          return {
+            ...tab,
+            table: target,
+            title: target.name
+          };
+        }
+        return tab;
+      }));
     }
   };
 

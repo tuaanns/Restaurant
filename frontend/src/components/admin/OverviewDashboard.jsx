@@ -704,42 +704,17 @@ export function OverviewDashboard({
             border: '1px solid #BBF7D0',
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'space-between',
-            flexWrap: 'wrap',
-            gap: '10px'
+            gap: '8px',
+            fontSize: '12.5px',
+            color: '#166534'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12.5px', color: '#166534' }}>
-              <Info size={16} color="#16a34a" style={{ flexShrink: 0 }} />
-              <span>{t('admin.newDayNotice') || 'Hôm nay là ngày mới chưa phát sinh đơn hàng. Dữ liệu các ngày trước vẫn được lưu đầy đủ.'}</span>
-              {Number(stats?.yesterday_revenue || 0) > 0 && (
-                <span style={{ fontWeight: 700, color: '#15803d' }}>
-                  ({t('admin.yesterdayRevenueLabel') || 'Doanh thu hôm qua'}: {formatMoney(stats.yesterday_revenue)})
-                </span>
-              )}
-            </div>
-            <button
-              type="button"
-              onClick={() => setTimeRange('7days')}
-              style={{
-                border: 'none',
-                background: '#16a34a',
-                color: '#ffffff',
-                padding: '5px 12px',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '4px',
-                boxShadow: '0 1px 2px rgba(0,0,0,0.05)',
-                transition: 'background-color 0.15s ease'
-              }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#15803d'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
-            >
-              <span>{t('admin.viewLast7Days') || 'Xem 7 ngày qua →'}</span>
-            </button>
+            <Info size={16} color="#16a34a" style={{ flexShrink: 0 }} />
+            <span>{t('admin.newDayNotice') || 'Hôm nay là ngày mới chưa phát sinh đơn hàng. Dữ liệu các ngày trước vẫn được lưu đầy đủ.'}</span>
+            {Number(stats?.yesterday_revenue || 0) > 0 && (
+              <span style={{ fontWeight: 700, color: '#15803d' }}>
+                ({t('admin.yesterdayRevenueLabel') || 'Doanh thu hôm qua'}: {formatMoney(stats.yesterday_revenue)})
+              </span>
+            )}
           </div>
         )}
 

@@ -166,7 +166,7 @@ export function App() {
   const [tables, setTables] = useState(initialMockData.tables);
   const [summary, setSummary] = useState(initialMockData.summary);
   const [menuCategories, setMenuCategories] = useState(initialMockData.menuList);
-  const [customers, setCustomers] = useState([]);
+  const [customers, setCustomers] = useState(() => initialMockData.customers || []);
 
   // Selected table & order (Ban đầu chưa chọn bàn nào, chỉ khi click chọn bàn mới hiển thị)
   const [selectedTable, setSelectedTable] = useState(null);

@@ -25,14 +25,19 @@ export function CustomerModal({
     return tier;
   };
 
-  const defaultCustomers = customers.length > 0 ? customers : [
-    { id: 1, name: 'Anh Hoàng', phone: '0912.888.666', customer_group: 'VIP' },
-    { id: 2, name: 'Chị Phương Linh', phone: '0988.666.888', customer_group: 'VIP' },
-    { id: 3, name: t('customer.walkin') || 'Khách vãng lai', phone: '-', customer_group: 'Khách lẻ' },
+  const defaultFallback = [
+    { id: 1, name: 'Tuấn', phone: '0949085842', customer_group: 'Khách VIP', code: 'KH00001' },
+    { id: 2, name: 'Anh Hoàng', phone: '0912.888.666', customer_group: 'VIP', code: 'KH00002' },
+    { id: 3, name: 'Chị Phương Linh', phone: '0988.666.888', customer_group: 'VIP', code: 'KH00003' },
+    { id: 4, name: t('customer.walkin') || 'Khách vãng lai', phone: '-', customer_group: 'Khách lẻ', code: 'KH00004' },
   ];
 
-  const filtered = defaultCustomers.filter(c =>
-    c.name.toLowerCase().includes(search.toLowerCase()) ||
+  const sourceCustomers = (customers && customers.length > 0) ? customers : defaultFallback;
+  const hasTuan = sourceCustomers.some(c => (c.phone && c.phone.includes('0949085842')) || (c.name && c.name.toLowerCase() === 'tuấn'));
+  const allCustomers = hasTuan ? sourceCustomers : [defaultFallback[0], ...sourceCustomers];
+
+  const filtered = allCustomers.filter(c =>
+    (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
     (c.phone && c.phone.includes(search))
   );
 

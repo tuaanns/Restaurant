@@ -20,8 +20,34 @@ export const initialMockData = {
   tables: [
     // Bàn MANG VỀ - luôn đứng đầu danh sách
     { id: 4, area_id: 1, area_code: 'floor_1', name: 'MANG VỀ', capacity: 1, status: 'empty', guest_count: 0, duration: null, notes: null, is_takeaway: true, is_vip: false, order: null },
-    // Tầng 1: 8 bàn trống hoàn toàn
-    { id: 1, area_id: 1, area_code: 'floor_1', name: 'BÀN 01', capacity: 4, status: 'empty', guest_count: 0, duration: null, notes: null, is_takeaway: false, is_vip: false, order: null },
+    // Tầng 1: 8 bàn trống
+    {
+      id: 1,
+      area_id: 1,
+      area_code: 'floor_1',
+      name: 'BÀN 01',
+      capacity: 4,
+      status: 'empty',
+      guest_count: 0,
+      duration: null,
+      notes: null,
+      is_takeaway: false,
+      is_vip: false,
+      order: {
+        id: 101,
+        table_id: 1,
+        order_code: 'ORD-BAN01',
+        customer: { id: 1, name: 'Tuấn', phone: '0949085842', customer_group: 'Khách VIP' },
+        subtotal: 0,
+        discount_percent: 0,
+        discount_amount: 0,
+        vat_percent: 8,
+        vat_amount: 0,
+        total_amount: 0,
+        sales_channel: 'direct',
+        items: []
+      }
+    },
     { id: 2, area_id: 1, area_code: 'floor_1', name: 'BÀN 02', capacity: 2, status: 'empty', guest_count: 0, duration: null, notes: null, is_takeaway: false, is_vip: false, order: null },
     { id: 3, area_id: 1, area_code: 'floor_1', name: 'BÀN 03', capacity: 4, status: 'empty', guest_count: 0, duration: null, notes: null, is_takeaway: false, is_vip: false, order: null },
     { id: 5, area_id: 1, area_code: 'floor_1', name: 'BÀN 04', capacity: 4, status: 'empty', guest_count: 0, duration: null, notes: null, is_takeaway: false, is_vip: false, order: null },
@@ -52,6 +78,12 @@ export const initialMockData = {
     { id: 24, area_id: 4, area_code: 'garden', name: 'VƯỜN 4', capacity: 6, status: 'empty', guest_count: 0, duration: null, notes: null, is_takeaway: false, is_vip: false, order: null },
   ],
   defaultOrderTable3: null,
+  customers: [
+    { id: 1, name: 'Tuấn', phone: '0949085842', customer_group: 'Khách VIP', code: 'KH00001' },
+    { id: 2, name: 'Anh Hoàng', phone: '0912.888.666', customer_group: 'VIP', code: 'KH00002' },
+    { id: 3, name: 'Chị Phương Linh', phone: '0988.666.888', customer_group: 'VIP', code: 'KH00003' },
+    { id: 4, name: 'Khách vãng lai', phone: '-', customer_group: 'Khách lẻ', code: 'KH00004' },
+  ],
   menuList: [
   {
     "id": 1,

@@ -132,6 +132,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
 
   Future<void> _loadTables() async {
     setState(() => _isLoading = true);
+    ApiService.fetchDefaultBankAccount();
     final data = await ApiService.fetchTables();
     if (mounted) {
       // Đảm bảo bàn MANG VỀ (isTakeaway) luôn đứng đầu danh sách

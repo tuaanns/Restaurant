@@ -24,6 +24,30 @@ class ApiService {
   // In-memory active order cache for offline/instant responsiveness (bắt đầu trống hết)
   static final Map<int, List<OrderItemData>> _tableItemsCache = {};
 
+  // Cached Bank Account
+  static BankAccount? cachedBankAccount;
+
+  // --- DEFAULT BANK ACCOUNT FOR VIETQR ---
+  static Future<BankAccount> fetchDefaultBankAccount() async {
+    if (cachedBankAccount != null) return cachedBankAccount!;
+    try {
+      final response = await http
+          .get(Uri.parse('$baseUrl/default-bank-account'))
+          .timeout(const Duration(seconds: 4));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['bank_account'] != null) {
+          cachedBankAccount = BankAccount.fromJson(data['bank_account']);
+          return cachedBankAccount!;
+        }
+      }
+    } catch (_) {}
+
+    cachedBankAccount = BankAccount.defaultAccount();
+    return cachedBankAccount!;
+  }
+
   // --- AUTHENTICATION ---
   static Future<User> login(String username, String password) async {
     final u = username.toLowerCase().trim();

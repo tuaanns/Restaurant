@@ -28,12 +28,20 @@ class _PaymentDialogState extends State<PaymentDialog> {
   String _selectedMethod = 'cash'; // 'cash', 'qr_banking', 'card'
   int _cashGiven = 0;
   bool _isProcessing = false;
+  BankAccount _bankAccount = ApiService.cachedBankAccount ?? BankAccount.defaultAccount();
 
   @override
   void initState() {
     super.initState();
     final total = _calcTotal();
     _cashGiven = total;
+    ApiService.fetchDefaultBankAccount().then((bank) {
+      if (mounted) {
+        setState(() {
+          _bankAccount = bank;
+        });
+      }
+    });
   }
 
   int _calcTotal() {
@@ -266,37 +274,49 @@ class _PaymentDialogState extends State<PaymentDialog> {
                     child: Column(
                       children: [
                         Container(
-                          width: 140,
-                          height: 140,
+                          padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: const Color(0xFF86EFAC)),
                           ),
-                          alignment: Alignment.center,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(Icons.qr_code_2, size: 80, color: Color(0xFF047857)),
-                              Text(
-                                'QUÁN TRÀ - ${I18n.formatTableName(widget.table.name)}',
-                                style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold),
-                              ),
-                            ],
+                          child: Image.network(
+                            _bankAccount.getVietQrUrl(totalAmount, 'QUAN TRA ${I18n.formatTableName(widget.table.name)}'),
+                            width: 145,
+                            height: 145,
+                            fit: BoxFit.contain,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Image.network(
+                                _bankAccount.getFallbackQrUrl(totalAmount, 'QUAN TRA ${I18n.formatTableName(widget.table.name)}'),
+                                width: 145,
+                                height: 145,
+                                fit: BoxFit.contain,
+                              );
+                            },
                           ),
                         ),
                         const SizedBox(height: 10),
-                        const Text(
-                          'Ngân hàng: MB Bank (Quân Đội)',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF065F46)),
+                        Text(
+                          _bankAccount.bankName,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF0F172A)),
                         ),
-                        const Text(
-                          'STK: 0901888999 - Chủ TK: QUAN TRA',
-                          style: TextStyle(fontSize: 11, color: Color(0xFF047857)),
+                        const SizedBox(height: 3),
+                        Text(
+                          '${I18n.t('accountNumber')}: ${_bankAccount.accountNumber}  •  ${I18n.t('accountOwner')}: ${_bankAccount.accountName}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontSize: 11.5, color: Color(0xFF475569)),
                         ),
+                        const SizedBox(height: 2),
+                        Text(
+                          '${I18n.t('transferContent')}: QUAN TRA ${I18n.formatTableName(widget.table.name)}',
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11.5, color: Color(0xFF1B5E20)),
+                        ),
+                        const SizedBox(height: 4),
                         Text(
                           'Số tiền: ${currencyFormat.format(totalAmount)}',
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF047857)),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1B5E20)),
                         ),
                       ],
                     ),

@@ -5,7 +5,7 @@ import '../services/api_service.dart';
 import '../services/i18n_service.dart';
 import '../services/print_service.dart';
 
-class PreBillDialog extends StatelessWidget {
+class PreBillDialog extends StatefulWidget {
   final DiningTable table;
   final List<OrderItemData> items;
   final PromotionModel? promotion;
@@ -18,6 +18,25 @@ class PreBillDialog extends StatelessWidget {
     this.promotion,
     required this.onPrinted,
   });
+
+  @override
+  State<PreBillDialog> createState() => _PreBillDialogState();
+}
+
+class _PreBillDialogState extends State<PreBillDialog> {
+  BankAccount _bankAccount = ApiService.cachedBankAccount ?? BankAccount.defaultAccount();
+
+  @override
+  void initState() {
+    super.initState();
+    ApiService.fetchDefaultBankAccount().then((bank) {
+      if (mounted) {
+        setState(() {
+          _bankAccount = bank;
+        });
+      }
+    });
+  }
 
   /// Chuyển đổi số tiền thành chữ Tiếng Việt chuẩn theo văn phong hóa đơn tài chính
   static String _readNumberGroup(int n, bool isLastGroup) {
@@ -92,6 +111,12 @@ class PreBillDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final table = widget.table;
+    final items = widget.items;
+    final promotion = widget.promotion;
+    final onPrinted = widget.onPrinted;
+    final bank = _bankAccount;
+
     final numFormat = NumberFormat('#,###', 'en_US');
     final now = DateTime.now();
     final dateStr = '${now.day}/${now.month}/${now.year}';
@@ -559,21 +584,64 @@ class PreBillDialog extends StatelessWidget {
                           ),
                           const SizedBox(height: 12),
 
-                          // MÃ VIETQR CHUYỂN KHOẢN (AURA RESTAURANT)
+                          // MÃ VIETQR CHUYỂN KHOẢN (ĐỒNG BỘ THEO WEBSITE & CSDL)
                           Center(
-                            child: Image.network(
-                              'https://img.vietqr.io/image/970422-19006888-compact2.png?amount=$total&addInfo=${Uri.encodeComponent('QUAN TRA BAN ${tableBadge['num']}')}&accountName=QUAN%20TRA',
-                              width: 140,
-                              height: 140,
-                              fit: BoxFit.contain,
-                              errorBuilder: (context, error, stackTrace) {
-                                return Image.network(
-                                  'https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${Uri.encodeComponent('QUAN TRA PAYMENT AMOUNT $total')}',
-                                  width: 140,
-                                  height: 140,
-                                  fit: BoxFit.contain,
-                                );
-                              },
+                            child: Container(
+                              padding: const EdgeInsets.all(4),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                              child: Image.network(
+                                bank.getVietQrUrl(total, 'QUAN TRA BAN ${tableBadge['num']}'),
+                                width: 140,
+                                height: 140,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Image.network(
+                                    bank.getFallbackQrUrl(total, 'QUAN TRA BAN ${tableBadge['num']}'),
+                                    width: 140,
+                                    height: 140,
+                                    fit: BoxFit.contain,
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Center(
+                            child: Text(
+                              I18n.t('scanQrToPay'),
+                              style: const TextStyle(
+                                fontFamily: 'serif',
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 2),
+                          Center(
+                            child: Text(
+                              '${bank.bankCode} - ${I18n.t('accountNumber')}: ${bank.accountNumber}',
+                              style: const TextStyle(
+                                fontFamily: 'serif',
+                                fontSize: 10.5,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Center(
+                            child: Text(
+                              '${I18n.t('accountOwner')}: ${bank.accountName.toUpperCase()}',
+                              style: const TextStyle(
+                                fontFamily: 'serif',
+                                fontSize: 10,
+                                color: Color(0xFF334155),
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                           const SizedBox(height: 10),
@@ -589,6 +657,18 @@ class PreBillDialog extends StatelessWidget {
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w500,
                                 color: Colors.black,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 3),
+                          const Center(
+                            child: Text(
+                              'Wifi: QUAN TRA - Pass: 88888888',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontFamily: 'serif',
+                                fontSize: 10,
+                                color: Color(0xFF64748B),
                               ),
                             ),
                           ),

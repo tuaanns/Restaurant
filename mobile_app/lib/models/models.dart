@@ -367,3 +367,71 @@ class ShiftStats {
 
   factory ShiftStats.empty() => ShiftStats();
 }
+
+class BankAccount {
+  final int id;
+  final String bankName;
+  final String bankCode;
+  final String bin;
+  final String accountNumber;
+  final String accountName;
+  final String branch;
+  final bool isDefault;
+  final bool isActive;
+  final String qrTemplate;
+
+  BankAccount({
+    required this.id,
+    required this.bankName,
+    required this.bankCode,
+    required this.bin,
+    required this.accountNumber,
+    required this.accountName,
+    this.branch = '',
+    this.isDefault = true,
+    this.isActive = true,
+    this.qrTemplate = 'compact2',
+  });
+
+  factory BankAccount.fromJson(Map<String, dynamic> json) {
+    return BankAccount(
+      id: json['id'] ?? 0,
+      bankName: json['bank_name'] ?? 'Ngân hàng Kỹ thương Việt Nam (Techcombank)',
+      bankCode: json['bank_code'] ?? 'TCB',
+      bin: json['bin'] ?? '970407',
+      accountNumber: json['account_number'] ?? '1116667770',
+      accountName: json['account_name'] ?? 'VO HOANG HAI',
+      branch: json['branch'] ?? '',
+      isDefault: json['is_default'] == true || json['is_default'] == 1,
+      isActive: json['is_active'] == true || json['is_active'] == 1,
+      qrTemplate: json['qr_template'] ?? 'compact2',
+    );
+  }
+
+  factory BankAccount.defaultAccount() {
+    return BankAccount(
+      id: 1,
+      bankName: 'Ngân hàng Kỹ thương Việt Nam (Techcombank)',
+      bankCode: 'TCB',
+      bin: '970407',
+      accountNumber: '1116667770',
+      accountName: 'VO HOANG HAI',
+      branch: 'Hội Sở',
+      isDefault: true,
+      isActive: true,
+      qrTemplate: 'compact2',
+    );
+  }
+
+  String getVietQrUrl(int amount, String transferContent) {
+    final cleanContent = transferContent.trim();
+    final cleanAccountName = accountName.trim();
+    final template = qrTemplate.isNotEmpty ? qrTemplate : 'compact2';
+    return 'https://img.vietqr.io/image/$bin-$accountNumber-$template.png?amount=$amount&addInfo=${Uri.encodeComponent(cleanContent)}&accountName=${Uri.encodeComponent(cleanAccountName)}';
+  }
+
+  String getFallbackQrUrl(int amount, String transferContent) {
+    return 'https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${Uri.encodeComponent('QUAN TRA $bankCode $accountNumber AMOUNT $amount CONTENT $transferContent')}';
+  }
+}
+

@@ -97,6 +97,7 @@ class PrintService {
     final defaultTitle = I18n.t('tablePrefix').isNotEmpty ? I18n.t('tablePrefix') : 'BÀN';
     String tableNumStr = table.name.replaceAll(RegExp(r'^BÀN\s*', caseSensitive: false), '').trim();
     if (tableNumStr.isEmpty) tableNumStr = '01';
+    final bank = ApiService.cachedBankAccount ?? BankAccount.defaultAccount();
 
     // Chuẩn khổ K80: chiều rộng 72mm-80mm
     const pageFormat = PdfPageFormat(
@@ -325,18 +326,21 @@ class PrintService {
               ),
               pw.SizedBox(height: 6),
 
-              // 5. MÃ VIETQR CHUYỂN KHOẢN (AURA RESTAURANT)
+              // 5. MÃ VIETQR CHUYỂN KHOẢN (ĐỒNG BỘ THEO WEBSITE & CSDL)
               pw.Center(
                 child: pw.BarcodeWidget(
                   barcode: pw.Barcode.qrCode(),
-                  data: 'https://img.vietqr.io/image/970422-19006888-compact2.png?amount=$total&addInfo=QUAN%20TRA%20BAN%20$tableNumStr&accountName=QUAN%20TRA',
+                  data: bank.getVietQrUrl(total, 'QUAN TRA BAN $tableNumStr'),
                   width: 70,
                   height: 70,
                 ),
               ),
               pw.SizedBox(height: 2),
               pw.Center(
-                child: pw.Text('VietQR - MB BANK (19006888)', style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold)),
+                child: pw.Text('VietQR - ${bank.bankCode} (${bank.accountNumber})', style: pw.TextStyle(fontSize: 7, fontWeight: pw.FontWeight.bold)),
+              ),
+              pw.Center(
+                child: pw.Text('Chủ TK: ${bank.accountName.toUpperCase()}', style: pw.TextStyle(fontSize: 6.5, fontWeight: pw.FontWeight.bold)),
               ),
               pw.SizedBox(height: 6),
 
@@ -350,7 +354,7 @@ class PrintService {
               pw.SizedBox(height: 1),
               pw.Center(
                 child: pw.Text(
-                  'Wifi: AURA_RESTAURANT - Pass: 88888888',
+                  'Wifi: QUAN TRA - Pass: 88888888',
                   style: const pw.TextStyle(fontSize: 7),
                 ),
               ),

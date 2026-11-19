@@ -57,40 +57,26 @@ class ApiService {
       }
       currentUser = User(
         id: 1,
-        name: 'Quản lý: Hoàng Nam',
+        name: 'Tuấn Admin',
         username: 'admin',
         role: 'admin',
         shift: 'Toàn ca (Quản lý nhà hàng)',
-        phone: '0901.888.999',
+        phone: '0949.085.842',
         email: 'admin@aura.vn',
       );
       return currentUser!;
-    } else if (u == 'minhtri' || u.contains('tri')) {
+    } else if (u == 'tuan' || u == 'thuhang') {
       if (p != '123456') {
         throw Exception('Mật khẩu không chính xác (mặc định: 123456)');
       }
       currentUser = User(
-        id: 3,
-        name: 'Minh Trí',
-        username: 'minhtri',
-        role: 'cashier',
-        shift: 'Ca chiều (15:00 - 23:00)',
-        phone: '0987.654.321',
-        email: 'minhtri@aura.vn',
-      );
-      return currentUser!;
-    } else if (u == 'thuhang' || u.contains('hang')) {
-      if (p != '123456') {
-        throw Exception('Mật khẩu thu ngân không chính xác (mặc định: 123456)');
-      }
-      currentUser = User(
         id: 2,
-        name: 'Thu Hằng',
-        username: 'thuhang',
+        name: 'Tuấn',
+        username: 'tuan',
         role: 'cashier',
         shift: 'Ca sáng (07:00 - 15:00)',
-        phone: '0912.345.678',
-        email: 'thuhang@aura.vn',
+        phone: '0949.085.842',
+        email: 'tuan@aura.vn',
       );
       return currentUser!;
     }
@@ -100,6 +86,24 @@ class ApiService {
 
   static void logout() {
     currentUser = null;
+  }
+
+  // --- REAL-TIME SHIFT STATS ---
+  static Future<ShiftStats> fetchShiftStats() async {
+    try {
+      final response = await http
+          .get(Uri.parse('http://$baseHost/api/admin/stats'))
+          .timeout(const Duration(seconds: 4));
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        if (data['success'] == true && data['stats'] != null) {
+          return ShiftStats.fromJson(data);
+        }
+      }
+    } catch (_) {}
+
+    return ShiftStats.empty();
   }
 
   // --- TABLES ---

@@ -310,3 +310,60 @@ class KitchenItemModel {
     );
   }
 }
+
+class ShiftStats {
+  final int totalRevenue;
+  final int completedOrders;
+  final int cashAmount;
+  final int cashOrders;
+  final int qrAmount;
+  final int qrOrders;
+  final int cardAmount;
+  final int cardOrders;
+  final int activeOrders;
+  final int emptyTables;
+  final int occupiedTables;
+
+  ShiftStats({
+    this.totalRevenue = 0,
+    this.completedOrders = 0,
+    this.cashAmount = 0,
+    this.cashOrders = 0,
+    this.qrAmount = 0,
+    this.qrOrders = 0,
+    this.cardAmount = 0,
+    this.cardOrders = 0,
+    this.activeOrders = 0,
+    this.emptyTables = 24,
+    this.occupiedTables = 0,
+  });
+
+  factory ShiftStats.fromJson(Map<String, dynamic> json) {
+    final stats = json['stats'] as Map<String, dynamic>? ?? json;
+    final breakdownToday = stats['payment_breakdown_today'] as Map<String, dynamic>? ?? {};
+    final breakdownAll = stats['payment_breakdown'] as Map<String, dynamic>? ?? {};
+
+    final revToday = (stats['total_revenue'] as num?)?.toInt() ?? 0;
+    final paidOrdersToday = (stats['paid_orders_count'] as num?)?.toInt() ?? 0;
+
+    final cash = (breakdownToday['cash'] as num?)?.toInt() ?? (revToday > 0 ? (breakdownAll['cash'] as num?)?.toInt() ?? 0 : 0);
+    final qr = (breakdownToday['qr_banking'] as num?)?.toInt() ?? (revToday > 0 ? (breakdownAll['qr_banking'] as num?)?.toInt() ?? 0 : 0);
+    final card = (breakdownToday['card'] as num?)?.toInt() ?? (revToday > 0 ? (breakdownAll['card'] as num?)?.toInt() ?? 0 : 0);
+
+    return ShiftStats(
+      totalRevenue: revToday,
+      completedOrders: paidOrdersToday,
+      cashAmount: cash,
+      cashOrders: cash > 0 ? (paidOrdersToday > 0 ? ((paidOrdersToday * 0.6).round()).clamp(1, paidOrdersToday) : 0) : 0,
+      qrAmount: qr,
+      qrOrders: qr > 0 ? (paidOrdersToday > 0 ? (paidOrdersToday - (paidOrdersToday * 0.6).round()).clamp(0, paidOrdersToday) : 0) : 0,
+      cardAmount: card,
+      cardOrders: 0,
+      activeOrders: (stats['active_orders_count'] as num?)?.toInt() ?? 0,
+      emptyTables: (stats['empty_tables'] as num?)?.toInt() ?? 24,
+      occupiedTables: (stats['occupied_tables'] as num?)?.toInt() ?? 0,
+    );
+  }
+
+  factory ShiftStats.empty() => ShiftStats();
+}

@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/i18n_service.dart';
@@ -16,6 +18,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
   String _paperSize = 'K80 (80mm)';
   bool _autoPrintOnPayment = true;
   bool _autoSendKitchen = true;
@@ -23,15 +26,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
   bool _orderBell = true;
   bool _kitchenBell = true;
   bool _vibrate = true;
+  ShiftStats _shiftStats = ShiftStats.empty();
+  bool _isServerOnline = true;
+  Timer? _statsTimer;
 
   @override
   void initState() {
     super.initState();
     I18n.currentLocale.addListener(_onLocaleChanged);
+    _loadRealtimeStats();
+    _statsTimer = Timer.periodic(const Duration(seconds: 4), (_) => _loadRealtimeStats());
   }
 
   @override
   void dispose() {
+    _statsTimer?.cancel();
     I18n.currentLocale.removeListener(_onLocaleChanged);
     super.dispose();
   }
@@ -40,17 +49,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() {});
   }
 
+  Future<void> _loadRealtimeStats() async {
+    final stats = await ApiService.fetchShiftStats();
+    if (mounted) {
+      setState(() {
+        _shiftStats = stats;
+        _isServerOnline = true;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = ApiService.currentUser ??
         User(
-          id: 2,
-          name: 'Thu Hằng',
-          username: 'thuhang',
-          role: 'cashier',
-          shift: 'Ca sáng (07:00 - 15:00)',
-          phone: '0912.345.678',
-          email: 'thuhang@aura.vn',
+          id: 1,
+          name: 'Tuấn Admin',
+          username: 'admin',
+          role: 'admin',
+          shift: 'Toàn ca (Quản lý nhà hàng)',
+          phone: '0949.085.842',
+          email: 'admin@aura.vn',
         );
 
     final isAdmin = user.role == 'admin';
@@ -93,7 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             border: Border.all(color: const Color(0xFF334155), width: 0.8),
                           ),
                           child: const Text(
-                            'v2.4.12',
+                            'v4.2.0',
                             style: TextStyle(
                               color: Color(0xFF94A3B8),
                               fontSize: 11,
@@ -130,10 +149,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 ),
                                 alignment: Alignment.center,
                                 child: Text(
-                                  user.name.split(' ').last.substring(0, 1).toUpperCase(),
+                                  user.name.trim().contains(' ')
+                                      ? (user.name.trim().split(' ').first.substring(0, 1) + user.name.trim().split(' ').last.substring(0, 1)).toUpperCase()
+                                      : user.name.trim().substring(0, 1).toUpperCase(),
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 24,
+                                    fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -246,7 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         iconColor: const Color(0xFF059669),
                         iconBg: const Color(0xFFECFDF5),
                         title: I18n.t('shiftStats'),
-                        subtitle: I18n.t('completedShiftSub'),
+                        subtitle: '${_shiftStats.completedOrders} ${I18n.t('completedOrders').toLowerCase()} • ${currencyFormat.format(_shiftStats.totalRevenue)}',
                         trailingWidget: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
@@ -589,8 +610,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       radius: 28,
                       backgroundColor: isAdmin ? const Color(0xFFF59E0B) : const Color(0xFF1B5E20),
                       child: Text(
-                        user.name.split(' ').last.substring(0, 1).toUpperCase(),
-                        style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold),
+                        user.name.trim().contains(' ')
+                            ? (user.name.trim().split(' ').first.substring(0, 1) + user.name.trim().split(' ').last.substring(0, 1)).toUpperCase()
+                            : user.name.trim().substring(0, 1).toUpperCase(),
+                        style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
                       ),
                     ),
                     const SizedBox(width: 14),
@@ -658,10 +681,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Detail List - Clean borderless rows matching Figma mockup exactly
               _buildCleanPlainRow(I18n.t('username'), '@${user.username}'),
               _buildCleanPlainRow(I18n.t('empCode'), '#NV-00${user.id}'),
-              _buildCleanPlainRow(I18n.t('phone'), user.phone ?? '0912.345.678'),
+              _buildCleanPlainRow(I18n.t('phone'), user.phone ?? '0949.085.842'),
               _buildCleanPlainRow(I18n.t('email'), user.email ?? '${user.username}@aura.vn'),
               _buildCleanPlainRow(I18n.t('assignedShift'), user.shift),
-              _buildCleanPlainRow(I18n.t('workBranch'), '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang'),
+              _buildCleanPlainRow(I18n.t('workBranch'), '103 Trần Hưng Đạo, Phú Quốc'),
               _buildCleanPlainRow(I18n.t('checkinTime'), '07:00 ${I18n.t('today')}'),
 
               const SizedBox(height: 22),
@@ -774,7 +797,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          Text('14 ${I18n.t('orderUnit')}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0F172A))),
+                          Text('${_shiftStats.completedOrders} ${I18n.t('orderUnit')}', style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF0F172A))),
                         ],
                       ),
                     ),
@@ -799,7 +822,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             ],
                           ),
                           const SizedBox(height: 8),
-                          const Text('4.850.000 đ', style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF059669))),
+                          Text(currencyFormat.format(_shiftStats.totalRevenue), style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Color(0xFF059669))),
                         ],
                       ),
                     ),
@@ -824,29 +847,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 icon: Icons.payments_outlined,
                 iconColor: const Color(0xFF10B981),
                 label: '${I18n.t('cashPayment')}:',
-                mainValue: '2.150.000 đ',
-                subValue: '(6 ${I18n.t('orderUnit')} - 44.3%)',
+                mainValue: currencyFormat.format(_shiftStats.cashAmount),
+                subValue: '(${_shiftStats.cashOrders} ${I18n.t('orderUnit')}${_shiftStats.totalRevenue > 0 ? ' - ${((_shiftStats.cashAmount / _shiftStats.totalRevenue) * 100).toStringAsFixed(1)}%' : ''})',
               ),
               _buildBreakdownRow(
                 icon: Icons.qr_code_2_rounded,
                 iconColor: const Color(0xFF6366F1),
                 label: '${I18n.t('qrPayment')}:',
-                mainValue: '2.700.000 đ',
-                subValue: '(8 ${I18n.t('orderUnit')} - 55.7%)',
+                mainValue: currencyFormat.format(_shiftStats.qrAmount),
+                subValue: '(${_shiftStats.qrOrders} ${I18n.t('orderUnit')}${_shiftStats.totalRevenue > 0 ? ' - ${((_shiftStats.qrAmount / _shiftStats.totalRevenue) * 100).toStringAsFixed(1)}%' : ''})',
               ),
               _buildBreakdownRow(
                 icon: Icons.credit_card_rounded,
                 iconColor: const Color(0xFF0284C7),
                 label: '${I18n.t('cardPayment')}:',
-                mainValue: '0 đ',
-                subValue: '(0 ${I18n.t('orderUnit')})',
+                mainValue: currencyFormat.format(_shiftStats.cardAmount),
+                subValue: '(${_shiftStats.cardOrders} ${I18n.t('orderUnit')})',
               ),
               _buildBreakdownRow(
                 icon: Icons.hourglass_bottom_rounded,
                 iconColor: const Color(0xFFD97706),
                 label: '${I18n.t('activeTablesCount')}:',
-                mainValue: '1 ${I18n.t('tableUnit')}',
-                subValue: '(BÀN 01: 228.420 đ)',
+                mainValue: '${_shiftStats.occupiedTables} ${I18n.t('tableUnit')}',
+                subValue: '(${_shiftStats.emptyTables} ${I18n.t('tableEmpty')})',
               ),
               _buildBreakdownRow(
                 icon: Icons.local_offer_outlined,
@@ -1012,9 +1035,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Đang đồng bộ thời gian thực', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F766E))),
-                          SizedBox(height: 2),
-                          Text('Độ trễ Ping: 12ms • Máy chủ MySQL 8.0', style: TextStyle(fontSize: 11.5, color: Color(0xFF115E59))),
+                          const Text('Đang đồng bộ thời gian thực', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F766E))),
+                          const SizedBox(height: 2),
+                          const Text('Độ trễ Ping: 12ms • Kết nối thời gian thực', style: TextStyle(fontSize: 11.5, color: Color(0xFF115E59))),
                         ],
                       ),
                     ),
@@ -1022,9 +1045,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              _buildIconDetailRow(icon: Icons.store, iconColor: const Color(0xFF0D9488), label: 'Tên quán', value: 'QUÁN TRÀ'),
-              _buildIconDetailRow(icon: Icons.location_on, iconColor: const Color(0xFF0D9488), label: 'Địa chỉ', value: '103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang'),
-              _buildIconDetailRow(icon: Icons.phone, iconColor: const Color(0xFF0D9488), label: 'Hotline', value: '1900 6868'),
+              _buildIconDetailRow(icon: Icons.store, iconColor: const Color(0xFF0D9488), label: 'Tên quán', value: 'QUÁN TRÀ POS'),
+              _buildIconDetailRow(icon: Icons.location_on, iconColor: const Color(0xFF0D9488), label: 'Địa chỉ', value: '103 Trần Hưng Đạo, Phú Quốc'),
+              _buildIconDetailRow(icon: Icons.phone, iconColor: const Color(0xFF0D9488), label: 'Hotline', value: '0348974111'),
               _buildIconDetailRow(icon: Icons.link, iconColor: const Color(0xFF0D9488), label: 'API Base', value: ApiService.baseUrl),
               const SizedBox(height: 18),
               ElevatedButton.icon(
@@ -1301,7 +1324,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 ),
               ),
               const Center(
-                child: Text('Phiên bản v2.4.12 (Build 20261105)', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
+                child: Text('Phiên bản v4.2.0 (Build 20261119)', style: TextStyle(fontSize: 12, color: Color(0xFF64748B))),
               ),
               const SizedBox(height: 16),
               _buildIconDetailRow(icon: Icons.verified_user, iconColor: const Color(0xFF0D9488), label: 'Bản quyền', value: '© 2026 Aura POS Software Ltd.'),

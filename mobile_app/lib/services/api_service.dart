@@ -511,6 +511,15 @@ class ApiService {
   static List<DiningTable> getMockTables() {
     return [
       DiningTable(
+        id: 4,
+        name: 'MANG VỀ',
+        areaCode: 'floor_1',
+        capacity: 1,
+        status: 'empty',
+        guestCount: 0,
+        isTakeaway: true,
+      ),
+      DiningTable(
         id: 1,
         name: 'BÀN 01',
         areaCode: 'floor_1',
@@ -533,15 +542,6 @@ class ApiService {
         capacity: 4,
         status: 'empty',
         guestCount: 0,
-      ),
-      DiningTable(
-        id: 4,
-        name: 'MANG VỀ',
-        areaCode: 'floor_1',
-        capacity: 1,
-        status: 'empty',
-        guestCount: 0,
-        isTakeaway: true,
       ),
       DiningTable(
         id: 5,

@@ -134,8 +134,14 @@ class _PosMainScreenState extends State<PosMainScreen> {
     setState(() => _isLoading = true);
     final data = await ApiService.fetchTables();
     if (mounted) {
+      // Đảm bảo bàn MANG VỀ (isTakeaway) luôn đứng đầu danh sách
+      final sorted = [...data]..sort((a, b) {
+          if (a.isTakeaway && !b.isTakeaway) return -1;
+          if (!a.isTakeaway && b.isTakeaway) return 1;
+          return 0;
+        });
       setState(() {
-        _tables = data;
+        _tables = sorted;
         _isLoading = false;
       });
     }

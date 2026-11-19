@@ -373,6 +373,8 @@ class I18n {
       'cashierRole': 'Thu Hằng (thu ngân)',
       'serverRole': 'Minh Trí (phục vụ)',
       'loginEmptyErr': 'Vui lòng nhập đầy đủ tên đăng nhập và mật khẩu!',
+      'rememberMe': 'Ghi nhớ đăng nhập',
+      'forgotPassword': 'Quên mật khẩu?',
       'selectLang': 'Cài đặt ngôn ngữ',
       'selectLangDesc': 'Chọn ngôn ngữ hiển thị cho giao diện POS (đồng bộ như bản website):',
 
@@ -619,6 +621,8 @@ class I18n {
       'cashierRole': 'Thu Hang (cashier)',
       'serverRole': 'Minh Tri (waiter)',
       'loginEmptyErr': 'Please enter both username and password!',
+      'rememberMe': 'Remember login',
+      'forgotPassword': 'Forgot password?',
       'selectLang': 'Language Settings',
       'selectLangDesc': 'Choose display language for POS interface (synchronized with Web):',
 
@@ -865,6 +869,8 @@ class I18n {
       'cashierRole': '투항 (캐셔)',
       'serverRole': '민찌 (서빙)',
       'loginEmptyErr': '사용자 이름과 비밀번호를 모두 입력해주세요!',
+      'rememberMe': '로그인 기억하기',
+      'forgotPassword': '비밀번호 찾기?',
       'selectLang': '언어 설정',
       'selectLangDesc': 'POS 화면에 표시할 언어를 선택하세요 (웹 버전과 동기화됨):',
 
@@ -1111,6 +1117,8 @@ class I18n {
       'cashierRole': 'Тху Ханг (кассир)',
       'serverRole': 'Минь Чи (официант)',
       'loginEmptyErr': 'Пожалуйста, введите имя пользователя и пароль!',
+      'rememberMe': 'Запомнить вход',
+      'forgotPassword': 'Забыли пароль?',
       'selectLang': 'Настройки языка',
       'selectLangDesc': 'Выберите язык интерфейса POS (синхронизировано с веб-версией):',
 

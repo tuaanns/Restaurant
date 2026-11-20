@@ -139,13 +139,10 @@ class _MenuScreenState extends State<MenuScreen> {
         product: product,
         tables: widget.tables,
         initialTableId: widget.selectedTableId,
-        onDishAdded: (targetTable, {bool autoOpenKitchen = true}) {
+        onDishAdded: (targetTable, {bool autoOpenKitchen = false}) {
           widget.onTableSelected(targetTable.id);
           setState(() {});
           widget.onOrderUpdated();
-          if (autoOpenKitchen) {
-            _handleDirectSendKitchen(targetTable);
-          }
         },
       ),
     );

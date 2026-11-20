@@ -357,8 +357,8 @@ class _AddDishDialogState extends State<AddDishDialog> {
                             const Icon(Icons.table_restaurant, size: 16, color: Color(0xFF1B5E20)),
                             const SizedBox(width: 6),
                             Text(
-                              '${I18n.t('orderForTableTitle')}: ${I18n.formatTableName(targetTable.name)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF1E293B)),
+                              '${I18n.t('orderForTableTitle')} ${I18n.formatTableName(targetTable.name)}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B)),
                             ),
                           ],
                         ),
@@ -374,30 +374,29 @@ class _AddDishDialogState extends State<AddDishDialog> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 12),
+                    const SizedBox(height: 14),
                     Row(
                       children: [
-                        // Nút 1: Thêm tiếp (nếu nhân viên muốn order tiếp món khác trước khi in báo bếp)
+                        // Nút Đóng / Hủy
                         Expanded(
                           flex: 2,
-                          child: OutlinedButton.icon(
+                          child: OutlinedButton(
                             style: OutlinedButton.styleFrom(
-                              foregroundColor: const Color(0xFF475569),
+                              foregroundColor: const Color(0xFF64748B),
                               backgroundColor: Colors.white,
                               side: const BorderSide(color: Color(0xFFCBD5E1)),
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
-                            icon: const Icon(Icons.add, size: 15),
-                            label: Text(
-                              I18n.t('addMore'),
-                              style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
+                            onPressed: () => Navigator.pop(context),
+                            child: Text(
+                              I18n.t('close'),
+                              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
                             ),
-                            onPressed: () => _handleAddDish(targetTable, autoOpenKitchen: false),
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        // Nút 2: Nút chính In & Báo Bếp ngay lập tức - Tự động hiển thị popup báo bếp không cần bấm rườm rà
+                        const SizedBox(width: 10),
+                        // Nút chính: Thêm món vào bàn (không báo bếp lẻ từng món)
                         Expanded(
                           flex: 3,
                           child: ElevatedButton.icon(
@@ -405,17 +404,17 @@ class _AddDishDialogState extends State<AddDishDialog> {
                               backgroundColor: const Color(0xFF1B5E20),
                               foregroundColor: Colors.white,
                               elevation: 2,
-                              padding: const EdgeInsets.symmetric(vertical: 12),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              padding: const EdgeInsets.symmetric(vertical: 13),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                             ),
-                            icon: const Icon(Icons.notifications_active, size: 16),
+                            icon: const Icon(Icons.add_shopping_cart, size: 18),
                             label: Text(
-                              '${I18n.t('orderAndKitchen')} ${I18n.formatTableName(targetTable.name)}',
-                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                              '${I18n.t('add')} vào ${I18n.formatTableName(targetTable.name)}',
+                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                             ),
-                            onPressed: () => _handleAddDish(targetTable, autoOpenKitchen: true),
+                            onPressed: () => _handleAddDish(targetTable),
                           ),
                         ),
                       ],
@@ -430,7 +429,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
     );
   }
 
-  void _handleAddDish(DiningTable targetTable, {required bool autoOpenKitchen}) {
+  void _handleAddDish(DiningTable targetTable) {
     final subtotal = _quantity * widget.product.price;
     ApiService.addDishToTable(
       _selectedTableId,
@@ -452,6 +451,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
             Expanded(
               child: Text(
                 'Đã thêm $_quantity x ${I18n.formatDishName(widget.product.name, widget.product.code)} vào ${I18n.formatTableName(targetTable.name)}!',
+                style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
           ],
@@ -461,7 +461,7 @@ class _AddDishDialogState extends State<AddDishDialog> {
         duration: const Duration(seconds: 2),
       ),
     );
-    widget.onDishAdded(targetTable, autoOpenKitchen: autoOpenKitchen);
+    widget.onDishAdded(targetTable, autoOpenKitchen: false);
   }
 }
 

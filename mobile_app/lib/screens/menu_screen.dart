@@ -243,7 +243,7 @@ class _MenuScreenState extends State<MenuScreen> {
 
                       // Search input
                       Container(
-                        height: 38,
+                        height: 40,
                         decoration: BoxDecoration(
                           color: const Color(0xFF131F33),
                           borderRadius: BorderRadius.circular(8),
@@ -265,9 +265,9 @@ class _MenuScreenState extends State<MenuScreen> {
                                   )
                                 : null,
                             hintText: I18n.t('search'),
-                            hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 12),
+                            hintStyle: const TextStyle(color: Color(0xFF64748B), fontSize: 12.5),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 9),
                           ),
                         ),
                       ),
@@ -315,7 +315,7 @@ class _MenuScreenState extends State<MenuScreen> {
                                 crossAxisCount: 2,
                                 crossAxisSpacing: 10,
                                 mainAxisSpacing: 10,
-                                childAspectRatio: 1.4,
+                                childAspectRatio: 1.35,
                               ),
                               itemCount: _filteredProducts.length,
                               itemBuilder: (context, index) {
@@ -438,7 +438,7 @@ class _MenuScreenState extends State<MenuScreen> {
         onTap: () => setState(() => _selectedCategoryCode = code),
         borderRadius: BorderRadius.circular(20),
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
             color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFF1F5F9),
             borderRadius: BorderRadius.circular(20),
@@ -450,7 +450,7 @@ class _MenuScreenState extends State<MenuScreen> {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 11.5,
+              fontSize: 12,
               fontWeight: FontWeight.w600,
               color: isSelected ? Colors.white : const Color(0xFF475569),
             ),
@@ -489,7 +489,7 @@ class _MenuScreenState extends State<MenuScreen> {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 13,
+                      fontSize: 13.5,
                       color: Color(0xFF0F172A),
                       height: 1.25,
                     ),
@@ -499,9 +499,10 @@ class _MenuScreenState extends State<MenuScreen> {
                 Container(
                   width: 26,
                   height: 26,
-                  decoration: const BoxDecoration(
-                    color: Color(0xFFF1F5F9),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFE8F5E9),
                     shape: BoxShape.circle,
+                    border: Border.all(color: const Color(0xFFC8E6C9), width: 0.8),
                   ),
                   child: const Center(
                     child: Icon(Icons.add, size: 14, color: Color(0xFF1B5E20)),
@@ -516,7 +517,7 @@ class _MenuScreenState extends State<MenuScreen> {
               child: Text(
                 '${product.code} • ${I18n.formatDishUnit(product.unit)}',
                 style: const TextStyle(
-                  fontSize: 11,
+                  fontSize: 11.5,
                   color: Color(0xFF94A3B8),
                   fontWeight: FontWeight.w500,
                 ),
@@ -534,22 +535,23 @@ class _MenuScreenState extends State<MenuScreen> {
                   currencyFormat.format(product.price),
                   style: const TextStyle(
                     fontWeight: FontWeight.w900,
-                    fontSize: 13.5,
+                    fontSize: 14,
                     color: Color(0xFF1B5E20),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF1F5F9),
-                    borderRadius: BorderRadius.circular(4),
+                    color: const Color(0xFFE8F5E9),
+                    borderRadius: BorderRadius.circular(5),
+                    border: Border.all(color: const Color(0xFFC8E6C9), width: 0.8),
                   ),
                   child: Text(
                     '+ ${I18n.t('add')}',
                     style: const TextStyle(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFF64748B),
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF1B5E20),
                     ),
                   ),
                 ),

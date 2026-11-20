@@ -202,7 +202,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
           content: Row(
             children: [
               const Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 child: Text(
                   'Đã tự động gửi & in báo bếp thành công cho ${I18n.formatTableName(table.name)} (${itemsToPrint.length} món)!',
@@ -333,7 +333,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                             crossAxisCount: 2,
                             crossAxisSpacing: 12,
                             mainAxisSpacing: 12,
-                            childAspectRatio: 1.08,
+                            childAspectRatio: 1.05,
                           ),
                           itemCount: filteredTables.length,
                           itemBuilder: (context, index) {
@@ -451,7 +451,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w700,
-                      fontSize: 12,
+                      fontSize: 12.5,
                     ),
                   ),
                 ),
@@ -483,7 +483,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
   Widget _buildViewSwitcher() {
     return Container(
       color: const Color(0xFF0B1320),
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
       child: Container(
         padding: const EdgeInsets.all(3),
         decoration: BoxDecoration(
@@ -496,7 +496,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
               child: GestureDetector(
                 onTap: () => setState(() => _selectedNavIndex = 0),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: _selectedNavIndex == 0 ? const Color(0xFF1B5E20) : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
@@ -515,7 +515,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                         style: TextStyle(
                           color: _selectedNavIndex == 0 ? Colors.white : const Color(0xFF94A3B8),
                           fontWeight: FontWeight.bold,
-                          fontSize: 12.5,
+                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -527,7 +527,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
               child: GestureDetector(
                 onTap: () => setState(() => _selectedNavIndex = 1),
                 child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 7),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   decoration: BoxDecoration(
                     color: _selectedNavIndex == 1 ? const Color(0xFF1B5E20) : Colors.transparent,
                     borderRadius: BorderRadius.circular(6),
@@ -546,7 +546,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                         style: TextStyle(
                           color: _selectedNavIndex == 1 ? Colors.white : const Color(0xFF94A3B8),
                           fontWeight: FontWeight.w600,
-                          fontSize: 12.5,
+                          fontSize: 13,
                         ),
                       ),
                     ],
@@ -583,7 +583,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
               onTap: () => setState(() => _selectedArea = a['code']!),
               child: Container(
                 margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
                 decoration: BoxDecoration(
                   color: isSelected ? const Color(0xFF0F172A) : const Color(0xFFF1F5F9),
                   borderRadius: BorderRadius.circular(20),
@@ -594,7 +594,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                 child: Text(
                   a['label']!,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 12.5,
                     fontWeight: FontWeight.w600,
                     color: isSelected ? Colors.white : const Color(0xFF475569),
                   ),
@@ -615,7 +615,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
 
     return Container(
       color: Colors.white,
-      padding: const EdgeInsets.fromLTRB(14, 0, 14, 10),
+      padding: const EdgeInsets.fromLTRB(14, 0, 14, 12),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
@@ -709,7 +709,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
         clipBehavior: Clip.none,
         children: [
           Container(
-            padding: const EdgeInsets.all(12),
+            padding: const EdgeInsets.all(13),
             decoration: BoxDecoration(
               color: cardBg,
               borderRadius: BorderRadius.circular(12),
@@ -745,7 +745,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                             style: const TextStyle(
                               color: Color(0xFF38BDF8),
                               fontWeight: FontWeight.w800,
-                              fontSize: 13,
+                              fontSize: 13.5,
                             ),
                           ),
                         ] else if (isVip) ...[
@@ -756,7 +756,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                             style: TextStyle(
                               color: textColor,
                               fontWeight: FontWeight.w800,
-                              fontSize: 13,
+                              fontSize: 13.5,
                             ),
                           ),
                         ] else ...[
@@ -765,7 +765,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                             style: TextStyle(
                               color: textColor,
                               fontWeight: FontWeight.w800,
-                              fontSize: 13.5,
+                              fontSize: 14,
                             ),
                           ),
                         ],
@@ -784,7 +784,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                         child: Text(
                           table.duration!,
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w700,
                             color: isBilling
                                 ? const Color(0xFF854D0E)
@@ -795,7 +795,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     else if (isEmpty)
                       Text(
                         '${table.capacity} ${I18n.t('tableSeats')}',
-                        style: TextStyle(fontSize: 10.5, color: subtextColor),
+                        style: TextStyle(fontSize: 11, color: subtextColor),
                       ),
                   ],
                 ),
@@ -820,7 +820,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                         I18n.t('tableEmpty'),
                         style: TextStyle(
                           color: subtextColor,
-                          fontSize: 12,
+                          fontSize: 12.5,
                           fontWeight: FontWeight.w500,
                         ),
                       )
@@ -836,7 +836,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                           Text(
                             '${table.guestCount > 0 ? table.guestCount : 2} ${I18n.t('tableGuests')} • $displayCount ${I18n.t('tableItems')}',
                             style: TextStyle(
-                              fontSize: 11,
+                              fontSize: 11.5,
                               fontWeight: FontWeight.w600,
                               color: subtextColor,
                             ),
@@ -850,7 +850,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                             table.notes!,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(fontSize: 10.5, color: subtextColor),
+                            style: TextStyle(fontSize: 11, color: subtextColor),
                           ),
                         ),
                     ],
@@ -868,7 +868,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                         style: TextStyle(
                           color: subtextColor,
                           fontWeight: FontWeight.w600,
-                          fontSize: 12,
+                          fontSize: 12.5,
                         ),
                       )
                     else
@@ -876,14 +876,14 @@ class _PosMainScreenState extends State<PosMainScreen> {
                         currencyFormat.format(displayAmount),
                         style: TextStyle(
                           fontWeight: FontWeight.w800,
-                          fontSize: 13,
+                          fontSize: 14,
                           color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF0F172A),
                         ),
                       ),
                     Text(
                       I18n.t('tableDetails'),
                       style: TextStyle(
-                        fontSize: 10,
+                        fontSize: 11,
                         fontWeight: FontWeight.w700,
                         color: isTakeaway ? const Color(0xFF38BDF8) : const Color(0xFF1B5E20),
                       ),
@@ -917,7 +917,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
   // --- FLOATING ORDER BAR ---
   Widget _buildFloatingOrderBar(DiningTable table, int totalAmount, int itemCount) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
       decoration: BoxDecoration(
         color: const Color(0xFF0B1422),
         borderRadius: BorderRadius.circular(14),
@@ -953,7 +953,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
-                      fontSize: 13,
+                      fontSize: 13.5,
                     ),
                   ),
                 ],
@@ -969,7 +969,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     style: const TextStyle(
                       color: Color(0xFF38BDF8),
                       fontWeight: FontWeight.w900,
-                      fontSize: 13.5,
+                      fontSize: 14.5,
                     ),
                   ),
                 ],
@@ -999,18 +999,19 @@ class _PosMainScreenState extends State<PosMainScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 8),
                     backgroundColor: const Color(0xFF172942),
                     textStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () => _handleDirectSendKitchen(table),
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: 10),
               Expanded(
                 flex: 2,
                 child: ElevatedButton(
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF1B5E20),
                     foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () => _openOrderDetail(table),
@@ -1056,6 +1057,11 @@ class _PosMainScreenState extends State<PosMainScreen> {
         unselectedItemColor: const Color(0xFF94A3B8),
         selectedFontSize: 10.5,
         unselectedFontSize: 10.5,
+        elevation: 0,
+        selectedLabelStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500),
+        selectedIconTheme: const IconThemeData(size: 24),
+        unselectedIconTheme: const IconThemeData(size: 22),
         type: BottomNavigationBarType.fixed,
         items: [
           BottomNavigationBarItem(

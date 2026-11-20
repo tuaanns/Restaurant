@@ -127,8 +127,8 @@ class _PreBillDialogState extends State<PreBillDialog> {
 
     // Tính toán chi phí
     final int subtotal = items.fold(0, (sum, it) => sum + it.subtotal);
-    int promoDiscount = promotion != null ? promotion!.calculateDiscount(subtotal) : 0;
-    if (promotion != null && subtotal < promotion!.minOrderAmount) {
+    int promoDiscount = promotion != null ? promotion.calculateDiscount(subtotal) : 0;
+    if (promotion != null && subtotal < promotion.minOrderAmount) {
       promoDiscount = 0;
     }
     final int afterPromo = (subtotal - promoDiscount).clamp(0, subtotal);
@@ -206,7 +206,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             child: Text(
                               'NHÀ HÀNG',
                               style: TextStyle(
-                                fontFamily: 'serif',
                                 fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
@@ -219,7 +218,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             child: Text(
                               'QUÁN TRÀ',
                               style: TextStyle(
-                                fontFamily: 'serif',
                                 fontSize: 17,
                                 fontWeight: FontWeight.w900,
                                 color: Colors.black,
@@ -232,14 +230,14 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             child: Text(
                               'ĐC: 103 Trần Hưng Đạo, Đặc khu Phú Quốc, Tỉnh An Giang',
                               textAlign: TextAlign.center,
-                              style: TextStyle(fontFamily: 'serif', fontSize: 11, color: Colors.black),
+                              style: TextStyle(fontSize: 11, color: Colors.black),
                             ),
                           ),
                           const SizedBox(height: 2),
                           const Center(
                             child: Text(
                               'Hotline: 1900 6868',
-                              style: TextStyle(fontFamily: 'serif', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.black),
+                              style: TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.black),
                             ),
                           ),
                           const SizedBox(height: 12),
@@ -263,7 +261,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                     Text(
                                       tableBadge['title']!,
                                       style: const TextStyle(
-                                        fontFamily: 'serif',
                                         fontSize: 12,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.black,
@@ -272,7 +269,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                     Text(
                                       tableBadge['num']!,
                                       style: const TextStyle(
-                                        fontFamily: 'serif',
                                         fontSize: 17,
                                         fontWeight: FontWeight.w900,
                                         color: Colors.black,
@@ -290,7 +286,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                   const Text(
                                     'PHIẾU TẠM TÍNH',
                                     style: TextStyle(
-                                      fontFamily: 'serif',
                                       fontSize: 15,
                                       fontWeight: FontWeight.w900,
                                       color: Colors.black,
@@ -300,7 +295,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                   const SizedBox(height: 2),
                                   RichText(
                                     text: TextSpan(
-                                      style: const TextStyle(fontFamily: 'serif', fontSize: 11.5, color: Colors.black),
+                                      style: const TextStyle(fontSize: 11.5, color: Colors.black),
                                       children: [
                                         const TextSpan(text: 'Mã HĐ: '),
                                         TextSpan(text: orderCode, style: const TextStyle(fontWeight: FontWeight.w900)),
@@ -309,11 +304,11 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                   ),
                                   Text(
                                     'Ngày bán: $dateStr',
-                                    style: const TextStyle(fontFamily: 'serif', fontSize: 11, color: Colors.black),
+                                    style: const TextStyle(fontSize: 11, color: Colors.black),
                                   ),
                                   Text(
                                     timeStr,
-                                    style: const TextStyle(fontFamily: 'serif', fontSize: 11, color: Colors.black),
+                                    style: const TextStyle(fontSize: 11, color: Colors.black),
                                   ),
                                 ],
                               ),
@@ -342,7 +337,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                           ),
                                           child: Text(
                                             I18n.t('dishColName'),
-                                            style: const TextStyle(fontFamily: 'serif', fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
                                           ),
                                         ),
                                       ),
@@ -356,7 +351,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                           child: Text(
                                             I18n.t('dishColPrice'),
                                             textAlign: TextAlign.right,
-                                            style: const TextStyle(fontFamily: 'serif', fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
                                           ),
                                         ),
                                       ),
@@ -370,7 +365,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                           child: Text(
                                             I18n.t('dishColQty'),
                                             textAlign: TextAlign.center,
-                                            style: const TextStyle(fontFamily: 'serif', fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
                                           ),
                                         ),
                                       ),
@@ -381,7 +376,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                           child: Text(
                                             I18n.t('dishColSubtotal'),
                                             textAlign: TextAlign.right,
-                                            style: const TextStyle(fontFamily: 'serif', fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
+                                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 11.5, color: Colors.black),
                                           ),
                                         ),
                                       ),
@@ -401,7 +396,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                       I18n.t('emptyOrderNotice'),
                                       textAlign: TextAlign.center,
                                       style: const TextStyle(
-                                        fontFamily: 'serif',
                                         color: Color(0xFF64748B),
                                         fontStyle: FontStyle.italic,
                                         fontSize: 11.5,
@@ -429,11 +423,11 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                                 children: [
                                                   Text(
                                                     I18n.formatDishName(item.name),
-                                                    style: const TextStyle(fontFamily: 'serif', fontSize: 11.5, color: Colors.black),
+                                                    style: const TextStyle(fontSize: 11.5, color: Colors.black),
                                                   ),
                                                   Text(
                                                     '(${I18n.formatDishUnit(item.unit.isNotEmpty ? item.unit : "Phần")})',
-                                                    style: const TextStyle(fontFamily: 'serif', fontSize: 10, color: Color(0xFF64748B)),
+                                                    style: const TextStyle(fontSize: 10, color: Color(0xFF64748B)),
                                                   ),
                                                 ],
                                               ),
@@ -449,7 +443,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                               child: Text(
                                                 numFormat.format(item.price),
                                                 textAlign: TextAlign.right,
-                                                style: const TextStyle(fontFamily: 'serif', fontSize: 11.5, color: Colors.black),
+                                                style: const TextStyle(fontSize: 11.5, color: Colors.black),
                                               ),
                                             ),
                                           ),
@@ -463,7 +457,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                               child: Text(
                                                 '${item.quantity}',
                                                 textAlign: TextAlign.center,
-                                                style: const TextStyle(fontFamily: 'serif', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.black),
+                                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.black),
                                               ),
                                             ),
                                           ),
@@ -474,7 +468,7 @@ class _PreBillDialogState extends State<PreBillDialog> {
                                               child: Text(
                                                 numFormat.format(item.subtotal),
                                                 textAlign: TextAlign.right,
-                                                style: const TextStyle(fontFamily: 'serif', fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.black),
+                                                style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: Colors.black),
                                               ),
                                             ),
                                           ),
@@ -493,11 +487,11 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             children: [
                               Text(
                                 I18n.t('orderSubtotal'),
-                                style: const TextStyle(fontFamily: 'serif', fontSize: 12, color: Colors.black),
+                                style: const TextStyle(fontSize: 12, color: Colors.black),
                               ),
                               Text(
                                 numFormat.format(subtotal),
-                                style: const TextStyle(fontFamily: 'serif', fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.black),
+                                style: const TextStyle(fontSize: 13.5, fontWeight: FontWeight.w800, color: Colors.black),
                               ),
                             ],
                           ),
@@ -508,15 +502,15 @@ class _PreBillDialogState extends State<PreBillDialog> {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    '${promotion!.name.isNotEmpty ? promotion!.name : promotion!.code}:',
-                                    style: const TextStyle(fontFamily: 'serif', fontSize: 12, color: Color(0xFF1B5E20), fontWeight: FontWeight.w600),
+                                    '${promotion.name.isNotEmpty ? promotion.name : promotion.code}:',
+                                    style: const TextStyle(fontSize: 12, color: Color(0xFF1B5E20), fontWeight: FontWeight.w600),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
                                   ),
                                 ),
                                 Text(
                                   '-${numFormat.format(promoDiscount)}',
-                                  style: const TextStyle(fontFamily: 'serif', fontSize: 12, color: Color(0xFF1B5E20), fontWeight: FontWeight.w600),
+                                  style: const TextStyle(fontSize: 12, color: Color(0xFF1B5E20), fontWeight: FontWeight.w600),
                                 ),
                               ],
                             ),
@@ -528,11 +522,11 @@ class _PreBillDialogState extends State<PreBillDialog> {
                               children: [
                                 const Text(
                                   'Chiết khấu:',
-                                  style: TextStyle(fontFamily: 'serif', fontSize: 12, color: Colors.black),
+                                  style: TextStyle(fontSize: 12, color: Colors.black),
                                 ),
                                 Text(
                                   '-${numFormat.format(discount)}',
-                                  style: const TextStyle(fontFamily: 'serif', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black),
                                 ),
                               ],
                             ),
@@ -544,11 +538,11 @@ class _PreBillDialogState extends State<PreBillDialog> {
                               children: [
                                 const Text(
                                   'VAT 8%:',
-                                  style: TextStyle(fontFamily: 'serif', fontSize: 12, color: Colors.black),
+                                  style: TextStyle(fontSize: 12, color: Colors.black),
                                 ),
                                 Text(
                                   numFormat.format(vat),
-                                  style: const TextStyle(fontFamily: 'serif', fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black),
+                                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Colors.black),
                                 ),
                               ],
                             ),
@@ -559,11 +553,11 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             children: [
                               Text(
                                 I18n.t('orderTotal'),
-                                style: const TextStyle(fontFamily: 'serif', fontSize: 15, fontWeight: FontWeight.w900, color: Colors.black),
+                                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w900, color: Colors.black),
                               ),
                               Text(
                                 numFormat.format(total),
-                                style: const TextStyle(fontFamily: 'serif', fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black),
+                                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w900, color: Colors.black),
                               ),
                             ],
                           ),
@@ -575,7 +569,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                               totalInWords,
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                fontFamily: 'serif',
                                 fontStyle: FontStyle.italic,
                                 fontSize: 11,
                                 color: Colors.black,
@@ -613,7 +606,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             child: Text(
                               I18n.t('scanQrToPay'),
                               style: const TextStyle(
-                                fontFamily: 'serif',
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
@@ -625,7 +617,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             child: Text(
                               '${bank.bankCode} - ${I18n.t('accountNumber')}: ${bank.accountNumber}',
                               style: const TextStyle(
-                                fontFamily: 'serif',
                                 fontSize: 10.5,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.black,
@@ -637,7 +628,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                             child: Text(
                               '${I18n.t('accountOwner')}: ${bank.accountName.toUpperCase()}',
                               style: const TextStyle(
-                                fontFamily: 'serif',
                                 fontSize: 10,
                                 color: Color(0xFF334155),
                                 fontWeight: FontWeight.w500,
@@ -652,7 +642,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                               I18n.t('thankYouReceipt'),
                               textAlign: TextAlign.center,
                               style: const TextStyle(
-                                fontFamily: 'serif',
                                 fontStyle: FontStyle.italic,
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.w500,
@@ -666,7 +655,6 @@ class _PreBillDialogState extends State<PreBillDialog> {
                               'Wifi: QUAN TRA - Pass: 88888888',
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontFamily: 'serif',
                                 fontSize: 10,
                                 color: Color(0xFF64748B),
                               ),

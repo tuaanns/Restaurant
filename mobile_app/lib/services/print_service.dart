@@ -24,6 +24,35 @@ class PrintService {
     );
   }
 
+  /// Nạp font chữ tiếng Việt đầy đủ (Regular, Bold, Italic, BoldItalic) chống lỗi font
+  static Future<pw.ThemeData> _getPdfTheme() async {
+    try {
+      final regular = await PdfGoogleFonts.robotoRegular();
+      final bold = await PdfGoogleFonts.robotoBold();
+      final italic = await PdfGoogleFonts.robotoItalic();
+      final boldItalic = await PdfGoogleFonts.robotoBoldItalic();
+      return pw.ThemeData.withFont(
+        base: regular,
+        bold: bold,
+        italic: italic,
+        boldItalic: boldItalic,
+      );
+    } catch (_) {
+      try {
+        final regular = await PdfGoogleFonts.notoSansRegular();
+        final bold = await PdfGoogleFonts.notoSansBold();
+        return pw.ThemeData.withFont(
+          base: regular,
+          bold: bold,
+          italic: regular,
+          boldItalic: bold,
+        );
+      } catch (_) {
+        return pw.ThemeData();
+      }
+    }
+  }
+
   /// Chuyển đổi số tiền thành chữ Tiếng Việt chuẩn theo văn phong hóa đơn tài chính
   static String _readNumberGroup(int n, bool isLastGroup) {
     const digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
@@ -117,12 +146,7 @@ class PrintService {
     // Chuẩn khổ K80/K58 theo cấu hình
     final pageFormat = getPageFormat();
 
-    pw.ThemeData? theme;
-    try {
-      final regular = await PdfGoogleFonts.robotoRegular();
-      final bold = await PdfGoogleFonts.robotoBold();
-      theme = pw.ThemeData.withFont(base: regular, bold: bold);
-    } catch (_) {}
+    final theme = await _getPdfTheme();
 
     final doc = pw.Document();
 
@@ -238,7 +262,7 @@ class PrintService {
                           child: pw.Text(
                             'Bàn chưa có món ăn nào được gọi',
                             textAlign: pw.TextAlign.center,
-                            style: pw.TextStyle(fontSize: 7.5, fontStyle: pw.FontStyle.italic),
+                            style: const pw.TextStyle(fontSize: 7.5),
                           ),
                         ),
                         pw.SizedBox(),
@@ -331,7 +355,7 @@ class PrintService {
               pw.Center(
                 child: pw.Text(
                   totalInWords,
-                  style: pw.TextStyle(fontSize: 7.5, fontStyle: pw.FontStyle.italic),
+                  style: const pw.TextStyle(fontSize: 7.5),
                   textAlign: pw.TextAlign.center,
                 ),
               ),
@@ -359,7 +383,7 @@ class PrintService {
               pw.Center(
                 child: pw.Text(
                   'Xin Cám Ơn & Hẹn Gặp Lại!!!',
-                  style: pw.TextStyle(fontSize: 8, fontStyle: pw.FontStyle.italic, fontWeight: pw.FontWeight.bold),
+                  style: pw.TextStyle(fontSize: 8, fontWeight: pw.FontWeight.bold),
                 ),
               ),
               pw.SizedBox(height: 1),
@@ -395,12 +419,7 @@ class PrintService {
 
     final pageFormat = getPageFormat();
 
-    pw.ThemeData? theme;
-    try {
-      final regular = await PdfGoogleFonts.robotoRegular();
-      final bold = await PdfGoogleFonts.robotoBold();
-      theme = pw.ThemeData.withFont(base: regular, bold: bold);
-    } catch (_) {}
+    final theme = await _getPdfTheme();
 
     final doc = pw.Document();
 
@@ -469,7 +488,7 @@ class PrintService {
                             children: [
                               pw.Text(I18n.formatDishName(it.name), style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold)),
                               if (it.note.isNotEmpty)
-                                pw.Text('Ghi chú: ${it.note}', style: pw.TextStyle(fontSize: 7, fontStyle: pw.FontStyle.italic)),
+                                pw.Text('Ghi chú: ${it.note}', style: const pw.TextStyle(fontSize: 7)),
                             ],
                           ),
                         ),
@@ -510,12 +529,7 @@ class PrintService {
 
     final pageFormat = getPageFormat();
 
-    pw.ThemeData? theme;
-    try {
-      final regular = await PdfGoogleFonts.robotoRegular();
-      final bold = await PdfGoogleFonts.robotoBold();
-      theme = pw.ThemeData.withFont(base: regular, bold: bold);
-    } catch (_) {}
+    final theme = await _getPdfTheme();
 
     final doc = pw.Document();
 
@@ -584,7 +598,7 @@ class PrintService {
                             children: [
                               pw.Text(I18n.formatDishName(it.name), style: pw.TextStyle(fontSize: 8.5, fontWeight: pw.FontWeight.bold)),
                               if (it.note.isNotEmpty)
-                                pw.Text('Ghi chú: ${it.note}', style: pw.TextStyle(fontSize: 7, fontStyle: pw.FontStyle.italic)),
+                                pw.Text('Ghi chú: ${it.note}', style: const pw.TextStyle(fontSize: 7)),
                             ],
                           ),
                         ),
@@ -635,12 +649,7 @@ class PrintService {
   static Future<void> printTestBill() async {
     final pageFormat = getPageFormat();
 
-    pw.ThemeData? theme;
-    try {
-      final regular = await PdfGoogleFonts.robotoRegular();
-      final bold = await PdfGoogleFonts.robotoBold();
-      theme = pw.ThemeData.withFont(base: regular, bold: bold);
-    } catch (_) {}
+    final theme = await _getPdfTheme();
 
     final doc = pw.Document();
     doc.addPage(

@@ -266,6 +266,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
           KitchenScreen(
             tables: _tables,
             onRefresh: _loadTables,
+            isActive: _selectedNavIndex == 2,
           ),
 
           // 3. Tab Đơn hàng

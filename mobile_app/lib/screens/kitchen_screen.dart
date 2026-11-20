@@ -6,11 +6,13 @@ import '../services/i18n_service.dart';
 class KitchenScreen extends StatefulWidget {
   final List<DiningTable> tables;
   final VoidCallback onRefresh;
+  final bool isActive;
 
   const KitchenScreen({
     super.key,
     required this.tables,
     required this.onRefresh,
+    this.isActive = false,
   });
 
   @override
@@ -31,7 +33,9 @@ class _KitchenScreenState extends State<KitchenScreen> {
   @override
   void didUpdateWidget(covariant KitchenScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    _loadKitchenData();
+    if ((widget.isActive && !oldWidget.isActive) || widget.tables != oldWidget.tables) {
+      _loadKitchenData();
+    }
   }
 
   @override

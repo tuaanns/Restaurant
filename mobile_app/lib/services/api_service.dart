@@ -23,6 +23,7 @@ class ApiService {
 
   // In-memory active order cache for offline/instant responsiveness (bắt đầu trống hết)
   static final Map<int, List<OrderItemData>> _tableItemsCache = {};
+  static final Map<int, int> _tableOrdersCache = {};
 
   // Cached Bank Account
   static BankAccount? cachedBankAccount;
@@ -181,7 +182,13 @@ class ApiService {
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
         final List list = data['tables'] ?? [];
-        return list.map((e) => DiningTable.fromJson(e)).toList();
+        final tables = list.map((e) => DiningTable.fromJson(e)).toList();
+        for (var t in tables) {
+          if (t.orderId != null) {
+            _tableOrdersCache[t.id] = t.orderId!;
+          }
+        }
+        return tables;
       }
     } catch (_) {}
 
@@ -243,21 +250,29 @@ class ApiService {
 
   static void _asyncAddBackendItem(int tableId, int productId, int quantity, String note) async {
     try {
-      await http.post(
-        Uri.parse('$baseUrl/tables/$tableId/order'),
-      ).then((res) {
+      int? orderId = _tableOrdersCache[tableId];
+      if (orderId == null) {
+        final res = await http.post(
+          Uri.parse('$baseUrl/tables/$tableId/order'),
+          headers: {'Accept': 'application/json'},
+        ).timeout(const Duration(seconds: 4));
         if (res.statusCode == 200) {
           final data = json.decode(res.body);
-          final orderId = data['order']?['id'];
-          if (orderId != null) {
-            http.post(
-              Uri.parse('$baseUrl/orders/$orderId/items'),
-              headers: {'Content-Type': 'application/json'},
-              body: json.encode({'product_id': productId, 'quantity': quantity, 'note': note}),
-            );
+          final idNum = data['order']?['id'];
+          if (idNum != null) {
+            orderId = (idNum as num).toInt();
+            _tableOrdersCache[tableId] = orderId;
           }
         }
-      });
+      }
+
+      if (orderId != null) {
+        await http.post(
+          Uri.parse('$baseUrl/orders/$orderId/items'),
+          headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+          body: json.encode({'product_id': productId, 'quantity': quantity, 'note': note}),
+        ).timeout(const Duration(seconds: 4));
+      }
     } catch (_) {}
   }
 
@@ -313,10 +328,32 @@ class ApiService {
       }
     }
 
-    // 2. Call backend if orderId available
-    if (orderId != null) {
+    // 2. Resolve targetOrderId
+    int? targetOrderId = orderId ?? _tableOrdersCache[tableId];
+    if (targetOrderId == null) {
       try {
-        await http.post(Uri.parse('$baseUrl/orders/$orderId/send-kitchen')).timeout(const Duration(seconds: 3));
+        final res = await http.post(
+          Uri.parse('$baseUrl/tables/$tableId/order'),
+          headers: {'Accept': 'application/json'},
+        ).timeout(const Duration(seconds: 3));
+        if (res.statusCode == 200) {
+          final data = json.decode(res.body);
+          final idNum = data['order']?['id'];
+          if (idNum != null) {
+            targetOrderId = (idNum as num).toInt();
+            _tableOrdersCache[tableId] = targetOrderId;
+          }
+        }
+      } catch (_) {}
+    }
+
+    // 3. Call backend if orderId available
+    if (targetOrderId != null) {
+      try {
+        await http.post(
+          Uri.parse('$baseUrl/orders/$targetOrderId/send-kitchen'),
+          headers: {'Accept': 'application/json'},
+        ).timeout(const Duration(seconds: 3));
       } catch (_) {}
     }
     return true;
@@ -326,7 +363,10 @@ class ApiService {
   static Future<List<KitchenItemModel>> fetchKitchenItems({List<DiningTable>? tables}) async {
     // 1. Thử lấy từ backend
     try {
-      final res = await http.get(Uri.parse('$baseUrl/kitchen/items')).timeout(const Duration(seconds: 3));
+      final res = await http.get(
+        Uri.parse('$baseUrl/kitchen/items'),
+        headers: {'Accept': 'application/json'},
+      ).timeout(const Duration(seconds: 3));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         if (data['success'] == true && data['items'] != null) {
@@ -335,18 +375,17 @@ class ApiService {
 
           kitchenItems.clear();
           kitchenItems.addAll(backendItems);
-          return kitchenItems;
         }
       }
     } catch (_) {}
 
-    // 2. Đồng bộ từ local _tableItemsCache và tables nếu offline hoặc backend chưa có
+    // 2. Đồng bộ từ local _tableItemsCache và tables để KHÔNG BAO GIỜ bị mất món
     if (tables != null && tables.isNotEmpty) {
       for (var t in tables) {
         final items = getTableItems(t.id);
         for (var it in items) {
           if (it.status == 'sent_kitchen') {
-            final exists = kitchenItems.any((k) => k.id == it.id);
+            final exists = kitchenItems.any((k) => k.id == it.id || (k.dishName == it.name && k.tableName == t.name));
             if (!exists) {
               final now = DateTime.now();
               final timeStr = '${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}';

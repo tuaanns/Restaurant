@@ -93,8 +93,8 @@ Route::prefix('pos')->group(function () {
     // Danh sách khách hàng
     Route::get('/customers', [PosController::class, 'getCustomers']);
 
-    // Chi tiết order của bàn được chọn
-    Route::get('/tables/{tableId}/order', [PosController::class, 'getTableOrder']);
+    // Chi tiết order của bàn được chọn (hỗ trợ cả GET và POST để tự động khởi tạo đơn)
+    Route::match(['get', 'post'], '/tables/{tableId}/order', [PosController::class, 'getTableOrder']);
 
     // Thêm món vào bàn
     Route::post('/orders/{orderId}/items', [PosController::class, 'addItem']);

@@ -615,9 +615,19 @@ class PrintService {
           onLayout: (format) async => doc.save(),
           name: 'BaoBep_${table.name}_$ticketCode',
         );
+      } else {
+        await Printing.layoutPdf(
+          onLayout: (format) async => doc.save(),
+          name: 'BaoBep_${table.name}_$ticketCode',
+        );
       }
     } catch (_) {
-      // In ngầm không bắt buộc mở hộp thoại khổ in
+      try {
+        await Printing.layoutPdf(
+          onLayout: (format) async => doc.save(),
+          name: 'BaoBep_${table.name}_$ticketCode',
+        );
+      } catch (_) {}
     }
   }
 

@@ -320,7 +320,7 @@ class _MenuScreenState extends State<MenuScreen> {
                               itemCount: _filteredProducts.length,
                               itemBuilder: (context, index) {
                                 final p = _filteredProducts[index];
-                                return _buildDishCard(p);
+                                return _buildDishCard(p, currentTable);
                               },
                             ),
                 ),
@@ -460,25 +460,38 @@ class _MenuScreenState extends State<MenuScreen> {
     );
   }
 
-  Widget _buildDishCard(Product product) {
+  Widget _buildDishCard(Product product, DiningTable currentTable) {
+    final tableItems = ApiService.getTableItems(currentTable.id);
+    final orderedQty = tableItems
+        .where((it) => it.productId == product.id || it.name.trim().toLowerCase() == product.name.trim().toLowerCase())
+        .fold<int>(0, (sum, it) => sum + it.quantity);
+    final hasOrdered = orderedQty > 0;
+
     return InkWell(
       onTap: () => _openAddDish(product),
       borderRadius: BorderRadius.circular(10),
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: hasOrdered ? const Color(0xFFF7FDF9) : Colors.white,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-          boxShadow: const [
-            BoxShadow(color: Color(0x06000000), blurRadius: 4, offset: Offset(0, 1)),
+          border: Border.all(
+            color: hasOrdered ? const Color(0xFF86EFAC) : const Color(0xFFE2E8F0),
+            width: hasOrdered ? 1.4 : 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: hasOrdered ? const Color(0x1416A34A) : const Color(0x06000000),
+              blurRadius: hasOrdered ? 6 : 4,
+              offset: const Offset(0, 1),
+            ),
           ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            // Top Row: Dish Name + Circular Plus Icon
+            // Top Row: Dish Name + Badge (ordered qty) or Circular Plus Icon
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -487,27 +500,43 @@ class _MenuScreenState extends State<MenuScreen> {
                     I18n.formatDishName(product.name, product.code),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13.5,
-                      color: Color(0xFF0F172A),
+                      color: hasOrdered ? const Color(0xFF0F172A) : const Color(0xFF1E293B),
                       height: 1.25,
                     ),
                   ),
                 ),
                 const SizedBox(width: 6),
-                Container(
-                  width: 26,
-                  height: 26,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
-                    shape: BoxShape.circle,
-                    border: Border.all(color: const Color(0xFFC8E6C9), width: 0.8),
+                if (hasOrdered)
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1B5E20),
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: const [
+                        BoxShadow(color: Color(0x221B5E20), blurRadius: 4, offset: Offset(0, 1)),
+                      ],
+                    ),
+                    child: Text(
+                      'x$orderedQty',
+                      style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 11),
+                    ),
+                  )
+                else
+                  Container(
+                    width: 26,
+                    height: 26,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFE8F5E9),
+                      shape: BoxShape.circle,
+                      border: Border.all(color: const Color(0xFFC8E6C9), width: 0.8),
+                    ),
+                    child: const Center(
+                      child: Icon(Icons.add, size: 14, color: Color(0xFF1B5E20)),
+                    ),
                   ),
-                  child: const Center(
-                    child: Icon(Icons.add, size: 14, color: Color(0xFF1B5E20)),
-                  ),
-                ),
               ],
             ),
 
@@ -542,12 +571,15 @@ class _MenuScreenState extends State<MenuScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3.5),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFE8F5E9),
+                    color: hasOrdered ? const Color(0xFFDCFCE7) : const Color(0xFFE8F5E9),
                     borderRadius: BorderRadius.circular(5),
-                    border: Border.all(color: const Color(0xFFC8E6C9), width: 0.8),
+                    border: Border.all(
+                      color: hasOrdered ? const Color(0xFF86EFAC) : const Color(0xFFC8E6C9),
+                      width: 0.8,
+                    ),
                   ),
                   child: Text(
-                    '+ ${I18n.t('add')}',
+                    hasOrdered ? '+ Thêm tiếp' : '+ ${I18n.t('add')}',
                     style: const TextStyle(
                       fontSize: 11.5,
                       fontWeight: FontWeight.w700,

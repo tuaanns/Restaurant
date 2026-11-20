@@ -9,6 +9,21 @@ import '../services/i18n_service.dart';
 class PrintService {
   static final numFormat = NumberFormat('#,###', 'en_US');
 
+  // Cấu hình máy in & Phiếu in
+  static String paperSize = 'K80 (80mm)';
+  static bool autoPrintOnPayment = true;
+  static bool autoSendKitchen = true;
+  static bool cutPaper = true;
+
+  static PdfPageFormat getPageFormat() {
+    final widthMm = paperSize.contains('58') ? 54.0 : 72.0;
+    return PdfPageFormat(
+      widthMm * PdfPageFormat.mm,
+      double.infinity,
+      marginAll: (paperSize.contains('58') ? 2.5 : 3.5) * PdfPageFormat.mm,
+    );
+  }
+
   /// Chuyển đổi số tiền thành chữ Tiếng Việt chuẩn theo văn phong hóa đơn tài chính
   static String _readNumberGroup(int n, bool isLastGroup) {
     const digits = ['không', 'một', 'hai', 'ba', 'bốn', 'năm', 'sáu', 'bảy', 'tám', 'chín'];
@@ -99,12 +114,8 @@ class PrintService {
     if (tableNumStr.isEmpty) tableNumStr = '01';
     final bank = ApiService.cachedBankAccount ?? BankAccount.defaultAccount();
 
-    // Chuẩn khổ K80: chiều rộng 72mm-80mm
-    const pageFormat = PdfPageFormat(
-      72 * PdfPageFormat.mm,
-      double.infinity,
-      marginAll: 3.5 * PdfPageFormat.mm,
-    );
+    // Chuẩn khổ K80/K58 theo cấu hình
+    final pageFormat = getPageFormat();
 
     pw.ThemeData? theme;
     try {
@@ -382,11 +393,7 @@ class PrintService {
     final pendingItems = items.where((it) => it.status == 'new_pending').toList();
     final itemsToDisplay = pendingItems.isNotEmpty ? pendingItems : items;
 
-    const pageFormat = PdfPageFormat(
-      72 * PdfPageFormat.mm,
-      double.infinity,
-      marginAll: 3.5 * PdfPageFormat.mm,
-    );
+    final pageFormat = getPageFormat();
 
     pw.ThemeData? theme;
     try {
@@ -501,11 +508,7 @@ class PrintService {
     final pendingItems = items.where((it) => it.status == 'new_pending').toList();
     final itemsToDisplay = pendingItems.isNotEmpty ? pendingItems : items;
 
-    const pageFormat = PdfPageFormat(
-      72 * PdfPageFormat.mm,
-      double.infinity,
-      marginAll: 3.5 * PdfPageFormat.mm,
-    );
+    final pageFormat = getPageFormat();
 
     pw.ThemeData? theme;
     try {
@@ -620,11 +623,7 @@ class PrintService {
 
   /// In phiếu hóa đơn test cho mục Cài đặt máy in
   static Future<void> printTestBill() async {
-    const pageFormat = PdfPageFormat(
-      72 * PdfPageFormat.mm,
-      double.infinity,
-      marginAll: 3.5 * PdfPageFormat.mm,
-    );
+    final pageFormat = getPageFormat();
 
     pw.ThemeData? theme;
     try {

@@ -181,39 +181,41 @@ class _AddDishDialogState extends State<AddDishDialog> {
 
                     const SizedBox(height: 16),
 
-                    // Quantity Counter
+                    // Quantity Counter & Quick Presets
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
                           I18n.t('portionQuantity'),
-                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF475569)),
+                          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF334155)),
                         ),
                         Container(
                           decoration: BoxDecoration(
+                            color: const Color(0xFFF8FAFC),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(color: const Color(0xFFCBD5E1)),
                           ),
                           child: Row(
+                            mainAxisSize: MainAxisSize.min,
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.remove, size: 18),
+                                icon: const Icon(Icons.remove, size: 20),
                                 onPressed: _quantity > 1 ? () => setState(() => _quantity--) : null,
-                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                constraints: const BoxConstraints(minWidth: 40, minHeight: 38),
                                 padding: EdgeInsets.zero,
                               ),
                               Container(
-                                constraints: const BoxConstraints(minWidth: 40),
+                                constraints: const BoxConstraints(minWidth: 42),
                                 alignment: Alignment.center,
                                 child: Text(
                                   '$_quantity',
-                                  style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                                  style: const TextStyle(fontWeight: FontWeight.w900, fontSize: 16, color: Color(0xFF0F172A)),
                                 ),
                               ),
                               IconButton(
-                                icon: const Icon(Icons.add, size: 18, color: Color(0xFF1B5E20)),
+                                icon: const Icon(Icons.add, size: 20, color: Color(0xFF1B5E20)),
                                 onPressed: () => setState(() => _quantity++),
-                                constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+                                constraints: const BoxConstraints(minWidth: 40, minHeight: 38),
                                 padding: EdgeInsets.zero,
                               ),
                             ],
@@ -221,13 +223,50 @@ class _AddDishDialogState extends State<AddDishDialog> {
                         ),
                       ],
                     ),
+                    const SizedBox(height: 8),
+
+                    // Quick Quantity Presets
+                    Row(
+                      children: [1, 2, 3, 5, 10].map((qty) {
+                        final isSel = _quantity == qty;
+                        return Expanded(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 2.5),
+                            child: InkWell(
+                              onTap: () => setState(() => _quantity = qty),
+                              borderRadius: BorderRadius.circular(6),
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(vertical: 6),
+                                decoration: BoxDecoration(
+                                  color: isSel ? const Color(0xFF1B5E20) : const Color(0xFFF1F5F9),
+                                  borderRadius: BorderRadius.circular(6),
+                                  border: Border.all(
+                                    color: isSel ? const Color(0xFF1B5E20) : const Color(0xFFCBD5E1),
+                                    width: isSel ? 1.5 : 1,
+                                  ),
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  '$qty',
+                                  style: TextStyle(
+                                    color: isSel ? Colors.white : const Color(0xFF334155),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 12.5,
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
 
                     const SizedBox(height: 16),
 
                     // Note input & quick tags
                     Text(
                       I18n.t('kitchenNotes'),
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF475569)),
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12.5, color: Color(0xFF334155)),
                     ),
                     const SizedBox(height: 6),
                     TextField(
@@ -239,33 +278,60 @@ class _AddDishDialogState extends State<AddDishDialog> {
                         contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                       ),
                       style: const TextStyle(fontSize: 12.5),
+                      onChanged: (_) => setState(() {}),
                     ),
                     const SizedBox(height: 8),
 
-                    // Quick Note Chips
+                    // Quick Note Chips with interactive multi-select toggle
                     Wrap(
                       spacing: 6,
                       runSpacing: 6,
                       children: _quickNotes.map((note) {
+                        final currentNotes = _noteController.text
+                            .split(RegExp(r'[,;]\s*'))
+                            .map((s) => s.trim())
+                            .where((s) => s.isNotEmpty)
+                            .toList();
+                        final isSelected = currentNotes.contains(note);
+
                         return InkWell(
                           onTap: () {
-                            if (_noteController.text.isEmpty) {
-                              _noteController.text = note;
+                            if (isSelected) {
+                              currentNotes.remove(note);
                             } else {
-                              _noteController.text += ', $note';
+                              currentNotes.add(note);
                             }
+                            _noteController.text = currentNotes.join(', ');
+                            setState(() {});
                           },
-                          borderRadius: BorderRadius.circular(4),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          borderRadius: BorderRadius.circular(6),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 150),
+                            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
                             decoration: BoxDecoration(
-                              color: const Color(0xFFF1F5F9),
-                              borderRadius: BorderRadius.circular(4),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              color: isSelected ? const Color(0xFFE8F5E9) : const Color(0xFFF1F5F9),
+                              borderRadius: BorderRadius.circular(6),
+                              border: Border.all(
+                                color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFFCBD5E1),
+                                width: isSelected ? 1.4 : 1,
+                              ),
                             ),
-                            child: Text(
-                              '+ $note',
-                              style: const TextStyle(fontSize: 10.5, color: Color(0xFF475569), fontWeight: FontWeight.w500),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                if (isSelected) ...[
+                                  const Icon(Icons.check, size: 13, color: Color(0xFF1B5E20)),
+                                  const SizedBox(width: 4),
+                                ],
+                                Text(
+                                  isSelected ? note : '+ $note',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: isSelected ? const Color(0xFF1B5E20) : const Color(0xFF475569),
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         );

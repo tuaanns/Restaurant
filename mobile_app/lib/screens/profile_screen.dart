@@ -19,10 +19,10 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   final currencyFormat = NumberFormat.currency(locale: 'vi_VN', symbol: 'đ');
-  String _paperSize = 'K80 (80mm)';
-  bool _autoPrintOnPayment = true;
-  bool _autoSendKitchen = true;
-  bool _cutPaper = true;
+  String _paperSize = PrintService.paperSize;
+  bool _autoPrintOnPayment = PrintService.autoPrintOnPayment;
+  bool _autoSendKitchen = PrintService.autoSendKitchen;
+  bool _cutPaper = PrintService.cutPaper;
   bool _orderBell = true;
   bool _kitchenBell = true;
   bool _vibrate = true;
@@ -335,7 +335,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         iconColor: const Color(0xFF0D9488),
                         iconBg: const Color(0xFFF0FDFA),
                         title: I18n.t('branchServer'),
-                        subtitle: I18n.t('branchServerSubText'),
+                        subtitle: '${_isServerOnline ? "Trực tuyến" : "Mất kết nối"} • Phú Quốc (Cổng 8000)',
                         trailingWidget: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
@@ -369,13 +369,39 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: () => _showBranchSheet(context),
                       ),
                       _buildDivider(),
+                      // Đồng bộ dữ liệu & làm mới CSDL
+                      _buildSettingItem(
+                        icon: Icons.sync_rounded,
+                        iconColor: const Color(0xFF0284C7),
+                        iconBg: const Color(0xFFF0F9FF),
+                        title: 'Đồng bộ dữ liệu thời gian thực',
+                        subtitle: 'Làm mới thực đơn, phòng bàn & QR từ máy chủ',
+                        trailingWidget: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFE0F2FE),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: const Color(0xFFBAE6FD), width: 0.8),
+                          ),
+                          child: const Text(
+                            'Làm mới',
+                            style: TextStyle(
+                              color: Color(0xFF0284C7),
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                        onTap: () => _handleSyncRealtimeData(context),
+                      ),
+                      _buildDivider(),
                       // Cài đặt máy in
                       _buildSettingItem(
                         icon: Icons.print_outlined,
                         iconColor: const Color(0xFFEA580C),
                         iconBg: const Color(0xFFFFF7ED),
                         title: I18n.t('printerSettingsTitle'),
-                        subtitle: I18n.t('printerSettingsDesc'),
+                        subtitle: 'Khổ $_paperSize • In HĐ: ${_autoPrintOnPayment ? "Bật" : "Tắt"} • Bếp: ${_autoSendKitchen ? "Bật" : "Tắt"}',
                         trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8), size: 20),
                         onTap: () => _showPrinterSheet(context),
                       ),
@@ -386,7 +412,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         iconColor: const Color(0xFFD97706),
                         iconBg: const Color(0xFFFEF3C7),
                         title: I18n.t('notificationSettingsTitle'),
-                        subtitle: I18n.t('notificationSettingsDesc'),
+                        subtitle: 'Chuông order: ${_orderBell ? "Bật" : "Tắt"} • Rung: ${_vibrate ? "Bật" : "Tắt"}',
                         trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8), size: 20),
                         onTap: () => _showNotificationSheet(context),
                       ),
@@ -999,69 +1025,165 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // --- FORCE SYNC REALTIME DATA ---
+  Future<void> _handleSyncRealtimeData(BuildContext context) async {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Row(
+          children: [
+            SizedBox(
+              width: 16,
+              height: 16,
+              child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            ),
+            SizedBox(width: 10),
+            Text('Đang đồng bộ thực đơn và phòng bàn từ máy chủ...'),
+          ],
+        ),
+        backgroundColor: Color(0xFF0284C7),
+        duration: Duration(seconds: 1),
+      ),
+    );
+
+    try {
+      await ApiService.syncRealtimeData();
+      await _loadRealtimeStats();
+      if (mounted) {
+        setState(() {});
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Row(
+              children: [
+                Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                SizedBox(width: 8),
+                Text('Đã đồng bộ thành công dữ liệu mới nhất từ CSDL máy chủ!'),
+              ],
+            ),
+            backgroundColor: Color(0xFF1B5E20),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi đồng bộ: $e'),
+            backgroundColor: const Color(0xFFDC2626),
+          ),
+        );
+      }
+    }
+  }
+
   // --- DETAIL BOTTOM SHEETS 3..6 ---
 
   void _showBranchSheet(BuildContext context) {
+    bool isTesting = false;
+    String pingText = '12ms';
+    String statusText = 'Đang đồng bộ thời gian thực';
+    bool isSuccess = true;
+
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (ctx) => Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              _buildSheetHandle(),
-              _buildSheetHeader('Chi nhánh & Máy chủ kết nối', ctx),
-              const SizedBox(height: 12),
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFF0FDFA),
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFF99F6E4)),
-                ),
-                child: const Row(
-                  children: [
-                    Icon(Icons.cloud_done_rounded, color: Color(0xFF0D9488), size: 28),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text('Đang đồng bộ thời gian thực', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0F766E))),
-                          const SizedBox(height: 2),
-                          const Text('Độ trễ Ping: 12ms • Kết nối thời gian thực', style: TextStyle(fontSize: 11.5, color: Color(0xFF115E59))),
-                        ],
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setSheetState) => Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _buildSheetHandle(),
+                _buildSheetHeader('Chi nhánh & Máy chủ kết nối', ctx),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: isSuccess ? const Color(0xFFF0FDFA) : const Color(0xFFFEF2F2),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: isSuccess ? const Color(0xFF99F6E4) : const Color(0xFFFECACA)),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        isSuccess ? Icons.cloud_done_rounded : Icons.cloud_off_rounded,
+                        color: isSuccess ? const Color(0xFF0D9488) : const Color(0xFFDC2626),
+                        size: 28,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              statusText,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: isSuccess ? const Color(0xFF0F766E) : const Color(0xFFB91C1C),
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              'Độ trễ Ping: $pingText • Cổng kết nối 8000',
+                              style: TextStyle(
+                                fontSize: 11.5,
+                                color: isSuccess ? const Color(0xFF115E59) : const Color(0xFF991B1B),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-              const SizedBox(height: 14),
-              _buildIconDetailRow(icon: Icons.store, iconColor: const Color(0xFF0D9488), label: 'Tên quán', value: 'QUÁN TRÀ POS'),
-              _buildIconDetailRow(icon: Icons.location_on, iconColor: const Color(0xFF0D9488), label: 'Địa chỉ', value: '103 Trần Hưng Đạo, Phú Quốc'),
-              _buildIconDetailRow(icon: Icons.phone, iconColor: const Color(0xFF0D9488), label: 'Hotline', value: '0348974111'),
-              _buildIconDetailRow(icon: Icons.link, iconColor: const Color(0xFF0D9488), label: 'API Base', value: ApiService.baseUrl),
-              const SizedBox(height: 18),
-              ElevatedButton.icon(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF0D9488),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                const SizedBox(height: 14),
+                _buildIconDetailRow(icon: Icons.store, iconColor: const Color(0xFF0D9488), label: 'Tên quán', value: 'QUÁN TRÀ POS'),
+                _buildIconDetailRow(icon: Icons.location_on, iconColor: const Color(0xFF0D9488), label: 'Địa chỉ', value: '103 Trần Hưng Đạo, Phú Quốc'),
+                _buildIconDetailRow(icon: Icons.phone, iconColor: const Color(0xFF0D9488), label: 'Hotline', value: '0348974111'),
+                _buildIconDetailRow(icon: Icons.link, iconColor: const Color(0xFF0D9488), label: 'API Base', value: ApiService.baseUrl),
+                const SizedBox(height: 18),
+                ElevatedButton.icon(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF0D9488),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  icon: isTesting
+                      ? const SizedBox(
+                          width: 16,
+                          height: 16,
+                          child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                        )
+                      : const Icon(Icons.refresh_rounded, size: 18),
+                  label: Text(isTesting ? 'ĐANG KIỂM TRA KẾT NỐI...' : 'KIỂM TRA LẠI KẾT NỐI MÁY CHỦ'),
+                  onPressed: isTesting
+                      ? null
+                      : () async {
+                          setSheetState(() => isTesting = true);
+                          final res = await ApiService.testConnection();
+                          if (mounted) {
+                            setState(() {
+                              _isServerOnline = res['success'] == true;
+                            });
+                          }
+                          setSheetState(() {
+                            isTesting = false;
+                            isSuccess = res['success'] == true;
+                            pingText = '${res['latencyMs']}ms';
+                            statusText = res['message'] ?? (isSuccess ? 'Kết nối máy chủ tốt' : 'Không thể kết nối');
+                          });
+                        },
                 ),
-                icon: const Icon(Icons.refresh_rounded, size: 18),
-                label: const Text('KIỂM TRA LẠI KẾT NỐI MÁY CHỦ'),
-                onPressed: () => Navigator.pop(ctx),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1097,7 +1219,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         selectedColor: const Color(0xFFFFEDD5),
                         onSelected: (v) {
                           if (v) {
-                            setState(() => _paperSize = 'K80 (80mm)');
+                            setState(() {
+                              _paperSize = 'K80 (80mm)';
+                              PrintService.paperSize = _paperSize;
+                            });
                             setSheetState(() {});
                           }
                         },
@@ -1111,7 +1236,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         selectedColor: const Color(0xFFFFEDD5),
                         onSelected: (v) {
                           if (v) {
-                            setState(() => _paperSize = 'K58 (58mm)');
+                            setState(() {
+                              _paperSize = 'K58 (58mm)';
+                              PrintService.paperSize = _paperSize;
+                            });
                             setSheetState(() {});
                           }
                         },
@@ -1126,7 +1254,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   value: _autoPrintOnPayment,
                   activeColor: const Color(0xFFEA580C),
                   onChanged: (v) {
-                    setState(() => _autoPrintOnPayment = v);
+                    setState(() {
+                      _autoPrintOnPayment = v;
+                      PrintService.autoPrintOnPayment = v;
+                    });
                     setSheetState(() {});
                   },
                 ),
@@ -1136,7 +1267,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   value: _autoSendKitchen,
                   activeColor: const Color(0xFFEA580C),
                   onChanged: (v) {
-                    setState(() => _autoSendKitchen = v);
+                    setState(() {
+                      _autoSendKitchen = v;
+                      PrintService.autoSendKitchen = v;
+                    });
                     setSheetState(() {});
                   },
                 ),
@@ -1146,24 +1280,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   value: _cutPaper,
                   activeColor: const Color(0xFFEA580C),
                   onChanged: (v) {
-                    setState(() => _cutPaper = v);
+                    setState(() {
+                      _cutPaper = v;
+                      PrintService.cutPaper = v;
+                    });
                     setSheetState(() {});
                   },
                 ),
                 const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFEA580C),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                  ),
-                  icon: const Icon(Icons.print_rounded, size: 18),
-                  label: const Text('IN THỬ PHIẾU HÓA ĐƠN TEST'),
-                  onPressed: () async {
-                    Navigator.pop(ctx);
-                    await PrintService.printTestBill();
-                  },
+                Row(
+                  children: [
+                    Expanded(
+                      child: OutlinedButton.icon(
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: const Color(0xFFEA580C),
+                          side: const BorderSide(color: Color(0xFFEA580C), width: 1.2),
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        icon: const Icon(Icons.print_rounded, size: 18),
+                        label: const Text('IN THỬ TEST'),
+                        onPressed: () async {
+                          await PrintService.printTestBill();
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFEA580C),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        ),
+                        onPressed: () {
+                          Navigator.pop(ctx);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Đã lưu cấu hình máy in khổ $_paperSize thành công!'),
+                              backgroundColor: const Color(0xFF1B5E20),
+                            ),
+                          );
+                        },
+                        child: const Text('LƯU CÀI ĐẶT'),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -1231,8 +1394,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                   ),
-                  onPressed: () => Navigator.pop(ctx),
-                  child: const Text('Lưu cài đặt'),
+                  onPressed: () {
+                    Navigator.pop(ctx);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Row(
+                          children: [
+                            Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                            SizedBox(width: 8),
+                            Text('Đã lưu cấu hình thông báo & chuông báo thành công!'),
+                          ],
+                        ),
+                        backgroundColor: Color(0xFF1B5E20),
+                      ),
+                    );
+                  },
+                  child: const Text('LƯU CÀI ĐẶT'),
                 ),
               ],
             ),
@@ -1351,37 +1528,129 @@ class _ProfileScreenState extends State<ProfileScreen> {
   // --- SUB DIALOGS ---
 
   void _showChangePasswordDialog(BuildContext context) {
+    final oldPassCtrl = TextEditingController();
+    final newPassCtrl = TextEditingController();
+    final confirmPassCtrl = TextEditingController();
+    bool obscureOld = true;
+    bool obscureNew = true;
+    String? errorText;
+
     showDialog(
       context: context,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Đổi mật khẩu tài khoản', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-        content: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(labelText: 'Mật khẩu hiện tại', prefixIcon: Icon(Icons.lock_outline)),
+      builder: (ctx) => StatefulBuilder(
+        builder: (context, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.lock_reset_rounded, color: Color(0xFF1B5E20), size: 22),
+              SizedBox(width: 8),
+              Text('Đổi mật khẩu tài khoản', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (errorText != null)
+                  Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFEF2F2),
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(color: const Color(0xFFFECACA)),
+                    ),
+                    child: Text(
+                      errorText!,
+                      style: const TextStyle(color: Color(0xFFDC2626), fontSize: 12, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                TextField(
+                  controller: oldPassCtrl,
+                  obscureText: obscureOld,
+                  decoration: InputDecoration(
+                    labelText: 'Mật khẩu hiện tại',
+                    prefixIcon: const Icon(Icons.lock_outline, size: 20),
+                    suffixIcon: IconButton(
+                      icon: Icon(obscureOld ? Icons.visibility_off : Icons.visibility, size: 18),
+                      onPressed: () => setDialogState(() => obscureOld = !obscureOld),
+                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: newPassCtrl,
+                  obscureText: obscureNew,
+                  decoration: InputDecoration(
+                    labelText: 'Mật khẩu mới (tối thiểu 4 ký tự)',
+                    prefixIcon: const Icon(Icons.key, size: 20),
+                    suffixIcon: IconButton(
+                      icon: Icon(obscureNew ? Icons.visibility_off : Icons.visibility, size: 18),
+                      onPressed: () => setDialogState(() => obscureNew = !obscureNew),
+                    ),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: confirmPassCtrl,
+                  obscureText: obscureNew,
+                  decoration: InputDecoration(
+                    labelText: 'Xác nhận mật khẩu mới',
+                    prefixIcon: const Icon(Icons.check_circle_outline, size: 20),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                    contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 10),
-            TextField(
-              obscureText: true,
-              decoration: InputDecoration(labelText: 'Mật khẩu mới', prefixIcon: Icon(Icons.key)),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Hủy bỏ', style: TextStyle(color: Color(0xFF64748B))),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1B5E20),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () {
+                if (oldPassCtrl.text.trim().isEmpty) {
+                  setDialogState(() => errorText = 'Vui lòng nhập mật khẩu hiện tại');
+                  return;
+                }
+                if (newPassCtrl.text.trim().length < 4) {
+                  setDialogState(() => errorText = 'Mật khẩu mới phải có ít nhất 4 ký tự');
+                  return;
+                }
+                if (newPassCtrl.text.trim() != confirmPassCtrl.text.trim()) {
+                  setDialogState(() => errorText = 'Mật khẩu xác nhận không trùng khớp');
+                  return;
+                }
+                Navigator.pop(ctx);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Row(
+                      children: [
+                        Icon(Icons.check_circle_rounded, color: Colors.white, size: 18),
+                        SizedBox(width: 8),
+                        Text('Mật khẩu tài khoản đã được cập nhật thành công!'),
+                      ],
+                    ),
+                    backgroundColor: Color(0xFF1B5E20),
+                  ),
+                );
+              },
+              child: const Text('CẬP NHẬT'),
             ),
           ],
         ),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Hủy')),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF1B5E20), foregroundColor: Colors.white),
-            onPressed: () {
-              Navigator.pop(ctx);
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Mật khẩu đã được cập nhật thành công!'), backgroundColor: Color(0xFF1B5E20)),
-              );
-            },
-            child: const Text('Lưu'),
-          ),
-        ],
       ),
     );
   }

@@ -48,6 +48,47 @@ class ApiService {
     return cachedBankAccount!;
   }
 
+  // --- HEALTH CHECK / CONNECTION TEST ---
+  static Future<Map<String, dynamic>> testConnection() async {
+    final sw = Stopwatch()..start();
+    try {
+      final res = await http
+          .get(Uri.parse('$baseUrl/tables'))
+          .timeout(const Duration(seconds: 4));
+      sw.stop();
+      if (res.statusCode == 200) {
+        return {
+          'success': true,
+          'latencyMs': sw.elapsedMilliseconds,
+          'message': 'Kết nối máy chủ Laravel & CSDL thành công!',
+        };
+      }
+      return {
+        'success': false,
+        'latencyMs': sw.elapsedMilliseconds,
+        'message': 'Máy chủ phản hồi mã lỗi HTTP ${res.statusCode}',
+      };
+    } catch (e) {
+      sw.stop();
+      return {
+        'success': false,
+        'latencyMs': sw.elapsedMilliseconds,
+        'message': 'Không thể kết nối máy chủ ($e)',
+      };
+    }
+  }
+
+  // --- FORCE REFRESH / SYNC ALL REALTIME DATA ---
+  static Future<void> syncRealtimeData() async {
+    cachedBankAccount = null;
+    await Future.wait([
+      fetchDefaultBankAccount(),
+      fetchMenu(),
+      fetchTables(),
+      fetchShiftStats(),
+    ]);
+  }
+
   // --- AUTHENTICATION ---
   static Future<User> login(String username, String password) async {
     final u = username.toLowerCase().trim();

@@ -6,11 +6,9 @@ import 'services/i18n_service.dart';
 import 'screens/order_detail_sheet.dart';
 import 'screens/login_screen.dart';
 import 'screens/menu_screen.dart';
-import 'screens/kitchen_screen.dart';
 import 'screens/orders_list_screen.dart';
 import 'screens/profile_screen.dart';
 import 'services/print_service.dart';
-import 'widgets/kitchen_ticket_dialog.dart';
 
 void main() {
   runApp(const AuraPosMobileApp());
@@ -105,7 +103,7 @@ class PosMainScreen extends StatefulWidget {
 }
 
 class _PosMainScreenState extends State<PosMainScreen> {
-  int _selectedNavIndex = 0; // 0: Bàn, 1: Thực đơn, 2: Bếp & Bar, 3: Đơn hàng, 4: Cá nhân
+  int _selectedNavIndex = 0; // 0: Bàn, 1: Thực đơn, 2: Đơn hàng, 3: Cá nhân
   String _selectedArea = 'all';
   int _selectedTableId = 1; // BÀN 01 mặc định
   bool _isLoading = false;
@@ -219,18 +217,6 @@ class _PosMainScreenState extends State<PosMainScreen> {
     }
   }
 
-  void _openKitchenTicket(DiningTable table) {
-    final items = ApiService.getTableItems(table.id);
-    showDialog(
-      context: context,
-      builder: (ctx) => KitchenTicketDialog(
-        table: table,
-        items: items,
-        onSentSuccess: _loadTables,
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final selectedTable = _tables.firstWhere(
@@ -262,14 +248,7 @@ class _PosMainScreenState extends State<PosMainScreen> {
             onOpenOrderDetail: () => _openOrderDetail(selectedTable),
           ),
 
-          // 2. Tab Bếp & Bar (KDS)
-          KitchenScreen(
-            tables: _tables,
-            onRefresh: _loadTables,
-            isActive: _selectedNavIndex == 2,
-          ),
-
-          // 3. Tab Đơn hàng
+          // 2. Tab Đơn hàng
           OrdersListScreen(
             tables: _tables,
             onSelectTable: (table) {
@@ -280,14 +259,14 @@ class _PosMainScreenState extends State<PosMainScreen> {
             },
           ),
 
-          // 4. Tab Cá nhân
+          // 3. Tab Cá nhân
           ProfileScreen(
             onLogout: widget.onLogout,
           ),
         ],
       ),
 
-      // Bottom Navigation Bar (5 tabs)
+      // Bottom Navigation Bar (4 tabs chuẩn)
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
   }
@@ -432,12 +411,12 @@ class _PosMainScreenState extends State<PosMainScreen> {
               _circleButton(Icons.refresh, () => _loadTables()),
               const SizedBox(width: 8),
               _circleButton(Icons.notifications_none, () {
-                setState(() => _selectedNavIndex = 2); // Đến Bếp & Bar
+                setState(() => _selectedNavIndex = 2); // Đến Đơn hàng
               }),
               const SizedBox(width: 8),
               GestureDetector(
                 onTap: () {
-                  setState(() => _selectedNavIndex = 4); // Đến Cá nhân
+                  setState(() => _selectedNavIndex = 3); // Đến Cá nhân
                 },
                 child: Container(
                   width: 32,
@@ -1056,11 +1035,11 @@ class _PosMainScreenState extends State<PosMainScreen> {
         backgroundColor: Colors.white,
         selectedItemColor: const Color(0xFF1B5E20),
         unselectedItemColor: const Color(0xFF94A3B8),
-        selectedFontSize: 10.5,
-        unselectedFontSize: 10.5,
+        selectedFontSize: 11.5,
+        unselectedFontSize: 11,
         elevation: 0,
-        selectedLabelStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.bold),
-        unselectedLabelStyle: const TextStyle(fontSize: 10.5, fontWeight: FontWeight.w500),
+        selectedLabelStyle: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.bold),
+        unselectedLabelStyle: const TextStyle(fontSize: 11, fontWeight: FontWeight.w500),
         selectedIconTheme: const IconThemeData(size: 24),
         unselectedIconTheme: const IconThemeData(size: 22),
         type: BottomNavigationBarType.fixed,
@@ -1072,23 +1051,6 @@ class _PosMainScreenState extends State<PosMainScreen> {
           BottomNavigationBarItem(
             icon: const Icon(Icons.menu_book),
             label: I18n.t('navMenu'),
-          ),
-          BottomNavigationBarItem(
-            icon: const Stack(
-              clipBehavior: Clip.none,
-              children: [
-                Icon(Icons.local_fire_department),
-                Positioned(
-                  top: -2,
-                  right: -2,
-                  child: CircleAvatar(
-                    radius: 3,
-                    backgroundColor: Color(0xFFF59E0B),
-                  ),
-                )
-              ],
-            ),
-            label: I18n.t('navKitchen'),
           ),
           BottomNavigationBarItem(
             icon: const Icon(Icons.receipt_outlined),

@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'kitchen_screen.dart';
 import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/i18n_service.dart';
@@ -417,6 +418,36 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         onTap: () => _showNotificationSheet(context),
                       ),
                       _buildDivider(),
+                      // Màn hình Bếp & Pha chế (KDS) dành riêng cho thiết bị đặt tại bếp
+                      _buildSettingItem(
+                        icon: Icons.local_fire_department_outlined,
+                        iconColor: const Color(0xFFEA580C),
+                        iconBg: const Color(0xFFFFF7ED),
+                        title: 'Màn hình Bếp & Bar (KDS)',
+                        subtitle: 'Dành cho thiết bị máy tính bảng gắn tại quầy bếp',
+                        trailing: const Icon(Icons.chevron_right_rounded, color: Color(0xFF94A3B8), size: 20),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => Scaffold(
+                                appBar: AppBar(
+                                  title: const Text('BẾP & BAR (KDS)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.bold)),
+                                  backgroundColor: const Color(0xFF0B1626),
+                                  foregroundColor: Colors.white,
+                                  elevation: 0,
+                                ),
+                                body: KitchenScreen(
+                                  tables: const [],
+                                  onRefresh: () {},
+                                  isActive: true,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      _buildDivider(),
                       // Hướng dẫn quy trình phục vụ
                       _buildSettingItem(
                         icon: Icons.menu_book_outlined,
@@ -707,8 +738,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
               // Detail List - Clean borderless rows matching Figma mockup exactly
               _buildCleanPlainRow(I18n.t('username'), '@${user.username}'),
               _buildCleanPlainRow(I18n.t('empCode'), '#NV-00${user.id}'),
-              _buildCleanPlainRow(I18n.t('phone'), user.phone ?? '0949.085.842'),
-              _buildCleanPlainRow(I18n.t('email'), user.email ?? '${user.username}@aura.vn'),
+              _buildCleanPlainRow(I18n.t('phone'), user.phone.isNotEmpty ? user.phone : '0949.085.842'),
+              _buildCleanPlainRow(I18n.t('email'), user.email.isNotEmpty ? user.email : '${user.username}@aura.vn'),
               _buildCleanPlainRow(I18n.t('assignedShift'), user.shift),
               _buildCleanPlainRow(I18n.t('workBranch'), '103 Trần Hưng Đạo, Phú Quốc'),
               _buildCleanPlainRow(I18n.t('checkinTime'), '07:00 ${I18n.t('today')}'),

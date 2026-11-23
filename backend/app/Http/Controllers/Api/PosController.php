@@ -525,13 +525,15 @@ class PosController extends Controller
 
         $paidAmount = (float)$request->input('paid_amount', $order->total_amount);
         $changeAmount = max(0, $paidAmount - $order->total_amount);
+        $now = Carbon::now();
 
         $order->update([
             'status' => 'paid',
             'payment_method' => $request->payment_method,
             'paid_amount' => $paidAmount,
             'change_amount' => $changeAmount,
-            'paid_at' => Carbon::now(),
+            'paid_at' => $now,
+            'created_at' => $now,
         ]);
 
         // Giải phóng bàn về trạng thái Trống

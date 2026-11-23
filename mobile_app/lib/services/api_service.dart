@@ -441,12 +441,32 @@ class ApiService {
     // 1. Clear local items
     _tableItemsCache[tableId] = [];
 
-    // 2. Call backend
-    if (orderId != null) {
+    // 2. Resolve targetOrderId
+    int? targetOrderId = orderId ?? _tableOrdersCache[tableId];
+    if (targetOrderId == null) {
+      try {
+        final res = await http.post(
+          Uri.parse('$baseUrl/tables/$tableId/order'),
+          headers: {'Accept': 'application/json'},
+        ).timeout(const Duration(seconds: 3));
+        if (res.statusCode == 200) {
+          final data = json.decode(res.body);
+          final idNum = data['order']?['id'];
+          if (idNum != null) {
+            targetOrderId = (idNum as num).toInt();
+          }
+        }
+      } catch (_) {}
+    }
+
+    _tableOrdersCache.remove(tableId);
+
+    // 3. Call backend
+    if (targetOrderId != null) {
       try {
         await http.post(
-          Uri.parse('$baseUrl/orders/$orderId/checkout'),
-          headers: {'Content-Type': 'application/json'},
+          Uri.parse('$baseUrl/orders/$targetOrderId/checkout'),
+          headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
           body: json.encode({
             'payment_method': paymentMethod,
             'paid_amount': paidAmount,

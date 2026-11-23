@@ -414,6 +414,7 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                 widget.table.duration = null;
                                 widget.table.totalAmount = 0;
                                 widget.table.itemCount = 0;
+                                widget.table.orderId = null;
 
                                 if (context.mounted) {
                                   Navigator.pop(context);

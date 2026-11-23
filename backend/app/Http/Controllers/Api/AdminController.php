@@ -37,15 +37,21 @@ class AdminController extends Controller
         $today = Carbon::today();
         $yesterday = Carbon::yesterday();
 
-        // Tổng doanh thu từ các đơn hôm nay (chỉ tính đơn đã thanh toán 'paid')
-        $todayOrders = Order::whereDate('created_at', $today)->get();
+        // Tổng doanh thu từ các đơn hôm nay (chỉ tính đơn đã thanh toán 'paid' hôm nay hoặc đơn hôm nay)
+        $todayOrders = Order::where(function ($q) use ($today) {
+            $q->whereDate('paid_at', $today)
+              ->orWhereDate('created_at', $today);
+        })->get();
         $totalRevenue = (float)$todayOrders->where('status', 'paid')->sum('total_amount');
 
         $paidOrdersCount = $todayOrders->where('status', 'paid')->count();
         $activeWithItemsCount = $todayOrders->where('status', 'active')->where('total_amount', '>', 0)->count();
 
         // So sánh với hôm qua để tính tăng trưởng thực tế (chỉ tính đơn đã thanh toán 'paid')
-        $yesterdayOrders = Order::whereDate('created_at', $yesterday)->get();
+        $yesterdayOrders = Order::where(function ($q) use ($yesterday) {
+            $q->whereDate('paid_at', $yesterday)
+              ->orWhereDate('created_at', $yesterday);
+        })->get();
         $yesterdayRevenue = (float)$yesterdayOrders->where('status', 'paid')->sum('total_amount');
         $yesterdayOrdersCount = $yesterdayOrders->where('status', 'paid')->count();
 
@@ -110,7 +116,8 @@ class AdminController extends Controller
         foreach ($hourlySlots as $slot) {
             $h = (int)substr($slot, 0, 2);
             $slotOrders = $todayOrders->filter(function ($order) use ($h) {
-                $orderHour = Carbon::parse($order->created_at)->hour;
+                $time = $order->paid_at ? Carbon::parse($order->paid_at) : Carbon::parse($order->created_at);
+                $orderHour = $time->hour;
                 return $orderHour >= $h && $orderHour < ($h + 2);
             });
             $hourlyData[] = [

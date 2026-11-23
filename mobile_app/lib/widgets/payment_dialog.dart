@@ -408,6 +408,18 @@ class _PaymentDialogState extends State<PaymentDialog> {
                                   paymentMethod: _selectedMethod,
                                   paidAmount: _cashGiven,
                                 );
+
+                                if (PrintService.autoPrintOnPayment) {
+                                  try {
+                                    await PrintService.printReceipt(
+                                      table: widget.table,
+                                      items: widget.items,
+                                      promotion: widget.promotion,
+                                      isPreBill: false,
+                                    );
+                                  } catch (_) {}
+                                }
+
                                 widget.table.status = 'empty';
                                 widget.table.guestCount = 0;
                                 widget.table.notes = null;

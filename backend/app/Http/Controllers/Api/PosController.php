@@ -436,9 +436,15 @@ class PosController extends Controller
     public function getKitchenItems(Request $request)
     {
         $items = OrderItem::whereHas('order', function ($query) {
-            $query->whereIn('status', ['active', 'billing']);
+            $query->whereIn('status', ['active', 'billing', 'paid']);
         })
-        ->whereIn('status', ['sent_kitchen', 'cooking', 'done'])
+        ->where(function ($query) {
+            $query->whereIn('status', ['sent_kitchen', 'cooking'])
+                  ->orWhere(function ($q) {
+                      $q->where('status', 'done')
+                        ->where('updated_at', '>=', Carbon::now()->subMinutes(30));
+                  });
+        })
         ->with('order.table')
         ->orderBy('sent_to_kitchen_at', 'desc')
         ->orderBy('created_at', 'desc')

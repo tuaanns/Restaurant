@@ -24,6 +24,37 @@ class PrintService {
     );
   }
 
+  /// In trực tiếp ngầm ra máy in (Silent Print) - Tuyệt đối không mở hộp thoại cài đặt / chỉnh khổ giấy của hệ điều hành
+  static Future<bool> directPrintDocument({
+    required pw.Document doc,
+    required String name,
+    bool allowDialogFallback = false,
+  }) async {
+    try {
+      final printers = await Printing.listPrinters();
+      if (printers.isNotEmpty) {
+        final targetPrinter = printers.firstWhere((p) => p.isDefault, orElse: () => printers.first);
+        return await Printing.directPrintPdf(
+          printer: targetPrinter,
+          onLayout: (format) async => doc.save(),
+          name: name,
+        );
+      }
+    } catch (_) {}
+
+    // Chỉ khi được yêu cầu hiển thị hộp thoại in (ví dụ in test), mới gọi layoutPdf
+    if (allowDialogFallback) {
+      try {
+        return await Printing.layoutPdf(
+          onLayout: (format) async => doc.save(),
+          name: name,
+        );
+      } catch (_) {}
+    }
+
+    return false;
+  }
+
   /// Nạp font chữ tiếng Việt đầy đủ (Regular, Bold, Italic, BoldItalic) chống lỗi font
   static Future<pw.ThemeData> _getPdfTheme() async {
     try {
@@ -399,10 +430,11 @@ class PrintService {
       ),
     );
 
-    // Mở hộp thoại in chuẩn của hệ điều hành (Android Print Spooler / Web Print / AirPrint)
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => doc.save(),
+    // In ngầm trực tiếp ra máy in nhiệt, tuyệt đối không mở hộp thoại chỉnh khổ giấy của hệ điều hành
+    await directPrintDocument(
+      doc: doc,
       name: '${isPreBill ? "PhieuTamTinh" : "HoaDon"}_${table.name}_$orderCode',
+      allowDialogFallback: false,
     );
   }
 
@@ -510,9 +542,11 @@ class PrintService {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => doc.save(),
+    // In ngầm trực tiếp ra máy in bếp, tuyệt đối không mở hộp thoại cài đặt / chỉnh khổ giấy
+    await directPrintDocument(
+      doc: doc,
       name: 'BaoBep_${table.name}_$ticketCode',
+      allowDialogFallback: false,
     );
   }
 
@@ -620,29 +654,12 @@ class PrintService {
       ),
     );
 
-    try {
-      final printers = await Printing.listPrinters();
-      if (printers.isNotEmpty) {
-        final targetPrinter = printers.firstWhere((p) => p.isDefault, orElse: () => printers.first);
-        await Printing.directPrintPdf(
-          printer: targetPrinter,
-          onLayout: (format) async => doc.save(),
-          name: 'BaoBep_${table.name}_$ticketCode',
-        );
-      } else {
-        await Printing.layoutPdf(
-          onLayout: (format) async => doc.save(),
-          name: 'BaoBep_${table.name}_$ticketCode',
-        );
-      }
-    } catch (_) {
-      try {
-        await Printing.layoutPdf(
-          onLayout: (format) async => doc.save(),
-          name: 'BaoBep_${table.name}_$ticketCode',
-        );
-      } catch (_) {}
-    }
+    // Tự động in trực tiếp ngầm tới máy in nhiệt, không mở hộp thoại chỉnh khổ giấy
+    await directPrintDocument(
+      doc: doc,
+      name: 'BaoBep_${table.name}_$ticketCode',
+      allowDialogFallback: false,
+    );
   }
 
   /// In phiếu hóa đơn test cho mục Cài đặt máy in
@@ -682,9 +699,11 @@ class PrintService {
       ),
     );
 
-    await Printing.layoutPdf(
-      onLayout: (PdfPageFormat format) async => doc.save(),
+    // Đối với in test, cho phép mở dialog xem trước nếu không tìm thấy máy in mặc định
+    await directPrintDocument(
+      doc: doc,
       name: 'TestPrint_K80',
+      allowDialogFallback: true,
     );
   }
 }

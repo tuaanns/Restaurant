@@ -5,7 +5,6 @@ import '../services/api_service.dart';
 import '../services/i18n_service.dart';
 import '../services/print_service.dart';
 import '../widgets/add_dish_dialog.dart';
-import '../widgets/kitchen_ticket_dialog.dart';
 
 class MenuScreen extends StatefulWidget {
   final List<DiningTable> tables;

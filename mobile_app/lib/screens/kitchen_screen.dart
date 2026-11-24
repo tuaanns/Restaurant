@@ -168,18 +168,24 @@ class _KitchenScreenState extends State<KitchenScreen> {
 
             // Kitchen Items List
             Expanded(
-              child: _filteredList.isEmpty
-                  ? Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          const Icon(Icons.check_circle_outline, size: 48, color: Color(0xFFCBD5E1)),
-                          const SizedBox(height: 8),
-                          Text(I18n.t('kNoItems'), style: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
-                        ],
+              child: _isLoading
+                  ? const Center(
+                      child: CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFF59E0B)),
                       ),
                     )
-                  : ListView.separated(
+                  : _filteredList.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(Icons.check_circle_outline, size: 48, color: Color(0xFFCBD5E1)),
+                              const SizedBox(height: 8),
+                              Text(I18n.t('kNoItems'), style: const TextStyle(color: Color(0xFF64748B), fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        )
+                      : ListView.separated(
                       padding: const EdgeInsets.all(12),
                       itemCount: _filteredList.length,
                       separatorBuilder: (context, index) => const SizedBox(height: 10),

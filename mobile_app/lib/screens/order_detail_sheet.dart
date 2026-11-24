@@ -4,7 +4,6 @@ import '../models/models.dart';
 import '../services/api_service.dart';
 import '../services/i18n_service.dart';
 import '../services/print_service.dart';
-import '../widgets/kitchen_ticket_dialog.dart';
 import '../widgets/prebill_dialog.dart';
 import '../widgets/payment_dialog.dart';
 import '../widgets/promotion_dialog.dart';
@@ -106,20 +105,6 @@ class _OrderDetailSheetState extends State<OrderDetailSheet> {
         ),
       );
     }
-  }
-
-  void _openKitchenTicket() {
-    showDialog(
-      context: context,
-      builder: (ctx) => KitchenTicketDialog(
-        table: widget.table,
-        items: items,
-        onSentSuccess: () {
-          _refreshItems();
-          widget.onOrderUpdated();
-        },
-      ),
-    );
   }
 
   void _openPreBill() {

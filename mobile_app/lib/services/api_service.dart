@@ -21,6 +21,20 @@ class ApiService {
   // Current logged in user
   static User? currentUser;
 
+  // Sanctum Auth Token
+  static String? authToken;
+
+  static Map<String, String> get authHeaders => {
+    'Accept': 'application/json',
+    if (authToken != null && authToken!.isNotEmpty) 'Authorization': 'Bearer $authToken',
+  };
+
+  static Map<String, String> get jsonHeaders => {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+    if (authToken != null && authToken!.isNotEmpty) 'Authorization': 'Bearer $authToken',
+  };
+
   // In-memory active order cache for offline/instant responsiveness (bắt đầu trống hết)
   static final Map<int, List<OrderItemData>> _tableItemsCache = {};
   static final Map<int, int> _tableOrdersCache = {};
@@ -33,7 +47,7 @@ class ApiService {
     if (cachedBankAccount != null) return cachedBankAccount!;
     try {
       final response = await http
-          .get(Uri.parse('$baseUrl/default-bank-account'))
+          .get(Uri.parse('$baseUrl/default-bank-account'), headers: authHeaders)
           .timeout(const Duration(seconds: 4));
 
       if (response.statusCode == 200) {
@@ -54,7 +68,7 @@ class ApiService {
     final sw = Stopwatch()..start();
     try {
       final res = await http
-          .get(Uri.parse('$baseUrl/tables'))
+          .get(Uri.parse('$baseUrl/tables'), headers: authHeaders)
           .timeout(const Duration(seconds: 4));
       sw.stop();
       if (res.statusCode == 200) {
@@ -105,6 +119,9 @@ class ApiService {
       final data = json.decode(res.body);
       if (res.statusCode == 200 && data['success'] == true && data['user'] != null) {
         currentUser = User.fromJson(data['user']);
+        if (data['token'] != null) {
+          authToken = data['token'].toString();
+        }
         return currentUser!;
       } else {
         final msg = data['message'] ?? 'Tên đăng nhập hoặc mật khẩu không chính xác!';
@@ -152,13 +169,14 @@ class ApiService {
 
   static void logout() {
     currentUser = null;
+    authToken = null;
   }
 
   // --- REAL-TIME SHIFT STATS ---
   static Future<ShiftStats> fetchShiftStats() async {
     try {
       final response = await http
-          .get(Uri.parse('http://$baseHost/api/admin/stats'))
+          .get(Uri.parse('http://$baseHost/api/admin/stats'), headers: authHeaders)
           .timeout(const Duration(seconds: 4));
 
       if (response.statusCode == 200) {
@@ -176,7 +194,7 @@ class ApiService {
   static Future<List<DiningTable>> fetchTables() async {
     try {
       final response = await http
-          .get(Uri.parse('$baseUrl/tables'))
+          .get(Uri.parse('$baseUrl/tables'), headers: authHeaders)
           .timeout(const Duration(seconds: 3));
 
       if (response.statusCode == 200) {
@@ -199,7 +217,7 @@ class ApiService {
   static Future<List<Category>> fetchMenu() async {
     try {
       final response = await http
-          .get(Uri.parse('$baseUrl/menu'))
+          .get(Uri.parse('$baseUrl/menu'), headers: authHeaders)
           .timeout(const Duration(seconds: 8));
 
       if (response.statusCode == 200) {
@@ -254,7 +272,7 @@ class ApiService {
       if (orderId == null) {
         final res = await http.post(
           Uri.parse('$baseUrl/tables/$tableId/order'),
-          headers: {'Accept': 'application/json'},
+          headers: authHeaders,
         ).timeout(const Duration(seconds: 4));
         if (res.statusCode == 200) {
           final data = json.decode(res.body);
@@ -269,7 +287,7 @@ class ApiService {
       if (orderId != null) {
         await http.post(
           Uri.parse('$baseUrl/orders/$orderId/items'),
-          headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+          headers: jsonHeaders,
           body: json.encode({'product_id': productId, 'quantity': quantity, 'note': note}),
         ).timeout(const Duration(seconds: 4));
       }
@@ -334,7 +352,7 @@ class ApiService {
       try {
         final res = await http.post(
           Uri.parse('$baseUrl/tables/$tableId/order'),
-          headers: {'Accept': 'application/json'},
+          headers: authHeaders,
         ).timeout(const Duration(seconds: 3));
         if (res.statusCode == 200) {
           final data = json.decode(res.body);
@@ -352,7 +370,7 @@ class ApiService {
       try {
         await http.post(
           Uri.parse('$baseUrl/orders/$targetOrderId/send-kitchen'),
-          headers: {'Accept': 'application/json'},
+          headers: authHeaders,
         ).timeout(const Duration(seconds: 3));
       } catch (_) {}
     }
@@ -365,7 +383,7 @@ class ApiService {
     try {
       final res = await http.get(
         Uri.parse('$baseUrl/kitchen/items'),
-        headers: {'Accept': 'application/json'},
+        headers: authHeaders,
       ).timeout(const Duration(seconds: 3));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
@@ -420,7 +438,7 @@ class ApiService {
     try {
       await http.patch(
         Uri.parse('$baseUrl/kitchen/items/$itemId/status'),
-        headers: {'Content-Type': 'application/json'},
+        headers: jsonHeaders,
         body: json.encode({'status': newStatus}),
       ).timeout(const Duration(seconds: 3));
     } catch (_) {}
@@ -430,7 +448,10 @@ class ApiService {
   static Future<bool> printPreBill(int tableId, {int? orderId}) async {
     if (orderId != null) {
       try {
-        await http.post(Uri.parse('$baseUrl/orders/$orderId/print-prebill')).timeout(const Duration(seconds: 3));
+        await http.post(
+          Uri.parse('$baseUrl/orders/$orderId/print-prebill'),
+          headers: authHeaders,
+        ).timeout(const Duration(seconds: 3));
       } catch (_) {}
     }
     return true;
@@ -447,7 +468,7 @@ class ApiService {
       try {
         final res = await http.post(
           Uri.parse('$baseUrl/tables/$tableId/order'),
-          headers: {'Accept': 'application/json'},
+          headers: authHeaders,
         ).timeout(const Duration(seconds: 3));
         if (res.statusCode == 200) {
           final data = json.decode(res.body);
@@ -466,7 +487,7 @@ class ApiService {
       try {
         await http.post(
           Uri.parse('$baseUrl/orders/$targetOrderId/checkout'),
-          headers: {'Content-Type': 'application/json', 'Accept': 'application/json'},
+          headers: jsonHeaders,
           body: json.encode({
             'payment_method': paymentMethod,
             'paid_amount': paidAmount,
@@ -521,7 +542,10 @@ class ApiService {
 
   static Future<List<PromotionModel>> getPromotions() async {
     try {
-      final res = await http.get(Uri.parse('$baseUrl/promotions')).timeout(const Duration(seconds: 3));
+      final res = await http.get(
+        Uri.parse('$baseUrl/promotions'),
+        headers: authHeaders,
+      ).timeout(const Duration(seconds: 3));
       if (res.statusCode == 200) {
         final data = json.decode(res.body);
         if (data['promotions'] != null) {

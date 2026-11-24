@@ -7,7 +7,11 @@ import { FooterShortcuts } from './components/FooterShortcuts';
 
 // Auth & Admin components
 import { LoginPage } from './components/auth/LoginPage';
-import { AdminDashboard } from './components/admin/AdminDashboard';
+
+// Code-splitting: Lazy load AdminDashboard để tối ưu tốc độ tải POS tức thì (< 0.5s)
+const AdminDashboard = React.lazy(() =>
+  import('./components/admin/AdminDashboard').then((m) => ({ default: m.AdminDashboard }))
+);
 
 // Modals
 import { MenuModal } from './components/modals/MenuModal';
@@ -1361,26 +1365,35 @@ export function App() {
 
       {/* 2. Main View (POS View HOẶC Admin Dashboard) */}
       {currentView === 'admin' && currentUser.role === 'admin' ? (
-        <AdminDashboard
-          currentUser={currentUser}
-          onUpdateCurrentUser={(updatedUser) => {
-            setCurrentUser(updatedUser);
-            try {
-              sessionStorage.setItem('pos_user', JSON.stringify(updatedUser));
-            } catch (e) {}
-          }}
-          initialTab={adminTab}
-          onTabChange={(tab) => setAdminTab(tab)}
-          onBackToPos={() => {
-            try {
-              sessionStorage.setItem('aura_pos_current_view', 'pos');
-              localStorage.setItem('aura_pos_current_view', 'pos');
-              window.history.replaceState(null, '', window.location.pathname + window.location.search);
-            } catch (e) {}
-            setCurrentView('pos');
-          }}
-          onLogout={handleLogout}
-        />
+        <React.Suspense
+          fallback={
+            <div className="flex-1 flex flex-col items-center justify-center min-h-[500px] text-gray-500">
+              <div className="w-10 h-10 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4" />
+              <p className="text-sm font-medium">Đang tải trang Quản trị...</p>
+            </div>
+          }
+        >
+          <AdminDashboard
+            currentUser={currentUser}
+            onUpdateCurrentUser={(updatedUser) => {
+              setCurrentUser(updatedUser);
+              try {
+                sessionStorage.setItem('pos_user', JSON.stringify(updatedUser));
+              } catch (e) {}
+            }}
+            initialTab={adminTab}
+            onTabChange={(tab) => setAdminTab(tab)}
+            onBackToPos={() => {
+              try {
+                sessionStorage.setItem('aura_pos_current_view', 'pos');
+                localStorage.setItem('aura_pos_current_view', 'pos');
+                window.history.replaceState(null, '', window.location.pathname + window.location.search);
+              } catch (e) {}
+              setCurrentView('pos');
+            }}
+            onLogout={handleLogout}
+          />
+        </React.Suspense>
       ) : (
         <div style={{ display: 'flex', flex: 1, overflow: 'hidden', position: 'relative' }}>
           {/* Cột Trái: Bộ lọc khu vực & Lưới bàn (Hiển thị nếu trên Desktop HOẶC trên Mobile tab tables) */}

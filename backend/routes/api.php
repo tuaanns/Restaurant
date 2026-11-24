@@ -15,17 +15,21 @@ use App\Http\Controllers\Api\PaymentWebhookController;
 // Authentication Routes (Đăng nhập / Đăng xuất / Lấy thông tin user)
 Route::prefix('auth')->group(function () {
     Route::post('/login', [AuthController::class, 'login']);
-    Route::post('/logout', [AuthController::class, 'logout']);
-    Route::get('/me', [AuthController::class, 'me']);
-    Route::get('/users', [AuthController::class, 'getUsers']);
-    Route::post('/users', [AuthController::class, 'createUser']);
-    Route::post('/users/import', [AuthController::class, 'importUsers']);
-    Route::patch('/users/{id}', [AuthController::class, 'updateUser']);
-    Route::delete('/users/{id}', [AuthController::class, 'deleteUser']);
+
+    Route::middleware('auth:sanctum')->group(function () {
+        Route::post('/logout', [AuthController::class, 'logout']);
+        Route::get('/me', [AuthController::class, 'me']);
+        Route::get('/users', [AuthController::class, 'getUsers'])->middleware('role:admin');
+        Route::post('/users', [AuthController::class, 'createUser'])->middleware('role:admin');
+        Route::post('/users/import', [AuthController::class, 'importUsers'])->middleware('role:admin');
+        Route::patch('/users/{id}', [AuthController::class, 'updateUser'])->middleware('role:admin');
+        Route::delete('/users/{id}', [AuthController::class, 'deleteUser'])->middleware('role:admin');
+    });
 });
 
-// Admin Management Routes (Thống kê doanh thu, Quản lý thực đơn)
-Route::prefix('admin')->group(function () {
+// Admin Management Routes (Thống kê doanh thu, Quản lý thực đơn, Sổ quỹ, v.v.)
+// Khóa bảo mật toàn bộ API Admin bằng Sanctum & Role: admin
+Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(function () {
     Route::get('/stats', [AdminController::class, 'getStats']);
     Route::get('/reports', [AdminController::class, 'getReports']);
 
@@ -80,8 +84,8 @@ Route::prefix('admin')->group(function () {
     Route::delete('/bank-accounts/{id}', [AdminController::class, 'deleteBankAccount']);
 });
 
-// POS Cashier Routes (Sơ đồ bàn, gọi món, báo bếp, in bill, thanh toán)
-Route::prefix('pos')->group(function () {
+// POS Cashier & Waiter Routes (Sơ đồ bàn, gọi món, báo bếp, in bill, thanh toán)
+Route::prefix('pos')->middleware(['auth:sanctum', 'role:admin,cashier,waiter'])->group(function () {
     // Tài khoản ngân hàng mặc định cho POS VietQR
     Route::get('/default-bank-account', [AdminController::class, 'getDefaultBankAccount']);
     // Sơ đồ bàn, khu vực và trạng thái
@@ -102,45 +106,48 @@ Route::prefix('pos')->group(function () {
     // Cập nhật số lượng hoặc ghi chú món
     Route::patch('/items/{itemId}', [PosController::class, 'updateItem']);
 
-    // Xóa món khỏi order
-    Route::delete('/items/{itemId}', [PosController::class, 'deleteItem']);
-
-    // Huỷ toàn bộ order (xoá sạch món, reset bàn về empty)
-    Route::post('/orders/{orderId}/clear', [PosController::class, 'clearOrder']);
-
-    // Gán khách hàng cho order (để tính % giảm giá thành viên)
-    Route::post('/orders/{orderId}/customer', [PosController::class, 'updateCustomer']);
-
-    // Danh sách chương trình khuyến mãi đang chạy (POS)
-    Route::get('/promotions', [PosController::class, 'getPromotions']);
-
-    // Áp dụng hoặc hủy khuyến mãi cho order
-    Route::post('/orders/{orderId}/promotion', [PosController::class, 'applyPromotion']);
-
     // Báo bếp (F10) & Quản lý bếp KDS
     Route::post('/orders/{orderId}/send-kitchen', [PosController::class, 'sendToKitchen']);
     Route::get('/kitchen/items', [PosController::class, 'getKitchenItems']);
     Route::patch('/kitchen/items/{itemId}/status', [PosController::class, 'updateKitchenItemStatus']);
 
-    // In tạm tính
-    Route::post('/orders/{orderId}/print-prebill', [PosController::class, 'printPreBill']);
-
-    // Thanh toán (F9)
-    Route::post('/orders/{orderId}/checkout', [PosController::class, 'checkout']);
-
-    // Chuyển bàn
-    Route::post('/tables/transfer', [PosController::class, 'transferTable']);
-
-    // Tách đơn sang bàn khác
-    Route::post('/tables/split-order', [PosController::class, 'splitOrder']);
-
-    // Khôi phục dữ liệu mẫu
-    Route::post('/reset-demo', [PosController::class, 'resetDemo']);
+    // Danh sách chương trình khuyến mãi đang chạy (POS)
+    Route::get('/promotions', [PosController::class, 'getPromotions']);
 
     // Kiểm tra trạng thái đơn hàng (Polling tự động đóng modal khi nhận tiền VietQR)
     Route::get('/orders/{orderId}/status', [PaymentWebhookController::class, 'getOrderStatus']);
+
+    // --- CÁC THAO TÁC CỦA THU NGÂN & QUẢN LÝ (ROLE: ADMIN, CASHIER) ---
+    Route::middleware('role:admin,cashier')->group(function () {
+        // Xóa món khỏi order
+        Route::delete('/items/{itemId}', [PosController::class, 'deleteItem']);
+
+        // Huỷ toàn bộ order (xoá sạch món, reset bàn về empty)
+        Route::post('/orders/{orderId}/clear', [PosController::class, 'clearOrder']);
+
+        // Gán khách hàng cho order (để tính % giảm giá thành viên)
+        Route::post('/orders/{orderId}/customer', [PosController::class, 'updateCustomer']);
+
+        // Áp dụng hoặc hủy khuyến mãi cho order
+        Route::post('/orders/{orderId}/promotion', [PosController::class, 'applyPromotion']);
+
+        // In tạm tính
+        Route::post('/orders/{orderId}/print-prebill', [PosController::class, 'printPreBill']);
+
+        // Thanh toán (F9)
+        Route::post('/orders/{orderId}/checkout', [PosController::class, 'checkout']);
+
+        // Chuyển bàn
+        Route::post('/tables/transfer', [PosController::class, 'transferTable']);
+
+        // Tách đơn sang bàn khác
+        Route::post('/tables/split-order', [PosController::class, 'splitOrder']);
+    });
+
+    // Khôi phục dữ liệu mẫu (Chỉ Admin)
+    Route::post('/reset-demo', [PosController::class, 'resetDemo'])->middleware('role:admin');
 });
 
-// Cổng tiếp nhận Webhook ngân hàng tự động (SePay, Casso, Android App Gateway)
+// Cổng tiếp nhận Webhook ngân hàng tự động (SePay, Casso, Android App Gateway) - Public cho gateway ngân hàng
 Route::post('/payment/webhook', [PaymentWebhookController::class, 'handleWebhook']);
 Route::post('/payment/test-simulate', [PaymentWebhookController::class, 'simulateWebhook']);

@@ -460,5 +460,39 @@ export const api = {
   simulatePaymentWebhook: async (data) => {
     const res = await axios.post(`${API_ROOT}/payment/test-simulate`, data);
     return res.data;
+  },
+
+  // Đồng bộ sự kiện thời gian thực (Real-time Events)
+  getLatestEvents: async (sinceId = 0) => {
+    const res = await axios.get(`${API_BASE}/events/latest?since_id=${sinceId}`);
+    return res.data;
+  },
+
+  getEventStreamUrl: (token) => {
+    const host = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
+    const base = import.meta.env.VITE_API_URL || `http://${host}:8000/api`;
+    return `${base}/pos/events/stream${token ? `?token=${encodeURIComponent(token)}` : ''}`;
+  },
+
+  // Quản lý Sao lưu CSDL (Database Backups)
+  getBackups: async () => {
+    const res = await axios.get(`${API_ROOT}/admin/backups`);
+    return res.data;
+  },
+
+  createBackup: async (type = 'manual') => {
+    const res = await axios.post(`${API_ROOT}/admin/backups/create`, { type });
+    return res.data;
+  },
+
+  deleteBackup: async (filename) => {
+    const res = await axios.delete(`${API_ROOT}/admin/backups/${encodeURIComponent(filename)}`);
+    return res.data;
+  },
+
+  getBackupDownloadUrl: (filename) => {
+    const host = typeof window !== 'undefined' && window.location.hostname ? window.location.hostname : 'localhost';
+    const base = import.meta.env.VITE_API_URL || `http://${host}:8000/api`;
+    return `${base}/admin/backups/${encodeURIComponent(filename)}/download`;
   }
 };

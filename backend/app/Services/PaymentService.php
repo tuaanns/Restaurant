@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\DiningTable;
 use App\Models\CashTransaction;
 use App\Services\CashBookService;
+use App\Services\PosEventService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 
@@ -142,6 +143,20 @@ class PaymentService
         }
 
         Log::info("Successfully auto-completed Order {$order->order_code} for table {$tableName} with amount {$amount}");
+
+        // Phát sự kiện realtime đồng bộ
+        try {
+            PosEventService::emit('table_updated', [
+                'table_id' => $order->table_id,
+                'order_id' => $order->id,
+                'action' => 'paid_webhook',
+            ]);
+            PosEventService::emit('order_paid', [
+                'order_id' => $order->id,
+                'table_id' => $order->table_id,
+                'amount' => $amount,
+            ]);
+        } catch (\Exception $e) {}
 
         return [
             'success' => true,

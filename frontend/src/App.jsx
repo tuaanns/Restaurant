@@ -281,6 +281,123 @@ export function App() {
     }
   }, [currentUser?.id]);
 
+  // Real-time Event Stream & Fallback Polling Cursor (Đồng bộ bàn, bếp, thanh toán tức thì < 0.2s)
+  const lastEventIdRef = useRef(0);
+
+  useEffect(() => {
+    if (!currentUser?.id) return;
+
+    let eventSource = null;
+    let fallbackInterval = null;
+    let isSubscribed = true;
+
+    const handleIncomingEvent = (event) => {
+      if (!event || !isSubscribed) return;
+      const { event_type, payload } = event;
+
+      if (event_type === 'table_updated') {
+        api.getTables().then((res) => {
+          if (res && res.tables && isSubscribed) {
+            setTables(res.tables);
+            if (res.summary) setSummary(res.summary);
+            setSelectedTable((prev) => {
+              if (!prev) return prev;
+              const matching = res.tables.find((t) => t.id === prev.id);
+              return matching || prev;
+            });
+          }
+        }).catch(() => {});
+
+        if (payload?.action === 'send_kitchen') {
+          playKitchenChime();
+          showToast('🔔 Nhân viên vừa gửi báo bếp món mới!', 'info');
+        } else if (payload?.action === 'checkout') {
+          showToast('✓ Bàn vừa được thanh toán thành công!', 'success');
+        }
+      } else if (event_type === 'kitchen_updated') {
+        window.dispatchEvent(new CustomEvent('aura_kitchen_updated', { detail: payload }));
+      } else if (event_type === 'order_paid') {
+        api.getTables().then((res) => {
+          if (res && res.tables && isSubscribed) {
+            setTables(res.tables);
+            if (res.summary) setSummary(res.summary);
+          }
+        }).catch(() => {});
+        setIsPaymentOpen(false);
+        showToast('✓ Đã xác nhận thanh toán chuyển khoản VietQR!', 'success');
+      }
+    };
+
+    // 1. Kết nối Server-Sent Events (SSE)
+    try {
+      const token = sessionStorage.getItem('pos_token') || localStorage.getItem('pos_token') || '';
+      const streamUrl = api.getEventStreamUrl(token);
+
+      eventSource = new EventSource(streamUrl);
+
+      eventSource.addEventListener('table_updated', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.id) lastEventIdRef.current = Math.max(lastEventIdRef.current, Number(data.id));
+          handleIncomingEvent(data);
+        } catch (err) {}
+      });
+
+      eventSource.addEventListener('kitchen_updated', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.id) lastEventIdRef.current = Math.max(lastEventIdRef.current, Number(data.id));
+          handleIncomingEvent(data);
+        } catch (err) {}
+      });
+
+      eventSource.addEventListener('order_paid', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.id) lastEventIdRef.current = Math.max(lastEventIdRef.current, Number(data.id));
+          handleIncomingEvent(data);
+        } catch (err) {}
+      });
+
+      eventSource.addEventListener('cycle_end', (e) => {
+        try {
+          const data = JSON.parse(e.data);
+          if (data.latest_id) lastEventIdRef.current = Math.max(lastEventIdRef.current, Number(data.latest_id));
+        } catch (err) {}
+      });
+
+      eventSource.onerror = () => {
+        // SSE tự động kết nối lại khi có gián đoạn
+      };
+    } catch (e) {
+      console.info('SSE not supported or connection error, relying on poll cursor');
+    }
+
+    // 2. Fallback Cursor Polling: Kiểm tra sự kiện mỗi 2.5s phòng khi SSE bị ngắt hoặc mạng LAN gián đoạn
+    fallbackInterval = setInterval(async () => {
+      if (!isSubscribed) return;
+      try {
+        const res = await api.getLatestEvents(lastEventIdRef.current);
+        if (res && res.success && Array.isArray(res.events) && res.events.length > 0) {
+          res.events.forEach((ev) => {
+            if (ev.id) lastEventIdRef.current = Math.max(lastEventIdRef.current, Number(ev.id));
+            handleIncomingEvent(ev);
+          });
+        }
+      } catch (err) {}
+    }, 2500);
+
+    return () => {
+      isSubscribed = false;
+      if (eventSource) {
+        eventSource.close();
+      }
+      if (fallbackInterval) {
+        clearInterval(fallbackInterval);
+      }
+    };
+  }, [currentUser?.id]);
+
   // Auth Handlers
   const handleLoginSuccess = (user) => {
     try {

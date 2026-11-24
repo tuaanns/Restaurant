@@ -1395,4 +1395,81 @@ class AdminController extends Controller
             ], 503);
         }
     }
+
+    /**
+     * Lấy danh sách các bản sao lưu CSDL
+     */
+    public function getBackups()
+    {
+        try {
+            \App\Services\BackupService::checkAndRunDailyAutoBackup();
+            $data = \App\Services\BackupService::getBackups();
+            return response()->json($data);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi lấy danh sách sao lưu: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Tạo bản sao lưu CSDL ngay lập tức (1-click manual backup)
+     */
+    public function createBackup(Request $request)
+    {
+        try {
+            $type = $request->input('type', 'manual');
+            $result = \App\Services\BackupService::createBackup($type);
+            return response()->json($result);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi tạo bản sao lưu: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Tải tệp sao lưu .sql về máy
+     */
+    public function downloadBackup($filename)
+    {
+        $path = \App\Services\BackupService::getBackupFilePath($filename);
+        if (!$path || !file_exists($path)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Tệp sao lưu không tồn tại hoặc đã bị xóa!'
+            ], 404);
+        }
+
+        return response()->download($path, $filename, [
+            'Content-Type' => 'application/sql',
+        ]);
+    }
+
+    /**
+     * Xóa một bản sao lưu CSDL
+     */
+    public function deleteBackup($filename)
+    {
+        try {
+            $deleted = \App\Services\BackupService::deleteBackup($filename);
+            if ($deleted) {
+                return response()->json([
+                    'success' => true,
+                    'message' => "Đã xóa bản sao lưu {$filename} thành công!"
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => 'Không tìm thấy tệp sao lưu cần xóa.'
+            ], 404);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Lỗi khi xóa bản sao lưu: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 }

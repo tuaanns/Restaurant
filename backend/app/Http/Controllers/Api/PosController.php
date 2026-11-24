@@ -13,6 +13,7 @@ use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\KitchenTicket;
 use App\Models\Promotion;
+use App\Services\PosEventService;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
@@ -261,6 +262,12 @@ class PosController extends Controller
             $order->table->update($tableUpdate);
         }
 
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'add_item',
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Đã thêm món vào order',
@@ -294,6 +301,12 @@ class PosController extends Controller
         $order = $item->order;
         $order->recalculateTotals();
 
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'update_item',
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Cập nhật món thành công',
@@ -326,6 +339,12 @@ class PosController extends Controller
                 'notes' => null,
             ]);
         }
+
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'delete_item',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -369,6 +388,12 @@ class PosController extends Controller
                 'notes' => null,
             ]);
         }
+
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'clear_order',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -426,7 +451,19 @@ class PosController extends Controller
                 'cashier' => $order->cashier_name,
                 'items' => $itemsToPrint,
             ],
-            'order' => $order->fresh(['items', 'customer', 'table'])
+            'order' => tap($order->fresh(['items', 'customer', 'table']), function ($ord) use ($ticketCode) {
+                PosEventService::emit('table_updated', [
+                    'table_id' => $ord->table_id,
+                    'order_id' => $ord->id,
+                    'action' => 'send_kitchen',
+                ]);
+                PosEventService::emit('kitchen_updated', [
+                    'table_id' => $ord->table_id,
+                    'order_id' => $ord->id,
+                    'ticket_code' => $ticketCode,
+                    'action' => 'new_kitchen_ticket',
+                ]);
+            })
         ]);
     }
 
@@ -483,7 +520,19 @@ class PosController extends Controller
         if ($status === 'cooking') $dbStatus = 'cooking';
         if ($status === 'done') $dbStatus = 'done';
 
+        $item = OrderItem::with('order')->find($itemId);
         OrderItem::where('id', $itemId)->update(['status' => $dbStatus]);
+
+        PosEventService::emit('kitchen_updated', [
+            'item_id' => $itemId,
+            'status' => $dbStatus,
+        ]);
+        if ($item && $item->order) {
+            PosEventService::emit('table_updated', [
+                'table_id' => $item->order->table_id,
+                'action' => 'kitchen_status_changed',
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -509,6 +558,12 @@ class PosController extends Controller
                 'notes' => 'Đã in tạm tính',
             ]);
         }
+
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'print_prebill',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -551,6 +606,17 @@ class PosController extends Controller
                 'notes' => null,
             ]);
         }
+
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'checkout',
+        ]);
+        PosEventService::emit('order_paid', [
+            'order_id' => $order->id,
+            'table_id' => $order->table_id,
+            'paid_amount' => $paidAmount,
+        ]);
 
         return response()->json([
             'success' => true,
@@ -597,6 +663,12 @@ class PosController extends Controller
         $order->save();
         $order->recalculateTotals();
 
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'update_item',
+        ]);
+
         return response()->json([
             'success' => true,
             'order' => $order->fresh(['items', 'customer', 'table', 'promotion'])
@@ -637,6 +709,12 @@ class PosController extends Controller
 
         $order->save();
         $order->recalculateTotals();
+
+        PosEventService::emit('table_updated', [
+            'table_id' => $order->table_id,
+            'order_id' => $order->id,
+            'action' => 'update_item',
+        ]);
 
         return response()->json([
             'success' => true,
@@ -686,6 +764,12 @@ class PosController extends Controller
             'guest_count' => 0,
             'started_at' => null,
             'notes' => null,
+        ]);
+
+        PosEventService::emit('table_updated', [
+            'from_table_id' => $fromTable->id,
+            'to_table_id' => $toTable->id,
+            'action' => 'transfer_table',
         ]);
 
         return response()->json([
@@ -821,6 +905,12 @@ class PosController extends Controller
             'notes' => $toRemainingCount . ' món',
         ]);
 
+        PosEventService::emit('table_updated', [
+            'from_table_id' => $fromTable->id,
+            'to_table_id' => $toTable->id,
+            'action' => 'split_order',
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => "Đã tách thành công $movedCount phần món sang {$toTable->name}!",
@@ -842,9 +932,97 @@ class PosController extends Controller
             'notes' => null,
         ]);
 
+        PosEventService::emit('table_updated', [
+            'action' => 'reset_demo',
+        ]);
+
         return response()->json([
             'success' => true,
             'message' => 'Đã khôi phục trạng thái ban đầu: tất cả các bàn đều trống!'
+        ]);
+    }
+
+    /**
+     * Lấy các sự kiện POS mới nhất (Polling cursor siêu nhẹ 1-2ms)
+     */
+    public function getLatestEvents(Request $request)
+    {
+        $sinceId = (int)$request->input('since_id', 0);
+        $result = PosEventService::getEventsSince($sinceId);
+        return response()->json($result);
+    }
+
+    /**
+     * Luồng Server-Sent Events (SSE) thời gian thực
+     */
+    public function streamEvents(Request $request)
+    {
+        // Xác thực qua Token header hoặc query ?token=
+        $user = $request->user();
+        if (!$user && $request->filled('token')) {
+            $accessToken = \Laravel\Sanctum\PersonalAccessToken::findToken($request->query('token'));
+            if ($accessToken) {
+                $user = $accessToken->tokenable;
+            }
+        }
+
+        if (!$user || !$user->is_active) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Yêu cầu đăng nhập để kết nối Realtime stream (Unauthenticated).'
+            ], 401);
+        }
+
+        $sinceId = (int)$request->input('since_id', 0);
+
+        return response()->stream(function () use ($sinceId) {
+            @set_time_limit(30);
+
+            // Gửi ping khởi tạo kết nối
+            echo "event: connected\n";
+            echo "data: " . json_encode(['status' => 'connected', 'time' => date('Y-m-d H:i:s')]) . "\n\n";
+            if (ob_get_level() > 0) ob_flush();
+            flush();
+
+            $currentId = $sinceId;
+            $startTime = time();
+            $maxDuration = 20;
+
+            while (time() - $startTime < $maxDuration) {
+                if (connection_aborted()) {
+                    break;
+                }
+
+                $eventData = PosEventService::getEventsSince($currentId, 20);
+                if (!empty($eventData['events'])) {
+                    foreach ($eventData['events'] as $ev) {
+                        echo "id: " . $ev['id'] . "\n";
+                        echo "event: " . $ev['event_type'] . "\n";
+                        echo "data: " . json_encode($ev) . "\n\n";
+                        $currentId = max($currentId, (int)$ev['id']);
+                    }
+                    if (ob_get_level() > 0) ob_flush();
+                    flush();
+                } else {
+                    if ((time() - $startTime) % 5 === 0) {
+                        echo ": heartbeat\n\n";
+                        if (ob_get_level() > 0) ob_flush();
+                        flush();
+                    }
+                }
+
+                usleep(500000);
+            }
+
+            echo "event: cycle_end\n";
+            echo "data: " . json_encode(['latest_id' => $currentId]) . "\n\n";
+            if (ob_get_level() > 0) ob_flush();
+            flush();
+        }, 200, [
+            'Content-Type' => 'text/event-stream',
+            'Cache-Control' => 'no-cache, no-transform',
+            'Connection' => 'keep-alive',
+            'X-Accel-Buffering' => 'no',
         ]);
     }
 }

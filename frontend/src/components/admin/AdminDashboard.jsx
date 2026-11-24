@@ -23,6 +23,7 @@ import { OverviewDashboard } from './OverviewDashboard';
 import { MenuView } from './MenuView';
 import { StaffView } from './StaffView';
 import { TablesView } from './TablesView';
+import { BackupManagerView } from './BackupManagerView';
 import { Card, CardHeader, CardContent } from '../ui/Card.jsx';
 import { DatePicker } from '../ui/DatePicker';
 import { initialMockData } from '../../mockData';
@@ -137,6 +138,13 @@ const NAV_ITEMS = [
     children: [
       { key: 'tables', label: 'Danh sách phòng/bàn' },
       { key: 'areas', label: 'Khu vực' },
+    ]
+  },
+  {
+    key: 'system_group',
+    label: 'Hệ thống',
+    children: [
+      { key: 'backups', label: 'Sao lưu dữ liệu' },
     ]
   },
 ];
@@ -1888,6 +1896,11 @@ export function AdminDashboard({ onBackToPos, currentUser, initialTab = 'overvie
         {/* ─── TAB: THIẾT LẬP (SETTINGS) ─── */}
         {activeTab === 'settings' && (
           <SettingsView onBackToDashboard={() => setActiveTab('overview')} />
+        )}
+
+        {/* ─── TAB: SAO LƯU DỮ LIỆU (DATABASE BACKUPS) ─── */}
+        {activeTab === 'backups' && (
+          <BackupManagerView />
         )}
 
         {/* ─── TAB: SỔ QUỸ (CASHBOOK) ─── */}

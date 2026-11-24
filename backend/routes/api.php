@@ -82,10 +82,22 @@ Route::prefix('admin')->middleware(['auth:sanctum', 'role:admin'])->group(functi
     Route::put('/bank-accounts/{id}', [AdminController::class, 'updateBankAccount']);
     Route::post('/bank-accounts/{id}/set-default', [AdminController::class, 'setDefaultBankAccount']);
     Route::delete('/bank-accounts/{id}', [AdminController::class, 'deleteBankAccount']);
+
+    // Quản lý Sao lưu CSDL (Database Backups)
+    Route::get('/backups', [AdminController::class, 'getBackups']);
+    Route::post('/backups/create', [AdminController::class, 'createBackup']);
+    Route::get('/backups/{filename}/download', [AdminController::class, 'downloadBackup']);
+    Route::delete('/backups/{filename}', [AdminController::class, 'deleteBackup']);
 });
+
+// SSE Event Stream hỗ trợ cả token dạng query string ?token= cho browser EventSource
+Route::get('/pos/events/stream', [PosController::class, 'streamEvents']);
 
 // POS Cashier & Waiter Routes (Sơ đồ bàn, gọi món, báo bếp, in bill, thanh toán)
 Route::prefix('pos')->middleware(['auth:sanctum', 'role:admin,cashier,waiter'])->group(function () {
+    // Đồng bộ sự kiện thời gian thực (Real-time SSE & Polling cursor)
+    Route::get('/events/latest', [PosController::class, 'getLatestEvents']);
+
     // Tài khoản ngân hàng mặc định cho POS VietQR
     Route::get('/default-bank-account', [AdminController::class, 'getDefaultBankAccount']);
     // Sơ đồ bàn, khu vực và trạng thái
